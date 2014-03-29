@@ -5,6 +5,10 @@ import sys, os, importlib, re, json
 class Controller():
 	"""Class 'Controller', singleton du controleur principal"""
 
+	# Hôte par defaut
+	HOST = "localhost"
+	PORT = 80
+
 	# chemin relatif du dossier des modules
 	MODULES_PATH = "modules"
 	# tableau de TOUS les modules dispo
@@ -14,8 +18,8 @@ class Controller():
 		self.init_modules()
 		self.enabled = []				# tableau des modules ACTIFS
 		self.last_cmd = None			# dernière commande executé (pour l'instruction "encore")
-		self.init_server()
 		self.load_conf(conf_file)
+		self.init_server()
 
 	def init_modules(self):
 		# Recherche des modules dispo
@@ -27,6 +31,36 @@ class Controller():
 				if module != None: 
 					for m in module.MODULES:
 						Controller.MODULES.append(name + "." + m)
+
+	def load_conf(self, conf_file):
+		# Chargement de la configuration (fichier JSON)
+		# try:
+			config = json.loads(open(conf_file).read())
+			for name in config:
+				if name == 'host':
+					Controller.HOST = config[name]
+				elif name == 'port':
+					Controller.PORT = config[name]
+				else:
+					conf = config[name]
+					mod = conf['module']
+					del conf['module']
+					conf['name'] = name
+					# Reconstruction du chemin du module
+					path = Controller.MODULES_PATH + "." + mod.split(".")[0]
+					# Et de la classe a charger
+					clss = mod.split(".")[1]
+					# Importation dynamique
+					module = importlib.import_module(path)
+					# Instanciation
+					clzz = getattr(module, clss)
+					inst = clzz(conf)
+					# Le module Speech a besoin du controller pour répondre (enfin pour couper le son de la freebox lors d'une réponse vocale)
+					inst.controller = self
+					self.enabled.append(inst)
+		# except:
+		# 	print("Erreur impossible de charger le ficheir de configuration '" + conf_file + "'")
+		# 	sys.exit()
 
 	def init_server(self):
 		# Initialisation du serveur web (Bottle)
@@ -42,30 +76,8 @@ class Controller():
 		self.app.route('/search', method='POST', callback=self.search)
 		self.app.route('/exec/<cmd:path>', callback=self.execute)
 
-	def load_conf(self, conf_file):
-		# Chargement de la configuration (fichier JSON)
-		# try:
-			config = json.loads(open(conf_file).read())
-			for name in config:
-				conf = config[name]
-				mod = conf['module']
-				del conf['module']
-				conf['name'] = name
-				# Reconstruction du chemin du module
-				path = Controller.MODULES_PATH + "." + mod.split(".")[0]
-				# Et de la classe a charger
-				clss = mod.split(".")[1]
-				# Importation dynamique
-				module = importlib.import_module(path)
-				# Instanciation
-				clzz = getattr(module, clss)
-				inst = clzz(conf)
-				# Le module Speech a besoin du controller pour répondre (enfin pour couper le son de la freebox lors d'une réponse vocale)
-				inst.controller = self
-				self.enabled.append(inst)
-		# except:
-		# 	print("Erreur impossible de charger le ficheir de configuration '" + conf_file + "'")
-		# 	sys.exit()
+	def run(self):
+		self.app.run(host=Controller.HOST, port=Controller.PORT, debug=True, quiet=False)
 
 	def index(self):
 		return '<h1>Bienvenue</h1>'
@@ -108,9 +120,6 @@ class Controller():
 		# print(module.name, cmd)
 		result = module.execute(cmd)
 		return result
-
-	def run(self):
-		self.app.run(host='192.168.0.5', port=80, debug=True, quiet=False)
 
 	def get_switchers(self):
 		switchers = []
