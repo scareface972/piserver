@@ -2,22 +2,26 @@ PiServer
 ========
 
 RaspberryPi Python Server
-- Web interface for GPIO control
+- Web interface for environment control
 - A recognition system of sentences (regular expressions) to execute one (or more) command.
 - Independent modules automatically loaded and configured
+- Speech recognition & Voice synthesizing
+
+(Recording for the recognition is actualy on local computer to a question of microphone quality)
 
 Requirements
 ------------
 
 * A RaspberryPi (with Raspbian not tested with other distrib)
 * Python3 (with Bottle)
+* WiringPi (http://wiringpi.com/)
 
-First
------
+Installation
+------------
 
-Setup configuration server file, by default "piserver.json"
-Verify by run command:
-* sudo python3 /path/to/piserver.py
+* Clone or download and extract the archive to a folder of your choice, eg "/etc/piserver/".
+* Edit the configuration file JSON "piserver.json" in there specifying the ip and port for the server (web and api).
+* Start the server with superuser privileges "sudo python3 piserver.py"
 
 Run as Service
 --------------
@@ -33,5 +37,6 @@ Make executable: sudo chmod +x /etc/init.d/piserver
 Voice Recognition
 -----------------
 
-Edit "speech2text.py" and setup RaspberryPi IP address
-Start speech2text.py and speak
+* Copy "speech2text.py" on your local computeur
+* Edit "speech2text.py" and setup RaspberryPi IP address
+* Start speech2text.py and speak
