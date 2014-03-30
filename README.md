@@ -2,10 +2,10 @@ PiServer
 ========
 
 RaspberryPi Python Server
-- Web interface for environment control
-- A recognition system of sentences (regular expressions) to execute one (or more) command.
-- Independent modules automatically loaded and configured
-- Speech recognition & Voice synthesizing
+* Web interface for environment control
+* A recognition system of sentences (regular expressions) to execute one (or more) command.
+* Independent modules automatically loaded and configured
+* Speech recognition & Voice synthesizing
 
 (Recording for the recognition is actualy on local computer to a question of microphone quality)
 
@@ -13,8 +13,8 @@ Requirements
 ------------
 
 * A RaspberryPi (with Raspbian not tested with other distrib)
-* Python3 (with Bottle)
-* WiringPi (http://wiringpi.com/)
+* Python3 (with Bottle, http://bottlepy.org)
+* WiringPi (http://wiringpi.com)
 
 Installation
 ------------
@@ -26,9 +26,9 @@ Installation
 Run as Service
 --------------
 
-Copy "piserver.init" to /etc/init.d/piserver
-Modify /etc/init.d/piserver with good path to your piserver.py
-Make executable: sudo chmod +x /etc/init.d/piserver
+* Copy "piserver.init" to /etc/init.d/piserver
+* Modify /etc/init.d/piserver with good path to your piserver.py
+* Make executable: sudo chmod +x /etc/init.d/piserver
 
 * Starting service: sudo /etc/init.d/piserver start
 * Stopping service: sudo /etc/init.d/piserver stop
