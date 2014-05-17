@@ -1,0 +1,167 @@
+body {
+    background-color: #000000;
+    padding: 0;
+    margin: 0;
+    font-family: 'Roboto';
+    font-weight: lighter;
+    color: #ffffff;
+    text-shadow: 0 0 5px #fff;
+}
+
+.red {
+    border: 1px red solid;
+}
+
+#clock {
+    position: absolute;
+    padding-top: 20px;
+    padding-left: 30px;
+}
+#clock > #date {
+    font-size: 42px;
+    text-align: center;
+}
+
+#clock > ul {
+    margin-top: -10px;
+    padding: 0px;
+    list-style: none;
+    text-align: center;
+}
+
+#clock > ul > li {
+    display: inline;
+    font-size: 96px;
+    text-align: center;
+}
+
+#clock > ul > li#point {
+    position: relative;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#clock > ul > li#pointSec, #clock > ul > li#sec {
+    font-size: 48px;
+    position: relative;
+    padding-left: 4px;
+    padding-right: 0px;
+}
+
+#weather {
+    position: absolute;
+    right: 0px;
+    width: 500px;
+    height: 260px;
+    font-size: 42px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+#icon {
+    width: 40%;
+    float: left;
+    text-align: right;
+}
+.icon {
+    position: relative;
+    display: inline-block;
+    font-size: 124px;
+    padding-right: 5px;
+    font-weight: 100;
+    margin-right: 10px;
+}
+#city {
+    padding-top: 16px;
+}
+#temp {
+    margin-top: -10px;
+    font-size: 96px;
+}
+#windsun {
+    clear: both;
+}
+
+.xdimmed {
+    color: #fff;
+    font-size: 22px;
+}
+
+.dimmed {
+    color: #fff;
+}
+
+#forecast {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    width: 500px;
+    height: 260px;
+}
+.forecast-table {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    text-align: right;
+    font-size: 26px;
+    line-height: 32px;
+    padding-bottom: 20px;
+    padding-right: 30px;
+}
+.forecast-table .day, .forecast-table .temp-min, .forecast-table .temp-max {
+    width: 80px;
+    text-align: right;
+}
+
+.forecast-table .day {
+    color: #999;
+}
+
+#domotic {
+    position: absolute;
+    bottom: 0px;
+    width: 500px;
+    height: 260px;
+}
+#domotic table {
+    position: absolute;
+    bottom: 0px;
+    padding-bottom: 20px;
+    padding-left: 30px;
+}
+#domotic table .title {
+    font-size: 42px;
+    text-transform: uppercase;
+    text-align: center;
+    padding-bottom: 20px;
+}
+#domotic .switch {
+    line-height: 40px;
+}
+#domotic .label {
+    padding-left: 40px;
+    padding-right: 10px;
+    font-family: 'Roboto';
+    font-weight: lighter;
+    font-size: 16px;
+    text-align: left;
+    text-transform: uppercase;
+}
+#domotic .circle-checked {
+    cursor: pointer;
+    background-color: rgba(204, 0, 102, 0);
+    border: 4px solid #fff;
+    height: 16px;
+    width: 16px;
+    -moz-border-radius:75px;
+    -webkit-border-radius: 75px;
+}
+#domotic .circle-unchecked {
+    cursor: pointer;
+    background-color: rgba(204, 0, 102, 0);
+    border: 4px solid #333;
+    height: 16px;
+    width: 16px;
+    -moz-border-radius:75px;
+    -webkit-border-radius: 75px;
+}
