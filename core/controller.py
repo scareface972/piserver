@@ -69,6 +69,7 @@ class Controller():
 		self.app.config['autojson'] = True
 		self.app.route('/', callback=self.index)
 		self.app.route('/static/:path#.+#', callback=self.static)
+		self.app.route('/home', callback=self.home)
 		self.app.route('/controls', callback=self.controls)
 		self.app.route('/manager', callback=self.manager)
 		self.app.route('/states', callback=self.states)
@@ -77,7 +78,7 @@ class Controller():
 		self.app.route('/exec/<cmd:path>', callback=self.execute)
 
 	def run(self):
-		self.app.run(host=Controller.HOST, port=Controller.PORT, debug=True, quiet=False)
+		self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=True)
 
 	def index(self):
 		return '<h1>Bienvenue</h1>'
@@ -85,9 +86,13 @@ class Controller():
 	def static(self, path):
 		return bottle.static_file(path, root='static')
 
+	@bottle.view('home')
+	def home(self):
+		return bottle.template('home', switchers=self.get_switchers())
+
 	@bottle.view('controls')
 	def controls(self):
-		return bottle.template('controls', switchers=self.get_switchers())
+		return bottle.template('controls', switchers=self.get_switchers(), style="black")
 
 	@bottle.view('manager')
 	def manager(seld):

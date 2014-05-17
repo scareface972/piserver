@@ -1,10 +1,10 @@
+%from modules import chacom
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="/static/global.css">
-<link rel="stylesheet" type="text/css" href="/static/switch.css">
+<link rel="stylesheet" type="text/css" href="/static/css/{{style}}/global.css">
+<link rel="stylesheet" type="text/css" href="/static/css/{{style}}/switch.css">
 <meta name="viewport" content="width=device-width"/>
-<script src="/static/controls.js"></script>
 </head>
 <body>
 <h1>Maison</h1>
@@ -23,6 +23,11 @@
 	        </div>
 	    </label>
 	</div></td>
+	<td>
+%if isinstance(module, chacom.Switch):
+	CHACOM
+%end
+	</td>
 	</tr>
 %end
 </table>
@@ -34,5 +39,6 @@
 </form>
 <div id="result"></div>
 -->
+<script src="/static/js/controls.js"></script>
 </body>
 </html>

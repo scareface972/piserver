@@ -8,7 +8,7 @@ wpi.piFaceSetup(PIN_BASE)
 # Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
 MODULES = ['Relay', 'LED']
 
-#
+# Relay 220v de la carte
 class Relay(modules.gpio.Output):
 	"""Class 'Relay' pour interagir avec les relay PiFace Digital"""
 
@@ -16,6 +16,7 @@ class Relay(modules.gpio.Output):
 		conf['pin'] += PIN_BASE
 		super().__init__(conf)
 
+# LED de contrôle de la carte
 class LED(modules.gpio.Output):
 	"""Class 'LED' pour interagir avec les LED PiFace Digital"""
 

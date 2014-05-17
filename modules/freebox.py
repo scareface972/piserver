@@ -1,8 +1,12 @@
 import modules
 import re, urllib
+from threading import Thread
+from time import sleep
 
 # Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
 MODULES = ['Freebox']
+
+START_TV_DELAY = 8
 
 class Freebox(modules.Switch):
 	"""Class 'Freebox', télécommande de la Freebox"""
@@ -81,6 +85,19 @@ class Freebox(modules.Switch):
 			result['success'] = True
 			if key == 'power' or key == 'toggle':
 				self.state = not self.state
+				if self.state:
+					t = StartTV(self)
+					t.start()
 			elif key == 'mute':
 				self.muted = not self.muted
 		return result
+
+class StartTV(Thread):
+	def __init__(self, callback):
+		Thread.__init__(self)
+		self.callback = callback
+
+	def run(self):
+		# print("StartTV")
+		sleep(START_TV_DELAY)
+		self.callback.execute('ok')
