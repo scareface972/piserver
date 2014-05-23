@@ -9,11 +9,20 @@ class Module(dict):
 	
 	def __init__(self, conf, cmds={}):
 		self.controller = None									# le controller
+		if not hasattr(self, 'state'):
+			self.state = None									# état par défaut
 		self.name = conf['name']								# nom de référence du module (ex: "salon" pour allume le "salon")
 		if 'group' in conf: self.group = conf['group']	# groupe de référence du module (ex: "lumiere" pour allume les "lumières")
 		else: self.group = None
 		self.cmds = cmds 										# tableau associatif des commandes (commande / regex)
 		self.setup()
+
+	def list_cmds(self):
+		cmds = []
+		for (cmd, rex) in self.cmds.items():
+			cmds.append(cmd)
+		# return "['" + "', '".join(cmds) + "']"
+		return cmds
 
 	def setup(self):
 		for (cmd, rex) in self.cmds.items():

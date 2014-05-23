@@ -18,7 +18,7 @@ body {
     padding-left: 30px;
 }
 #clock > #date {
-    font-size: 42px;
+    font-size: 32px;
     text-align: center;
 }
 
@@ -31,7 +31,7 @@ body {
 
 #clock > ul > li {
     display: inline;
-    font-size: 96px;
+    font-size: 72px;
     text-align: center;
 }
 
@@ -42,7 +42,7 @@ body {
 }
 
 #clock > ul > li#pointSec, #clock > ul > li#sec {
-    font-size: 48px;
+    font-size: 32px;
     position: relative;
     padding-left: 4px;
     padding-right: 0px;
@@ -53,30 +53,30 @@ body {
     right: 0px;
     width: 500px;
     height: 260px;
-    font-size: 42px;
+    font-size: 32px;
     text-align: center;
     text-transform: uppercase;
 }
 
 #icon {
-    width: 40%;
+    width: 30%;
     float: left;
     text-align: right;
 }
 .icon {
     position: relative;
     display: inline-block;
-    font-size: 124px;
-    padding-right: 5px;
+    font-size: 86px;
     font-weight: 100;
-    margin-right: 10px;
+    margin-top: 10px;
+    margin-left: 100px;
 }
 #city {
     padding-top: 16px;
 }
 #temp {
     margin-top: -10px;
-    font-size: 96px;
+    font-size: 72px;
 }
 #windsun {
     clear: both;
@@ -95,7 +95,7 @@ body {
     position: absolute;
     right: 0px;
     bottom: 0px;
-    width: 500px;
+    width: 400px;
     height: 260px;
 }
 .forecast-table {
@@ -127,13 +127,14 @@ body {
     position: absolute;
     bottom: 0px;
     padding-bottom: 20px;
-    padding-left: 30px;
+    /*padding-left: 30px;*/
 }
 #domotic table .title {
-    font-size: 42px;
+    font-size: 32px;
     text-transform: uppercase;
-    text-align: center;
+    text-align: left;
     padding-bottom: 20px;
+    padding-left: 40px;
 }
 #domotic .switch {
     line-height: 40px;

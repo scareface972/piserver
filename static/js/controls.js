@@ -38,6 +38,15 @@ function setup(name, action) {
 	xhr.send(null);
 }
 
+function associate(name) {
+	if (xhr != null) xhr.abort();
+	xhr = getXMLHttpRequest();
+	uri = '/exec/' + name + '/associate';
+	//console.log('-> uri: ' + uri);
+	xhr.open('GET', uri, true);
+	xhr.send(null);
+}
+
 function search(qry) {
 	//console.log('set state: ' + name + ' ' + action)
 	if (xhr != null) xhr.abort();

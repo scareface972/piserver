@@ -1,12 +1,12 @@
 import bottle
-from modules import *
+from modules import Switch, speech
 import sys, os, importlib, re, json
 
 class Controller():
 	"""Class 'Controller', singleton du controleur principal"""
 
 	# Hôte par defaut
-	HOST = "localhost"
+	HOST = "*"
 	PORT = 80
 
 	# chemin relatif du dossier des modules
@@ -71,7 +71,7 @@ class Controller():
 		self.app.route('/static/:path#.+#', callback=self.static)
 		self.app.route('/home', callback=self.home)
 		self.app.route('/controls', callback=self.controls)
-		self.app.route('/manager', callback=self.manager)
+		self.app.route('/modules', callback=self.modules)
 		self.app.route('/states', callback=self.states)
 		self.app.route('/search/<qry:re:[a-z0-9 _\-]+>', method='GET', callback=self.search)
 		self.app.route('/search', method='POST', callback=self.search)
@@ -80,11 +80,11 @@ class Controller():
 	def run(self):
 		self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=True)
 
-	def index(self):
-		return '<h1>Bienvenue</h1>'
-
 	def static(self, path):
 		return bottle.static_file(path, root='static')
+
+	def index(self):
+		return '<h1>Bienvenue</h1>'
 
 	@bottle.view('home')
 	def home(self):
@@ -94,9 +94,13 @@ class Controller():
 	def controls(self):
 		return bottle.template('controls', switchers=self.get_switchers(), style="black")
 
-	@bottle.view('manager')
-	def manager(seld):
-		return bottle.template('manager')
+	def modules(self):
+		mods = []
+		for module in self.enabled:
+			if not isinstance(module, speech.Speech):
+				modtype = 'switch' if isinstance(module, Switch) else module.__class__.__name__.lower()
+				mods.append({'name': module.name, 'group': module.group, 'state': module.state, 'cmds': module.list_cmds(), 'type': modtype})
+		return dict(success=True, modules=mods)
 
 	def states(self):
 		bottle.response.content_type = 'text/event-stream'

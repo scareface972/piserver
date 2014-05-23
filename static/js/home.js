@@ -101,7 +101,7 @@ Weather.prototype.updateCurrent = function() {
         var temp_max = roundVal(json.main.temp_max);
         var tempString = temp+'&deg;';
         if (temp != temp_min && temp_min != temp_max)
-            tempString += '<div class="xdimmed">' + temp_min+'&deg; - ' + temp_min+'&deg;</div>';
+            tempString += '<div class="xdimmed">min:' + temp_min+'&deg; - max:' + temp_max+'&deg;</div>';
         $('#temp').updateWithText(tempString);
 
         var wind = roundVal(json.wind.speed);
@@ -204,6 +204,22 @@ Calendar.prototype.load = function() {
 Calendar.prototype.update = function() {
 
 }
+
+var source = new EventSource('/states');
+source.addEventListener('message', function(e) {
+    //console.log('data: ' + e.data);
+    var result = JSON.parse(e.data);
+    if (result.success) {
+        for (i=0; i<result.states.length; i++) {
+            var elt = $('#'+result.states[i].name)[0];
+            //console.log('state changed: ' + result.states[i].name + ' > ' + result.states[i].state + " " + elt.className)
+            if (result.states[i].state && elt.className == 'circle-unchecked')
+                $('#'+result.states[i].name).attr('class', 'circle-checked');
+            else if (!result.states[i].state && elt.className == 'circle-checked')
+                $('#'+result.states[i].name).attr('class', 'circle-unchecked');
+        }
+    }
+}, false);
 
 function check(element) {
     var elt = $(element)[0];

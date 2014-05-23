@@ -5,28 +5,18 @@
 		"module": "speech.Speech"
 	},
 	"salon": {
-		"module": "piface.Relay",
-		"group": "lumiere",
-		"pin": 0
-	},
-	"cuisine": {
-		"module": "piface.Relay",
-		"group": "lumiere",
-		"pin": 1
-	},
-	"freebox": {
-		"module": "freebox.Freebox",
-		"alias": "tele",
-		"box": "hd1",
-		"code": "75393185"
-	},
-	"chacom": {
-		"module": "chacom.Switch",
+		"module": "chacon.Switch",
 		"group": "lumiere",
 		"pin": 0,
 		"code": {
 			"sender": "8976434",
 			"interruptor": "10"
 		}
+	},
+	"freebox": {
+		"module": "freebox.Freebox",
+		"alias": "tele",
+		"box": "hd1",
+		"code": "75393185"
 	}
 }

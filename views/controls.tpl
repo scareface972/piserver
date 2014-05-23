@@ -1,4 +1,4 @@
-%from modules import chacom
+%from modules import chacon
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,8 +24,8 @@
 	    </label>
 	</div></td>
 	<td>
-%if isinstance(module, chacom.Switch):
-	CHACOM
+%if isinstance(module, chacon.Switch):
+	&nbsp;<a href="#" onclick="associate('{{module.name}}')">Associer</a>
 %end
 	</td>
 	</tr>
