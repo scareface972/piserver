@@ -4,6 +4,7 @@
 *.so
 
 # Packages
+libsrc
 *.egg
 *.egg-info
 dist
@@ -34,3 +35,4 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+*.bck
