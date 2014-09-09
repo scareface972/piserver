@@ -19,24 +19,20 @@ Requirements
 Installation
 ------------
 
-* Clone or download and extract the archive to a folder of your choice, eg "/etc/piserver/".
-* Edit the configuration file JSON "piserver.json" in there specifying the ip and port for the server (web and api).
-* Start the server with superuser privileges "sudo python3 piserver.py"
+* Download distribution PiServer-X.X.tar.gz
+* Extract archive and go to directory
+	tar xzf PiServer-X.X.tar.gz && cd PiServer-X.X
+* And install app
+	sudo python3 setup.py install
 
-Run as Service
---------------
+Configuration
+-------------
 
-* Copy "piserver.init" to /etc/init.d/piserver
-* Modify /etc/init.d/piserver with good path to your piserver.py
-* Make executable: sudo chmod +x /etc/init.d/piserver
+* Edit /usr/local/piserver/config.json
 
-* Starting service: sudo /etc/init.d/piserver start
-* Stopping service: sudo /etc/init.d/piserver stop
-* Restarting service: sudo /etc/init.d/piserver restart
+Running/Stopping service
+------------------------
 
-Voice Recognition
------------------
-
-* Copy "speech2text.py" on your local computeur
-* Edit "speech2text.py" and setup RaspberryPi IP address
-* Start speech2text.py and speak
+* sudo service piserver start
+* sudo service piserver stop
+* sudo service piserver restart

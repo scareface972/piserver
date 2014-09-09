@@ -7,7 +7,6 @@
 libsrc
 *.egg
 *.egg-info
-dist
 build
 eggs
 parts
@@ -36,3 +35,4 @@ nosetests.xml
 .project
 .pydevproject
 *.bck
+__pycache__
