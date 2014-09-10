@@ -66,7 +66,7 @@ Freebox
 * Requiere Freebox
 
 Define Freebox interruptor to config.json (ex enrty:)
-```
+```json
 {
 	...
 	"freebox": {
@@ -86,7 +86,7 @@ Temperature & Presure
 * Requiere DHT11 module connected to RPi
 
 Define DHT11 sensor to config.json (ex enrty:)
-```
+```json
 {
 	...
 	"temp": {
@@ -108,7 +108,7 @@ Light capture
 	Install by running : cd i2c-tools_3.1.0/py-smbus && sudo python3 setup.py install
 
 Define BH1750FVI sensor to config.json (ex enrty:)
-```
+```json
 {
 	...
 	"light": {
