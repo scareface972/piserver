@@ -37,8 +37,8 @@ Running/Stopping service
 * sudo service piserver stop
 * sudo service piserver restart
 
-Chacon module
--------------
+Chacon interruptor
+------------------
 
 * Requiere RF 433.92MHz transmiter connected to RPi
 
