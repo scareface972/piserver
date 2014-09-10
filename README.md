@@ -42,8 +42,8 @@ Chacon module
 
 * Requiere RF 433.92MHz transmiter connected to RPi
 
-
 Define Chacon interruptor to config.json (ex enrty:)
+```json
 {
 	...
 	"plafond": {
@@ -58,7 +58,7 @@ Define Chacon interruptor to config.json (ex enrty:)
 	}
 	...
 }
-
+```
 
 Freebox
 -------
@@ -66,6 +66,7 @@ Freebox
 * Requiere Freebox
 
 Define Freebox interruptor to config.json (ex enrty:)
+```
 {
 	...
 	"freebox": {
@@ -77,6 +78,7 @@ Define Freebox interruptor to config.json (ex enrty:)
 	}
 	...
 }
+```
 
 Temperature & Presure
 ---------------------
@@ -84,6 +86,7 @@ Temperature & Presure
 * Requiere DHT11 module connected to RPi
 
 Define DHT11 sensor to config.json (ex enrty:)
+```
 {
 	...
 	"temp": {
@@ -92,6 +95,7 @@ Define DHT11 sensor to config.json (ex enrty:)
 	}
 	...
 }
+```
 
 Light capture
 -------------
@@ -104,6 +108,7 @@ Light capture
 	Install by running : cd i2c-tools_3.1.0/py-smbus && sudo python3 setup.py install
 
 Define BH1750FVI sensor to config.json (ex enrty:)
+```
 {
 	...
 	"light": {
@@ -112,3 +117,4 @@ Define BH1750FVI sensor to config.json (ex enrty:)
 	}
 	...
 }
+```
