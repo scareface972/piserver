@@ -38,5 +38,9 @@
 	"temp": {
 		"module": "sensor.DHT11",
 		"pin": 1
+	},
+	"light": {
+		"module": "sensor.BH1750FVI",
+		"pin": "i2c"
 	}
 }
