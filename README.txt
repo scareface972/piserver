@@ -42,6 +42,7 @@ Chacon module
 
 * Requiere RF 433.92MHz transmiter connected to RPi
 
+<<<<<<< HEAD
 
     Define Chacon interruptor to config.json (ex enrty:)
     {
@@ -59,6 +60,25 @@ Chacon module
     	...
     }
 
+=======
+```
+Define Chacon interruptor to config.json (ex enrty:)
+{
+	...
+	"plafond": {
+		"module": "chacon.Interruptor", 	// Module target
+		"where": "salon",					// Interruptor physic emplacement
+		"group": "lumiere",					// Module group name
+		"pin": 0,							// RF Transmiter PIN
+		"code": {
+			"sender": "8976434",			// Sender code (identify RPi as remote)
+			"interruptor": "1"				// Interrupteur number
+		}
+	}
+	...
+}
+```
+>>>>>>> 3fe311bffd740d3c80c466d28316cecd47c65f08
 
 Freebox
 -------
