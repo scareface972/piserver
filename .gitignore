@@ -36,3 +36,4 @@ nosetests.xml
 .pydevproject
 *.bck
 __pycache__
+HOW TO COMPILE.txt

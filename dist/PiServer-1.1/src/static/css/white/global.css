@@ -1,0 +1,16 @@
+html, body {
+    font-family: 'Open Sans','Helvetica Neue', HelveticaNeue, Helvetica, Arial, 'Lucida Grande', sans-serif;
+    font-size: 14px; color: #2e2e2e;
+    line-height: 25px;
+    height: 100%;
+}
+body {
+    margin: 20;
+    padding: 20;
+}
+td {
+    vertical-align: middle;
+}
+.label {
+    font-weight: bold;
+}
