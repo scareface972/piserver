@@ -2,7 +2,9 @@ import bottle
 from modules import Switch, speech
 import sys, os, importlib, re, json, time
 from threading import Thread
-import datetime
+import datetime, logging
+
+logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 class Controller():
 	"""Class 'Controller', singleton du controleur principal"""
@@ -84,6 +86,8 @@ class Controller():
 		self.app.route('/search/<qry:re:[a-z0-9 _\-]+>', method='GET', callback=self.search)
 		self.app.route('/search', method='POST', callback=self.search)
 		self.app.route('/exec/<cmd:path>', callback=self.execute)
+		self.app.route('/restart', callback=self.restart)
+		self.app.route('/reboot', callback=self.reboot)
 
 	def init_thread(self):
 		t = CtrlThread(self)
@@ -141,6 +145,22 @@ class Controller():
 		result = module.execute(cmd)
 		return result
 
+	def restart(self):
+		logging.debug('CONTROLER:: restart')
+		result = dict(success=True)
+		res = os.system('service piserver restart')
+		logging.debug('CONTROLER:: res: ' + str(res))
+		if res != 0: result = dict(success=False, result=res)
+		return result
+
+	def reboot(self):
+		logging.debug('CONTROLER:: reboot')
+		result = dict(success=True)
+		res = os.system('reboot')
+		logging.debug('CONTROLER:: res: ' + str(res))
+		if res != 0: result = dict(success=False, result=res)
+		return result
+
 	def get_switchers(self):
 		switchers = []
 		for module in self.enabled:
@@ -174,37 +194,40 @@ class Controller():
 			if name == module.name:
 				return module
 
-class CtrlThread(Thread):
-	def __init__(self, ctrl):
-		Thread.__init__(self)
-		self.ctrl = ctrl
-		self.lux = 0
-		self.presence = True
+# class CtrlThread(Thread):
+# 	def __init__(self, ctrl):
+# 		Thread.__init__(self)
+# 		self.ctrl = ctrl
+# 		self.lux = 0
+# 		self.presence = True
 
-	def run(self):
-		while True:
-			# print ('runner')
-			now = datetime.datetime.now()
-			if now.hour > 7 and now.hour < 22:
-				for module in self.ctrl.enabled:
-					mod = module.__module__.replace('modules.', '') + '.' + module.__class__.__name__
-					# print('module', mod)
-					if 'sensor.BH1750FVI' == mod:
-						self.lux = module.get()
-						# print('-> lux:', self.lux)
-					if 'presence.Presence' == mod:
-						self.presence = module.get()
-						# print('-> presence:', self.presence)
-				for module in self.ctrl.enabled:
-					if isinstance(module, Switch):
-						state = module.state
-						# print(module.name, 'presence' in module.autoswitch)
-						if 'presence' in module.autoswitch:
-							state = self.presence
-						# print(module.name, 'light' in module.autoswitch)
-						if 'light' in module.autoswitch:
-							state = state and self.lux <= 20
-						if state != module.state:
-							# print('-->', module.name, state)
-							module.execute('on' if state else 'off')
-			time.sleep(60 * 10)
+# 	def run(self):
+# 		while True:
+# 			# print ('runner')
+# 			now = datetime.datetime.now()
+# 			#if now.hour > 7 and now.hour < 22:
+# 			for module in self.ctrl.enabled:
+# 				mod = module.__module__.replace('modules.', '') + '.' + module.__class__.__name__
+# 				# print('module', mod)
+# 				if 'sensor.BH1750FVI' == mod:
+# 					self.lux = module.get()
+# 					# print('-> lux:', self.lux)
+# 				if 'presence.Presence' == mod:
+# 					self.presence = module.get()
+# 					if not self.presence: module.manual = False
+# 					# print('-> presence:', self.presence)
+# 			for module in self.ctrl.enabled:
+# 				if isinstance(module, Switch):
+# 					state = module.state
+# 					# print(module.name, 'presence' in module.autoswitch)
+# 					if 'presence' in module.autoswitch:
+# 						state = self.presence
+# 					# print(module.name, 'light' in module.autoswitch)
+# 					if 'light' in module.autoswitch:
+# 						state = state and self.lux <= 20
+# 					if state != module.state and not module.manual:
+# 						# print('-->', module.name, state)
+# 						module.execute('on' if state else 'off', True)
+# 					elif state == module.state and module.manual:
+# 						module.manual = False
+# 			time.sleep(60 * 10)
