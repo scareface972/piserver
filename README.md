@@ -7,8 +7,6 @@ RaspberryPi Python Server
 * Independent modules automatically loaded and configured
 * Speech recognition & Voice synthesizing
 
-(Recording for the recognition is actualy on local computer to a question of microphone quality)
-
 Requirements
 ------------
 
@@ -37,8 +35,15 @@ Running/Stopping service
 * sudo service piserver stop
 * sudo service piserver restart
 
+Speech recognition
+==================
+Speech recognition is actualy on local computer to a question of microphone quality
+
+Modify config in speech2text.py and run program.
+You must be register as Google Developper and enable Speech API for use it !
+
 Chacon interruptor
-------------------
+==================
 
 * Requiere RF 433.92MHz transmiter connected to RPi
 
@@ -61,7 +66,7 @@ Define Chacon interruptor to config.json (ex enrty:)
 ```
 
 Freebox
--------
+=======
 
 * Requiere Freebox
 
@@ -81,7 +86,7 @@ Define Freebox interruptor to config.json (ex enrty:)
 ```
 
 Temperature & Presure
----------------------
+=====================
 
 * Requiere DHT11 module connected to RPi
 
@@ -98,7 +103,7 @@ Define DHT11 sensor to config.json (ex enrty:)
 ```
 
 Light capture
--------------
+=============
 
 * Requiere BH1750FVI module connected to RPi
 * Requiere I2C enabled in your RPi (http://skpang.co.uk/blog/archives/575)
