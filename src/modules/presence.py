@@ -55,5 +55,5 @@ class Presence(modules.Module):
 			cmd = 'on' if self.has_owner else 'off'
 			switchers = self.controller.get_switchers()
 			for s in switchers:
-				print(s.name + '/' + cmd)
+				# print(s.name + '/' + cmd)
 				self.controller.execute(s.name + '/' + cmd)

@@ -40,3 +40,22 @@
 09/24/2014 12:01:13  PRESENCE:: -> name: 0f7a96fc > True
 09/24/2014 12:01:13  PRESENCE:: -> current: False
 09/24/2014 12:01:13  PRESENCE:: --> change: 0f7a96fc > True
+09/24/2014 12:08:42  PRESENCE:: execute: 0f7a96fc/false
+09/24/2014 12:08:42  PRESENCE:: -> name: 0f7a96fc > False
+09/24/2014 12:08:42  PRESENCE:: -> current: False
+09/24/2014 12:08:42  PRESENCE:: --> change: 0f7a96fc > False
+09/24/2014 12:09:05  PRESENCE:: execute: 0f7a96fc/true
+09/24/2014 12:09:05  PRESENCE:: -> name: 0f7a96fc > True
+09/24/2014 12:09:05  PRESENCE:: -> current: False
+09/24/2014 12:09:05  PRESENCE:: --> change: 0f7a96fc > True
+09/24/2014 12:09:17  PRESENCE:: execute: 0f7a96fc/false
+09/24/2014 12:09:17  PRESENCE:: -> name: 0f7a96fc > False
+09/24/2014 12:09:17  PRESENCE:: -> current: True
+09/24/2014 12:09:17  PRESENCE:: --> change: 0f7a96fc > False
+09/24/2014 12:09:42  PRESENCE:: execute: 0f7a96fc/true
+09/24/2014 12:09:42  PRESENCE:: -> name: 0f7a96fc > True
+09/24/2014 12:09:42  PRESENCE:: -> current: False
+09/24/2014 12:09:42  PRESENCE:: --> change: 0f7a96fc > True
+09/24/2014 12:10:10  PRESENCE:: execute: 0f7a96fc/true
+09/24/2014 12:10:10  PRESENCE:: -> name: 0f7a96fc > True
+09/24/2014 12:10:10  PRESENCE:: -> current: True
