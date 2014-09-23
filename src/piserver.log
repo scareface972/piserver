@@ -1,0 +1,42 @@
+09/23/2014 11:23:52  PRESENCE:: execute: 0f7a96fc/true
+09/23/2014 11:23:52  PRESENCE:: -> name: 0f7a96fc > True
+09/23/2014 11:23:52  PRESENCE:: -> current: False
+09/23/2014 11:23:52  PRESENCE:: --> change: 0f7a96fc > True
+09/23/2014 11:24:59  PRESENCE:: execute: 0f7a96fc/true
+09/23/2014 11:24:59  PRESENCE:: -> name: 0f7a96fc > True
+09/23/2014 11:24:59  PRESENCE:: -> current: True
+09/23/2014 11:44:54  PRESENCE:: execute: 0f7a96fc/true
+09/23/2014 11:44:54  PRESENCE:: -> name: 0f7a96fc > True
+09/23/2014 11:44:54  PRESENCE:: -> current: True
+09/23/2014 11:48:06  PRESENCE:: execute: 0f7a96fc/true
+09/23/2014 11:48:06  PRESENCE:: -> name: 0f7a96fc > True
+09/23/2014 11:48:06  PRESENCE:: -> current: False
+09/23/2014 11:48:06  PRESENCE:: --> change: 0f7a96fc > True
+09/23/2014 11:52:33  PRESENCE:: execute: 0f7a96fc/true
+09/23/2014 11:52:33  PRESENCE:: -> name: 0f7a96fc > True
+09/23/2014 11:52:33  PRESENCE:: -> current: False
+09/23/2014 11:52:33  PRESENCE:: --> change: 0f7a96fc > True
+09/23/2014 11:53:39  PRESENCE:: execute: 0f7a96fc/false
+09/23/2014 11:53:39  PRESENCE:: -> name: 0f7a96fc > False
+09/23/2014 11:53:39  PRESENCE:: -> current: True
+09/23/2014 11:53:39  PRESENCE:: --> change: 0f7a96fc > False
+09/23/2014 11:55:40  PRESENCE:: execute: 0f7a96fc/true
+09/23/2014 11:55:40  PRESENCE:: -> name: 0f7a96fc > True
+09/23/2014 11:55:40  PRESENCE:: -> current: False
+09/23/2014 11:55:40  PRESENCE:: --> change: 0f7a96fc > True
+09/23/2014 11:55:56  PRESENCE:: execute: 0f7a96fc/false
+09/23/2014 11:55:56  PRESENCE:: -> name: 0f7a96fc > False
+09/23/2014 11:55:56  PRESENCE:: -> current: True
+09/23/2014 11:55:56  PRESENCE:: --> change: 0f7a96fc > False
+09/24/2014 12:00:21  PRESENCE:: execute: 0f7a96fc/true
+09/24/2014 12:00:21  PRESENCE:: -> name: 0f7a96fc > True
+09/24/2014 12:00:21  PRESENCE:: -> current: False
+09/24/2014 12:00:21  PRESENCE:: --> change: 0f7a96fc > True
+09/24/2014 12:01:03  PRESENCE:: execute: 0f7a96fc/false
+09/24/2014 12:01:03  PRESENCE:: -> name: 0f7a96fc > False
+09/24/2014 12:01:03  PRESENCE:: -> current: True
+09/24/2014 12:01:03  PRESENCE:: --> change: 0f7a96fc > False
+09/24/2014 12:01:13  PRESENCE:: execute: 0f7a96fc/true
+09/24/2014 12:01:13  PRESENCE:: -> name: 0f7a96fc > True
+09/24/2014 12:01:13  PRESENCE:: -> current: False
+09/24/2014 12:01:13  PRESENCE:: --> change: 0f7a96fc > True

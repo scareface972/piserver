@@ -37,8 +37,8 @@ class Presence(modules.Module):
 				logging.debug('PRESENCE:: --> change: ' + name + ' > ' + str(state))
 				# print('-> name: ', name, "state: ", state)
 				self.checkChange()
-				result['success'] = True
 				self.first_time = False
+			result['success'] = True
 		return result
 
 	def checkChange(self):
@@ -52,11 +52,8 @@ class Presence(modules.Module):
 		# print("has owner: " + str(has_owner))
 		if has_owner != self.has_owner or self.first_time:
 			self.has_owner = has_owner
-			# cmd = 'on' if self.has_owner else 'off'
-			if self.has_owner: return
+			cmd = 'on' if self.has_owner else 'off'
 			switchers = self.controller.get_switchers()
 			for s in switchers:
-				# print(s.name + '/' + cmd)
-				if s.name == 'freebox': continue
-				if s.state == 'on':
-					self.controller.execute(s.name + '/off')
+				print(s.name + '/' + cmd)
+				self.controller.execute(s.name + '/' + cmd)
