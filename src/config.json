@@ -1,5 +1,5 @@
 {
-	"debug": false,
+	"debug": true,
 	"host": "192.168.0.6",
 	"port": 80,
 	"speech": {
@@ -16,8 +16,7 @@
 		"code": {
 			"sender": "8976434",
 			"interruptor": "1"
-		},
-		"autoswitch": "presence, light"
+		}
 	},
 	"lampe": {
 		"module": "chacon.Interruptor",
@@ -34,8 +33,7 @@
 		"where": "salon",
 		"alias": "tele",
 		"box": "hd1",
-		"code": "75393185",
-		"autoswitch": "presence"
+		"code": "99093614"
 	},
 	"temp": {
 		"module": "sensor.DHT11",

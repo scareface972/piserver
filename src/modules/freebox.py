@@ -47,6 +47,7 @@ class Freebox(modules.Switch):
 		}
 		super().__init__(conf, cmds, True)
 		self.url = "http://" + conf['box'] + ".freebox.fr/pub/remote_control?code=" + conf['code'];
+		print(self.url)
 
 
 	def analys(self, qry):
@@ -85,11 +86,13 @@ class Freebox(modules.Switch):
 			if key.isdigit():
 				for k in key:
 					url = self.url + '&key=' + k + '&long=' + longPress
+					print(url)
 					req = urllib.request.Request(url)
 					try: p = urllib.request.urlopen(req)
 					except: pass
 			else:
 				url = self.url + '&key=' + key + '&long=' + longPress
+				print(url)
 				for r in range(repeat):
 					req = urllib.request.Request(url)
 					try: p = urllib.request.urlopen(req)

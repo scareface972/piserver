@@ -32,7 +32,7 @@ class DHT11(modules.Module):
 		return result
 
 class BH1750FVI(modules.Module):
-	"""Class 'BH1750FVI' pour le catpeur de liminosité BH1750FVI"""
+	"""Class 'BH1750FVI' pour le catpeur de luminosité BH1750FVI"""
 
 	def __init__(self, conf):
 		self.pin = conf['pin']
@@ -55,8 +55,5 @@ class BH1750FVI(modules.Module):
 	def load(self):
 		bus = smbus.SMBus(1)
 		addr = 0x23
-		self.lux = 0
-		while self.lux == 0:
-			data = bus.read_i2c_block_data(addr,0x11)
-			self.lux = (data[1] + (256 * data[0])) / 1.2
-			time.sleep(1)
+		data = bus.read_i2c_block_data(addr,0x11)
+		self.lux = (data[1] + (256 * data[0])) / 1.2

@@ -1,3 +1,4 @@
+from core.controller import Controller
 import modules
 import logging
 from time import sleep
@@ -15,6 +16,7 @@ class Presence(modules.Module):
 		self.presence = {}
 		self.has_owner = False
 		self.first_time = True
+		print("debug: " + str(Controller.DEBUG))
 
 	def get(self):
 		return self.has_owner or self.first_time
@@ -45,15 +47,18 @@ class Presence(modules.Module):
 		if not len(self.presence) > 0: return
 		has_owner = False
 		for name in self.presence:
-			# print (name, self.presence[name])
+			# print(name, self.presence[name])
 			if self.presence[name] == True:
 				has_owner = True
 				break
-		# print("has owner: " + str(has_owner))
+		print("has owner: " + str(has_owner))
 		if has_owner != self.has_owner or self.first_time:
 			self.has_owner = has_owner
-			cmd = 'on' if self.has_owner else 'off'
 			switchers = self.controller.get_switchers()
-			for s in switchers:
-				# print(s.name + '/' + cmd)
-				self.controller.execute(s.name + '/' + cmd)
+			if not self.has_owner:
+				cmd = 'off' # 'on' if self.has_owner else 'off'
+				for s in switchers:
+					if not Controller.DEBUG or s.name == 'lampe':
+						# if s.name == 'freebox' and cmd == 'on': continue
+						print('-> ' + s.name + ': ' + cmd)
+						self.controller.execute(s.name + '/' + cmd)

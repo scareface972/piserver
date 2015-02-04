@@ -12,7 +12,7 @@ class Controller():
 	# Hôte par defaut
 	HOST = "*"
 	PORT = 80
-	DEBUG = False
+	DEBUG = True
 
 	# chemin relatif du dossier des modules
 	MODULES_PATH = "modules"

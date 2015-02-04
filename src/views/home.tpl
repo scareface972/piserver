@@ -39,7 +39,7 @@
                 <td colspan="{{colcount}}" class="title">Domicile</td>
             </tr>
             <tr>
-                <td colspan="{{colcount}}" class="label" id="home_temp"></td>
+                <td colspan="{{colcount}}" class="label" id="home_temp">Chargement...</td>
             </tr>
             %for module in switchers:
             %   checked = 'checked' if module.state else 'unchecked'

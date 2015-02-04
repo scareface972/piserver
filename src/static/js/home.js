@@ -2,7 +2,7 @@
  * Created by benjamin on 01/05/14.
  */
 
-if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript requires jQuery') }
+if (typeof jQuery === 'undefined') { throw new Error('This JavaScript requires jQuery') }
 
 /**
  * Starting App
@@ -10,7 +10,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
 $(document).ready(function() {
     var h = new Horloge(true);
     var w = new Weather();
-    var s = new DHT11();
+    var s = new Temps();
 });
 
 /**
@@ -204,13 +204,15 @@ Calendar.prototype.update = function() {
 
 }
 
-var DHT11 = function() {
+var Temps = function() {
     this.update();
+    var t = this;
+    this.timer = setInterval(function(){t.update();}, 30*60000);
 }
-DHT11.prototype.update = function() {
-    $.getJSON('/exec/dht11/all', this.params, function(json, textStatus) {
-        // console.log('json: ' + json);
-        // console.log('textStatus: ' + textStatus);
+Temps.prototype.update = function() {
+    $.getJSON('/exec/temp/all', this.params, function(json, textStatus) {
+        //console.log('json: ' + json);
+        //console.log('textStatus: ' + textStatus);
         if (textStatus == 'success') {
             console.log('temp: ' + json['temp_c'] + '°C');
             console.log('humidity: ' + json['humidity'] + '%');
