@@ -4,4 +4,4 @@ recursive-include src/views *.tpl
 include requirements.txt
 include LICENSE
 include MANIFEST.in
-include README.rst
+include README.md
