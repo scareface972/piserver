@@ -1,12 +1,14 @@
 {
 	"debug": true,
-	"host": "192.168.0.6",
+	"host": "192.168.0.5",
 	"port": 80,
 	"speech": {
-		"module": "speech.Speech"
+		"module": "speech.Speech",
+		"enabled": false
 	},
 	"presence": {
-		"module": "presence.Presence"
+		"module": "presence.Presence",
+		"enabled": false
 	},
 	"plafond": {
 		"module": "chacon.Interruptor",
@@ -16,7 +18,8 @@
 		"code": {
 			"sender": "8976434",
 			"interruptor": "1"
-		}
+		},
+		"enabled": false
 	},
 	"lampe": {
 		"module": "chacon.Interruptor",
@@ -26,7 +29,8 @@
 		"code": {
 			"sender": "8976434",
 			"interruptor": "2"
-		}
+		},
+		"enabled": false
 	},
 	"freebox": {
 		"module": "freebox.Freebox",
@@ -37,10 +41,12 @@
 	},
 	"temp": {
 		"module": "sensor.DHT11",
-		"pin": 1
+		"pin": 1,
+		"enabled": false
 	},
 	"light": {
 		"module": "sensor.BH1750FVI",
-		"pin": "i2c"
+		"pin": "i2c",
+		"enabled": false
 	}
 }
