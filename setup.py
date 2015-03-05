@@ -56,10 +56,3 @@ setup(name='PiServer',
 				  ('/etc/init.d', ['src/piserver'])],
 		cmdclass={'install': install},
 	)
-
-#msg  = "\n###################################################################################\n"
-#msg += "Thank you for installing piserver\n"
-#msg += "  You can start/stop/restart with command: sudo service piserver start/stop/restart\n"
-#msg += "  Please edit '/usr/local/piserver/config.json' for update your config\n"
-#msg += "###################################################################################"
-#sys.exit(msg)
