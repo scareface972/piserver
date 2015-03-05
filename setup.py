@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-import os, fileinput, site
+#!/usr/bin/env python3
+import os, sys, fileinput, site
 from setuptools.command.install import install as installer
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 def read(fname):
 	return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -29,13 +29,21 @@ chacon = Extension('libchacon',
 					sources = ['libs/libchacon.cpp'],
 					libraries = ['wiringPi'])
 
+#REQUIREMENTS = []
+#for i in open("requirements.txt").readlines():
+#	line = i.strip()
+#	if not line.find('#') and not line.find('--') >= 0: 
+#		REQUIREMENTS.append(line)
+#print(REQUIREMENTS)
+
 setup(name='PiServer',
 		version='1.1',
 		description='PiServer is domotic server for Chacon Interruptor, Freebox, Temp Sensor that expose data by web interface and api',
-		long_description=read('README.md'),
+		long_description=read('README.rst'),
 		author='Benjamin Touchard',
 		author_email='benjamin@kolapsis.com',
 		url='http://www.kolapsis.com/',
+		#install_requires=REQUIREMENTS,
 		packages=['piserver', 'piserver.core', 'piserver.modules'],
 		package_dir={'piserver': 'src'},
 		include_package_data=True,
@@ -46,6 +54,12 @@ setup(name='PiServer',
 		ext_modules=[dht11, chacon],
 		data_files=[('piserver', ['src/config.json']),
 				  ('/etc/init.d', ['src/piserver'])],
-		#entry_points={'console_scripts': ['piserver = piserver.piserver:main']},
 		cmdclass={'install': install},
 	)
+
+#msg  = "\n###################################################################################\n"
+#msg += "Thank you for installing piserver\n"
+#msg += "  You can start/stop/restart with command: sudo service piserver start/stop/restart\n"
+#msg += "  Please edit '/usr/local/piserver/config.json' for update your config\n"
+#msg += "###################################################################################"
+#sys.exit(msg)
