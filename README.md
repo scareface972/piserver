@@ -20,11 +20,11 @@ Installation
 * Download distribution PiServer-X.X.tar.gz
 * Extract archive and go to directory
 	tar xzf PiServer-X.X.tar.gz && cd PiServer-X.X
-* And install server (from extract directory)
+* Now, install server (from extract directory)
 	1. sudo apt-get install build-essential python3 python3-dev python3-setuptools python3-pip
 	2. sudo pip-3 -r requirements.txt
 	3. sudo python3 setup.py install
-* And to uninstall server (from extract directory)
+* And for uninstall server (from extract directory)
 	sudo pip-3 uninstall piserver -r requirements.txt
 
 Configuration
