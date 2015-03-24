@@ -1,0 +1,131 @@
+import modules.gpio
+import wiringpi2 as wpi
+from threading import Thread
+from time import sleep, time
+import logging
+import concurrent.futures
+import libchacon
+
+logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+# Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
+MODULES = ['Interruptor']
+
+OUTPUT = 1
+LOW = 0
+HIGH = 1
+PIN_OUT = 0
+
+SHORT_DELAY = 100 	# 275
+LONG_DELAY = 600 	# 1225
+VERROU1 = 9000 		# 9900
+VERROU2 = 2000 		# 2675
+
+REPEAT_COUNT = 10
+
+# Interrupteur RF (Chacom)
+class Interruptor(modules.gpio.GPIOOutput):
+	"""Class 'Interruptor' interrupteur RF (Chacon)"""
+
+	def __init__(self, conf):
+		# print(conf['code'])
+		self.group = 0
+		self.sender = conf['code']['sender']
+		self.interruptor = conf['code']['interruptor']
+		super().__init__(conf)
+		self.cmds['associate'] = None
+
+	def execute(self, cmd):
+		logging.debug('CHACON:: execute: ' + cmd)
+		result = dict(success=False, name=self.name, state=self.state)
+		if cmd == 'associate':
+			self.sendSequence(True, REPEAT_COUNT * 2)
+			result['state'] = self.state
+			result['success'] = True
+		else:
+			if cmd == 'toggle': new_state = not self.state
+			elif cmd == 'on': new_state = True
+			elif cmd == 'off': new_state = False
+			if self.state != new_state:
+				logging.debug('CHACON:: thread: pin=' + str(self.pin) + 'sender=' + self.sender + 'interruptor=' + self.interruptor + 'state=' + str(new_state))
+				self.state = self.sendSequence(new_state, REPEAT_COUNT)
+				result['state'] = self.state
+				result['success'] = True
+		return result
+
+	def sendSequence(self, state, repeat):
+		sender = '{0:026b}'.format(int(self.sender))
+		interruptor = '{0:04b}'.format(int(self.interruptor))
+		group = 0
+		state = 1 if state else 0
+		# print("transmit:", self.interruptor, str(state))
+		for i in range(0, repeat):
+			self.transmit(sender, interruptor, group, state)
+			wpi.delayMicroseconds(10000)
+		# print("finished", self.interruptor)
+		return True if state == 1 else False
+
+	# def delayMicroseconds(self, ms):
+	# 	s = ms / 1000000
+	# 	sleep(s)
+
+	def transmit(self, sender, interruptor, group, state):
+		# self.msg = ""
+		# Sequence de verrou anoncant le départ du signal au recepeteur
+		wpi.digitalWrite(self.pin, HIGH)
+		wpi.delayMicroseconds(SHORT_DELAY)     		# un bit de bruit avant de commencer pour remettre les delais du recepteur a 0
+		wpi.digitalWrite(self.pin, LOW)
+		wpi.delayMicroseconds(VERROU1)    			# premier verrou de 9900µs
+		wpi.digitalWrite(self.pin, HIGH)    		# high again
+		wpi.delayMicroseconds(SHORT_DELAY)     		# attente de 275µs entre les deux verrous
+		wpi.digitalWrite(self.pin, LOW)     		# second verrou de 2675µs
+		wpi.delayMicroseconds(VERROU2)
+		wpi.digitalWrite(self.pin, HIGH)    		# On reviens en état haut pour bien couper les verrous des données
+		# self.msg += "10101"
+
+		# Envoie du code emetteur (272946 = 1000010101000110010  en binaire)
+		for i in sender:
+			self.sendPair(int(i))
+
+		# Envoie du bit définissant si c'est une commande de groupe ou non (26em bit)
+		self.sendPair(group)
+		# Envoie du bit définissant si c'est allumé ou eteint 27em bit)
+		self.sendPair(state)
+
+		# Envoie des 4 derniers bits, qui représentent le code interrupteur, ici 0 (encode sur 4 bit donc 0000)
+		# nb: sur  les télécommandes officielle chacon, les interrupteurs sont logiquement nommés de 0 à x
+		# interrupteur 1 = 0 (donc 0000) , interrupteur 2 = 1 (1000) , interrupteur 3 = 2 (0100) etc...
+		for i in interruptor:
+			self.sendPair(int(i))
+
+		wpi.digitalWrite(self.pin, HIGH)   			# coupure données, verrou
+		wpi.delayMicroseconds(SHORT_DELAY)    		# attendre 275µs
+		wpi.digitalWrite(self.pin, LOW)    			# verrou 2 de 2675µs pour signaler la fermeture du signal
+		wpi.delayMicroseconds(VERROU2)
+		# self.msg += "10"
+
+	def sendPair(self, b):
+		# print("sendPair", b)
+		if b:
+			self.sendBit(1)
+			self.sendBit(0)
+			# self.msg += "10"
+		else:
+			self.sendBit(0)
+			self.sendBit(1)
+			# self.msg += "01"
+
+	# Envois d'une pulsation (passage de l'etat haut a l'etat bas)
+	# 1 = 310µs haut puis 1340µs bas
+	# 0 = 310µs haut puis 310µs bas
+	def sendBit(self, b):
+		if b:
+			wpi.digitalWrite(self.pin, HIGH)
+			wpi.delayMicroseconds(SHORT_DELAY)   # 275 orinally, but tweaked.
+			wpi.digitalWrite(self.pin, LOW)
+			wpi.delayMicroseconds(LONG_DELAY)  # 1225 orinally, but tweaked.
+		else:
+			wpi.digitalWrite(self.pin, HIGH)
+			wpi.delayMicroseconds(SHORT_DELAY)   # 275 orinally, but tweaked.
+			wpi.digitalWrite(self.pin, LOW)
+			wpi.delayMicroseconds(SHORT_DELAY)   # 275 orinally, but tweaked.

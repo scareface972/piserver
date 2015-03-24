@@ -1,0 +1,5 @@
+sudo python3 libchaconsetup.py build
+sudo python3 libchaconsetup.py install
+sudo python3
+>> import libchacon
+>> libchacon.send(0, 8976434, 2, "on")

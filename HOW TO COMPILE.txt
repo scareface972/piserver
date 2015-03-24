@@ -1,0 +1,13 @@
+# source compilation
+python3 -W ignore::UserWarning:distutils.dist setup.py sdist
+cd dist/
+tar xzf PiServer-1.1.tar.gz
+cd PiServer-1.1/
+sudo python3 setup.py install
+cd ../..
+
+# uninstall all
+sudo rm -rf dist/ /etc/init.d/piserver /usr/local/piserver /usr/local/lib/python3.2/dist-packages/piserver /usr/local/lib/python3.2/dist-packages/PiServer-1.1-py3.2.egg-info
+
+# install
+sudo python3 setup.py install

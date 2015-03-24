@@ -1,0 +1,46 @@
+{
+	"debug": false,
+	"host": "192.168.0.6",
+	"port": 80,
+	"speech": {
+		"module": "speech.Speech"
+	},
+	"presence": {
+		"module": "presence.Presence"
+	},
+	"plafond": {
+		"module": "chacon.Interruptor",
+		"where": "salon",
+		"group": "lumiere",
+		"pin": 0,
+		"code": {
+			"sender": "8976434",
+			"interruptor": "1"
+		}
+	},
+	"lampe": {
+		"module": "chacon.Interruptor",
+		"where": "salon",
+		"group": "lumiere",
+		"pin": 0,
+		"code": {
+			"sender": "8976434",
+			"interruptor": "2"
+		}
+	},
+	"freebox": {
+		"module": "freebox.Freebox",
+		"where": "salon",
+		"alias": "tele",
+		"box": "hd1",
+		"code": "99093614"
+	},
+	"temp": {
+		"module": "sensor.DHT11",
+		"pin": 1
+	},
+	"light": {
+		"module": "sensor.BH1750FVI",
+		"pin": "i2c"
+	}
+}

@@ -1,0 +1,6 @@
+sudo python3 dht11setup.py build
+sudo python3 dht11setup.py install
+sudo python3
+>> import dht11
+>> pinNum = 1
+>> h, c, f = dht11.get(pinNum)
