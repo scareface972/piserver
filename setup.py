@@ -44,7 +44,7 @@ setup(name='PiServer',
 			'views':['src/views/*']
 		},
 		ext_modules=[dht11, chacon],
-		data_files=[('piserver', ['src/config.json']),
+		data_files=[('piserver', ['src/config.json', 'src/rules.json']),
 				  ('/etc/init.d', ['src/piserver'])],
 		#entry_points={'console_scripts': ['piserver = piserver.piserver:main']},
 		cmdclass={'install': install},

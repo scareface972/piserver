@@ -137,3 +137,122 @@
 01/30/2015 04:37:13  PRESENCE:: -> name: 0f7a96fc > True
 01/30/2015 04:37:13  PRESENCE:: -> current: False
 01/30/2015 04:37:13  PRESENCE:: --> change: 0f7a96fc > True
+03/24/2015 04:56:26  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 04:56:26  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:13:16  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:14:50  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:14:50  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:20:13  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:20:13  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:20:57  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:20:57  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:21:01  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:21:01  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:28:21  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:28:21  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:28:32  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:28:32  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:30:04  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:30:04  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:31:26  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:31:26  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:43:35  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:43:35  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:44:11  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:44:11  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:44:32  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:44:32  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:44:52  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:44:52  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:46:38  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:46:38  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:46:41  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:46:41  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:46:52  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:46:52  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:48:20  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:48:20  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:52:51  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:52:51  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:53:02  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:53:02  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:54:35  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:54:35  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:54:35  Chacon::execute: off
+03/24/2015 05:54:35  Chacon::execute: off
+03/24/2015 05:54:45  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:54:45  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:54:45  Chacon::execute: on
+03/24/2015 05:54:46  Chacon::execute: on
+03/24/2015 05:54:52  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:54:52  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:54:52  Chacon::execute: off
+03/24/2015 05:54:53  Chacon::execute: off
+03/24/2015 05:54:59  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:54:59  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:54:59  Chacon::execute: on
+03/24/2015 05:54:59  Chacon::execute: on
+03/24/2015 05:56:04  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:56:04  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:56:04  Chacon::execute: off
+03/24/2015 05:56:04  Chacon::execute: off
+03/24/2015 05:56:09  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:56:09  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:56:09  Chacon::execute: off
+03/24/2015 05:56:09  Chacon::execute: off
+03/24/2015 05:56:09  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:56:15  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 05:56:15  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 05:56:15  Chacon::execute: off
+03/24/2015 05:56:15  Chacon::execute: off
+03/24/2015 05:56:20  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 05:56:20  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 05:56:20  Chacon::execute: on
+03/24/2015 05:56:20  Chacon::execute: on
+03/24/2015 06:04:41  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 06:04:41  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 06:04:41  Chacon::execute: off
+03/24/2015 06:04:42  Chacon::execute: off
+03/24/2015 06:04:43  Chacon::execute: off
+03/24/2015 06:04:43  Chacon::execute: off
+03/24/2015 06:04:43  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 06:04:43  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 06:04:47  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 06:04:51  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 06:04:51  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 06:04:51  Chacon::execute: off
+03/24/2015 06:04:51  Chacon::execute: off
+03/24/2015 06:04:51  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 06:04:51  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 06:04:51  Chacon::execute: on
+03/24/2015 06:04:52  Chacon::execute: on
+03/24/2015 06:04:53  Chacon::execute: on
+03/24/2015 06:04:53  Chacon::execute: on
+03/24/2015 06:05:14  Chacon::execute: off
+03/24/2015 06:05:36  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 06:05:38  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 06:05:38  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 06:05:38  Chacon::execute: off
+03/24/2015 06:05:38  Chacon::execute: off
+03/24/2015 06:05:39  Chacon::execute: off
+03/24/2015 06:05:47  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 06:05:47  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 06:05:47  Chacon::execute: on
+03/24/2015 06:05:47  Chacon::execute: on
+03/24/2015 06:05:48  Chacon::execute: on
+03/24/2015 06:05:48  Chacon::execute: on
+03/24/2015 06:07:46  Presence::execute: 4df1d29d62e99fb3/false
+03/24/2015 06:07:46  Presence::change: 4df1d29d62e99fb3 > False
+03/24/2015 06:07:46  Chacon::execute: off
+03/24/2015 06:07:46  Chacon::execute: off
+03/24/2015 06:08:27  Chacon::execute: off
+03/24/2015 06:08:27  Chacon::execute: off
+03/24/2015 06:09:54  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 06:09:54  Presence::change: 4df1d29d62e99fb3 > True
+03/24/2015 06:09:54  Chacon::execute: on
+03/24/2015 06:09:54  Chacon::execute: on
+03/24/2015 06:10:26  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 06:11:31  Chacon::execute: off
+03/24/2015 06:23:05  Presence::execute: 4df1d29d62e99fb3/true
+03/24/2015 06:23:08  Chacon::execute: on
+03/24/2015 06:23:09  Chacon::execute: off

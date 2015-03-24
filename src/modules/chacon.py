@@ -4,6 +4,9 @@ from threading import Thread
 from time import sleep, time
 import concurrent.futures
 import libchacon
+import logging
+
+logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
 MODULES = ['Interruptor']
@@ -20,6 +23,7 @@ class Interruptor(modules.gpio.GPIOOutput):
 		self.cmds['associate'] = None
 
 	def execute(self, cmd):
+		logging.debug('Chacon::execute: ' + cmd)
 		result = dict(success=False, name=self.name, state=self.state)
 		if cmd == 'associate':
 			libchacon.send(self.pin, self.sender, self.interruptor, 1)

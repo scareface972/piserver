@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 
 class Module(dict):
@@ -10,10 +11,9 @@ class Module(dict):
 	def __init__(self, conf, cmds={}):
 		self.controller = None									# le controller
 		self.module_name = conf['module'];
-		if not hasattr(self, 'state'):
-			self.state = None									# état par défaut
+		if not hasattr(self, 'state'): self.state = None		# état par défaut
 		self.name = conf['name']								# nom de référence du module (ex: "salon" pour allume le "salon")
-		if 'group' in conf: self.group = conf['group']	# groupe de référence du module (ex: "lumiere" pour allume les "lumières")
+		if 'group' in conf: self.group = conf['group']			# groupe de référence du module (ex: "lumiere" pour allume les "lumières")
 		else: self.group = None
 		self.cmds = cmds 										# tableau associatif des commandes (commande / regex)
 		self.autoswitch = conf['autoswitch'] if 'autoswitch' in conf else ''

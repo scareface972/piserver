@@ -12,7 +12,8 @@ class Controller():
 	# Hôte par defaut
 	HOST = "*"
 	PORT = 80
-	DEBUG = True
+	
+	DEBUG = False
 
 	# chemin relatif du dossier des modules
 	MODULES_PATH = "modules"
@@ -53,7 +54,6 @@ class Controller():
 			else:
 				conf = config[name]
 				mod = conf['module']
-				# del conf['module']
 				conf['name'] = name
 				conf['debug'] = Controller.DEBUG
 				# Reconstruction du chemin du module
@@ -71,6 +71,11 @@ class Controller():
 		# except:
 		# 	print("Erreur impossible de charger le ficheir de configuration '" + conf_file + "'")
 		# 	sys.exit()
+
+	def get_module(self, name):
+		for mod in self.enabled:
+			if mod.module_name == name: return mod
+		return None
 
 	def init_server(self):
 		# Initialisation du serveur web (Bottle)
