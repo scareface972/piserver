@@ -21,20 +21,17 @@ class install(installer):
 		os.chmod(filename, 0o755)
 		
 
-dht11 = Extension('libdht11',
-					sources = ['libs/libdht11.cpp'],
+dht11 = Extension('DHT11Sensor',
+					sources = ['libs/DHT11Sensor.cpp'],
 					libraries = ['wiringPi'])
 
-chacon = Extension('libchacon',
-					sources = ['libs/libchacon.cpp'],
+chacon = Extension('ChaconEmitter',
+					sources = ['libs/ChaconEmitter.cpp'],
 					libraries = ['wiringPi'])
 
-#REQUIREMENTS = []
-#for i in open("requirements.txt").readlines():
-#	line = i.strip()
-#	if not line.find('#') and not line.find('--') >= 0: 
-#		REQUIREMENTS.append(line)
-#print(REQUIREMENTS)
+chacon = Extension('ChaconReceiver',
+					sources = ['libs/ChaconReceiver.cpp'],
+					libraries = ['wiringPi'])
 
 setup(name='PiServer',
 		version='1.1',
@@ -43,7 +40,6 @@ setup(name='PiServer',
 		author='Benjamin Touchard',
 		author_email='benjamin@kolapsis.com',
 		url='http://www.kolapsis.com/',
-		#install_requires=REQUIREMENTS,
 		packages=['piserver', 'piserver.core', 'piserver.modules'],
 		package_dir={'piserver': 'src'},
 		include_package_data=True,

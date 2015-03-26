@@ -7,8 +7,9 @@ PiServer.egg-info/PKG-INFO
 PiServer.egg-info/SOURCES.txt
 PiServer.egg-info/dependency_links.txt
 PiServer.egg-info/top_level.txt
-libs/libchacon.cpp
-libs/libdht11.cpp
+libs/ChaconEmitter.cpp
+libs/ChaconReceiver.cpp
+libs/DHT11Sensor.cpp
 src/__init__.py
 src/alarms.json
 src/config.json

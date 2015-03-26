@@ -20,16 +20,19 @@ Description: PiServer
         
         * A RaspberryPi (with Raspbian not tested with other distrib)
         * Python3 (with Bottle, http://bottlepy.org)
-        * WiringPi (http://wiringpi.com)
+        * WiringPi library (http://wiringpi.com)
         
         Installation
         ------------
         
         * Download distribution PiServer-X.X.tar.gz
         * Extract archive and go to directory
-        	tar xzf PiServer-X.X.tar.gz && cd PiServer-X.X
-        * And install app
-        	sudo python3 setup.py install
+        	tar -xzf PiServer-X.X.tar.gz && cd PiServer-X.X
+        * Now, install server (from extract directory)
+        	1. sudo ./configure.sh
+        	2. sudo python3 setup.py install
+        * And for uninstall server (from extract directory)
+        	sudo pip-3 uninstall piserver -r requirements.txt
         
         Configuration
         -------------
@@ -131,4 +134,5 @@ Description: PiServer
         	...
         }
         ```
+        
 Platform: UNKNOWN

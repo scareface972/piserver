@@ -1,10 +1,8 @@
 import modules.gpio
 import wiringpi2 as wpi
-from threading import Thread
 from time import sleep, time
-import concurrent.futures
-import libchacon
-import logging
+import threading, logging
+import ChaconEmitter, ChaconReceiver
 
 logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -23,10 +21,10 @@ class Interruptor(modules.gpio.GPIOOutput):
 		self.cmds['associate'] = None
 
 	def execute(self, cmd):
-		logging.debug('Chacon::execute: ' + cmd)
+		logging.debug('Interruptor::execute: ' + cmd)
 		result = dict(success=False, name=self.name, state=self.state)
 		if cmd == 'associate':
-			libchacon.send(self.pin, self.sender, self.interruptor, 1)
+			ChaconEmitter.send(self.pin, self.sender, self.interruptor, 1)
 			result['state'] = self.state
 			result['success'] = True
 		else:
@@ -35,8 +33,22 @@ class Interruptor(modules.gpio.GPIOOutput):
 			elif cmd == 'on': new_state = 1
 			elif cmd == 'off': new_state = 0
 			if current != new_state:
-				current = libchacon.send(self.pin, self.sender, self.interruptor, int(new_state))
+				current = ChaconEmitter.send(self.pin, self.sender, self.interruptor, int(new_state))
 				self.state = True if current == 1 else False
 				result['state'] = self.state
 				result['success'] = True
 		return result
+
+class Receiver(modules.Module):
+	def __init__(self, conf):
+		super().__init__(conf)
+		self.pin = conf['pin']
+		self.thread = threading.Thread(target=self.worker)
+		self.thread.start()
+
+	def worker(self):
+		#ChaconReceiver.setCallback(self.callback)
+		ChaconReceiver.run(self.pin)
+
+	def callback(self, value):
+		print("callback", value)

@@ -1,5 +1,5 @@
 import bottle
-from modules import Switch, speech
+from modules import Switch, speech, chacon
 import sys, os, importlib, re, json, time
 from threading import Thread
 import datetime, logging
@@ -13,7 +13,7 @@ class Controller():
 	HOST = "*"
 	PORT = 80
 	
-	DEBUG = False
+	DEBUG = True
 
 	# chemin relatif du dossier des modules
 	MODULES_PATH = "modules"
@@ -21,31 +21,17 @@ class Controller():
 	MODULES = []
 
 	def __init__(self, conf_file):
-		self.init_modules()
+		#self.init_modules()
 		self.enabled = []				# tableau des modules ACTIFS
 		self.last_cmd = None			# dernière commande executé (pour l'instruction "encore")
 		self.load_conf(conf_file)
-		self.init_server()
-		# self.init_thread()
-
-	def init_modules(self):
-		# Recherche des modules dispo
-		for name in os.listdir(Controller.MODULES_PATH):
-			if name.endswith(".py") and not name.startswith(".") and not name.startswith("__"):
-				name = name.replace(".py", "")
-				path = Controller.MODULES_PATH + "." + name
-				module = importlib.import_module(path)
-				if module != None: 
-					for m in module.MODULES:
-						Controller.MODULES.append(name + "." + m)
-
 	def load_conf(self, conf_file):
 		# Chargement de la configuration (fichier JSON)
-		# try:
 		config = json.loads(open(conf_file).read())
 		if 'debug' in config:
 			Controller.DEBUG = config['debug']
 			del config['debug']
+		# print(" -> load config: debug = " + str(Controller.DEBUG))
 		for name in config:
 			if name == 'host':
 				Controller.HOST = config[name]
@@ -53,6 +39,7 @@ class Controller():
 				Controller.PORT = config[name]
 			else:
 				conf = config[name]
+				if 'enabled' in conf and conf['enabled'] == False: continue
 				mod = conf['module']
 				conf['name'] = name
 				conf['debug'] = Controller.DEBUG
@@ -61,16 +48,30 @@ class Controller():
 				# Et de la classe a charger
 				clss = mod.split(".")[1]
 				# Importation dynamique
+				# print (" --> import module: " + path)
 				module = importlib.import_module(path)
+				# print (" --> module: " + str(module))
 				# Instanciation
+				print ("class", clss)
 				clzz = getattr(module, clss)
 				inst = clzz(conf)
 				# Le module Speech a besoin du controller pour répondre (enfin pour couper le son de la freebox lors d'une réponse vocale)
 				inst.controller = self
 				self.enabled.append(inst)
-		# except:
-		# 	print("Erreur impossible de charger le ficheir de configuration '" + conf_file + "'")
-		# 	sys.exit()
+		# print(" -> host = " + str(Controller.HOST))
+		# print(" -> port = " + str(Controller.PORT))
+		self.init_server()
+
+	#def init_modules(self):
+	#	# Recherche des modules dispo
+	#	for name in os.listdir(Controller.MODULES_PATH):
+	#		if name.endswith(".py") and not name.startswith(".") and not name.startswith("__"):
+	#			name = name.replace(".py", "")
+	#			path = Controller.MODULES_PATH + "." + name
+	#			module = importlib.import_module(path)
+	#			if module != None: 
+	#				for m in module.MODULES:
+	#					Controller.MODULES.append(name + "." + m)
 
 	def get_module(self, name):
 		for mod in self.enabled:
@@ -94,9 +95,9 @@ class Controller():
 		self.app.route('/restart', callback=self.restart)
 		self.app.route('/reboot', callback=self.reboot)
 
-	def init_thread(self):
-		t = CtrlThread(self)
-		t.start()
+	#def init_thread(self):
+	#	t = CtrlThread(self)
+	#	t.start()
 
 	def run(self):
 		self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False)

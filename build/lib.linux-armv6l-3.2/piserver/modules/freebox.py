@@ -47,7 +47,7 @@ class Freebox(modules.Switch):
 		}
 		super().__init__(conf, cmds, True)
 		self.url = "http://" + conf['box'] + ".freebox.fr/pub/remote_control?code=" + conf['code'];
-		print(self.url)
+		# print(self.url)
 
 
 	def analys(self, qry):

@@ -256,3 +256,36 @@
 03/24/2015 06:23:05  Presence::execute: 4df1d29d62e99fb3/true
 03/24/2015 06:23:08  Chacon::execute: on
 03/24/2015 06:23:09  Chacon::execute: off
+03/26/2015 10:17:31  Presence::load rules: /usr/local/piserver/rules.json
+03/26/2015 10:35:44  Presence::load rules: /usr/local/piserver/rules.json
+03/26/2015 10:36:05  Chacon::execute: on
+03/26/2015 10:36:08  Chacon::execute: off
+03/26/2015 10:48:00  Presence::load rules: /usr/local/piserver/rules.json
+03/26/2015 10:48:17  Presence::load rules: /usr/local/piserver/rules.json
+03/26/2015 10:48:37  Chacon::execute: on
+03/26/2015 10:48:39  Chacon::execute: on
+03/26/2015 10:48:42  Chacon::execute: off
+03/27/2015 12:03:05  Presence::load rules: /usr/local/piserver/rules.json
+03/27/2015 12:04:03  Interruptor::execute: on
+03/27/2015 12:08:29  Presence::load rules: /usr/local/piserver/rules.json
+03/27/2015 12:09:38  Presence::load rules: /usr/local/piserver/rules.json
+03/27/2015 12:10:12  Presence::load rules: /usr/local/piserver/rules.json
+03/27/2015 12:11:16  Presence::load rules: rules.json
+03/27/2015 12:13:54  Presence::load rules: rules.json
+03/27/2015 12:19:14  Presence::load rules: rules.json
+03/27/2015 12:19:39  Presence::load rules: rules.json
+03/27/2015 12:19:49  Presence::load rules: rules.json
+03/27/2015 12:21:12  Presence::load rules: rules.json
+03/27/2015 12:21:37  Presence::load rules: rules.json
+03/27/2015 12:22:38  Presence::load rules: rules.json
+03/27/2015 12:25:22  Presence::load rules: rules.json
+03/27/2015 12:26:24  Presence::load rules: rules.json
+03/27/2015 12:26:43  Presence::load rules: rules.json
+03/27/2015 12:27:00  Presence::load rules: rules.json
+03/27/2015 12:27:15  Presence::load rules: rules.json
+03/27/2015 12:27:32  Presence::load rules: rules.json
+03/27/2015 12:31:11  Presence::load rules: rules.json
+03/27/2015 12:31:53  Presence::load rules: rules.json
+03/27/2015 12:32:45  Presence::load rules: rules.json
+03/27/2015 12:34:40  Presence::load rules: rules.json
+03/27/2015 12:37:45  Presence::load rules: rules.json

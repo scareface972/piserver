@@ -1,5 +1,5 @@
 import modules
-import libdht11
+import DHT11Sensor
 import time
 import smbus
 
@@ -19,7 +19,7 @@ class DHT11(modules.Module):
 		#print(cmd)
 		h = 0
 		c = 0
-		h, c, f = libdht11.get(self.pin)
+		h, c, f = DHT11Sensor.get(self.pin)
 		self.value['success'] = False
 		if cmd == 'temp' or cmd == 'all':
 			self.value['success'] = True

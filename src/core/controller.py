@@ -1,5 +1,5 @@
 import bottle
-from modules import Switch, speech
+from modules import Switch, speech, chacon
 import sys, os, importlib, re, json, time
 from threading import Thread
 import datetime, logging
@@ -13,7 +13,7 @@ class Controller():
 	HOST = "*"
 	PORT = 80
 	
-	DEBUG = False
+	DEBUG = True
 
 	# chemin relatif du dossier des modules
 	MODULES_PATH = "modules"
@@ -25,7 +25,6 @@ class Controller():
 		self.enabled = []				# tableau des modules ACTIFS
 		self.last_cmd = None			# dernière commande executé (pour l'instruction "encore")
 		self.load_conf(conf_file)
-
 	def load_conf(self, conf_file):
 		# Chargement de la configuration (fichier JSON)
 		config = json.loads(open(conf_file).read())
@@ -53,6 +52,7 @@ class Controller():
 				module = importlib.import_module(path)
 				# print (" --> module: " + str(module))
 				# Instanciation
+				print ("class", clss)
 				clzz = getattr(module, clss)
 				inst = clzz(conf)
 				# Le module Speech a besoin du controller pour répondre (enfin pour couper le son de la freebox lors d'une réponse vocale)
