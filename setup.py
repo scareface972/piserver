@@ -25,11 +25,11 @@ dht11 = Extension('DHT11Sensor',
 					sources = ['libs/DHT11Sensor.cpp'],
 					libraries = ['wiringPi'])
 
-chacon = Extension('ChaconEmitter',
+emitter = Extension('ChaconEmitter',
 					sources = ['libs/ChaconEmitter.cpp'],
 					libraries = ['wiringPi'])
 
-chacon = Extension('ChaconReceiver',
+receiver = Extension('ChaconReceiver',
 					sources = ['libs/ChaconReceiver.cpp'],
 					libraries = ['wiringPi'])
 
@@ -45,10 +45,12 @@ setup(name='PiServer',
 		include_package_data=True,
 		package_data={
 			'static':['src/static/*'],
-			'views':['src/views/*']
+			'views':['src/views/*'],
+			'imgs':['src/imgs/*']
 		},
-		ext_modules=[dht11, chacon],
+		ext_modules=[dht11, emitter, receiver],
 		data_files=[('piserver', ['src/config.json', 'src/rules.json']),
-				  ('/etc/init.d', ['src/piserver'])],
+#					('piserver/bin/', 'receiver/receiver'),
+					('/etc/init.d', ['src/piserver'])],
 		cmdclass={'install': install},
 	)

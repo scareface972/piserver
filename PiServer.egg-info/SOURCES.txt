@@ -12,6 +12,8 @@ libs/ChaconReceiver.cpp
 libs/DHT11Sensor.cpp
 src/__init__.py
 src/alarms.json
+src/chacon.json
+src/config.bck.json
 src/config.json
 src/piserver
 src/piserver.py

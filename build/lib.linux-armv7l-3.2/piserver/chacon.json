@@ -1,0 +1,25 @@
+{
+	"receiver" : {
+		"plafond": {
+			"where": "salon",
+			"group": "lumiere",
+			"interruptor": 1
+		},
+		"lampe": {
+			"where": "salon",
+			"group": "lumiere",
+			"interruptor": 2
+		},
+		"cuisine": {
+			"where": "cuisine",
+			"group": "lumiere",
+			"interruptor": 3
+		}
+	},
+	"emitter": {
+		"cuisine": {
+			"code": 13552350,
+			"interruptor": [0,1]
+		}
+	}
+}
