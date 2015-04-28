@@ -107,11 +107,18 @@ static PyObject * ChaconReceiver_run(PyObject *self, PyObject *args) {
         log("Error: Librairie Wiring PI introuvable, veuillez lier cette librairie...");
         return NULL;
     }
+    log("Starting thread...");
+	
+	PyObject *arglist;
+	PyObject *ret;
+	PyGILState_STATE gstate;
+    
     pinMode(pin, INPUT);
 	scheduler_realtime();
+	
 	for(;;) {
 		Py_BEGIN_ALLOW_THREADS
-    	int i = 0;
+		int i = 0;
 		unsigned long t = 0;
 		int prevBit = 0;
 		int bit = 0;
@@ -119,8 +126,8 @@ static PyObject * ChaconReceiver_run(PyObject *self, PyObject *args) {
 		bool group = false;
 		bool on = false;
 		unsigned long recipient = 0;
-		//string command = "";
-		do t = pulseIn(pin, LOW, 1000000);
+		string command = "";
+    	do t = pulseIn(pin, LOW, 1000000);
 		while(t < 2400 || t > 2800);
 		while(i < 64) {
 			t = pulseIn(pin, LOW, 1000000);
@@ -151,18 +158,23 @@ static PyObject * ChaconReceiver_run(PyObject *self, PyObject *args) {
 			++i;
 		}
 		if (i>0) {
-			/*command.append(longToString(sender));
+			command.append(longToString(sender));
 			if(on) command.append(" on");
 			else command.append(" off");
 			command.append(" "+longToString(recipient));
-			log(command.c_str());*/
-			PyObject *arglist;
-			arglist = Py_BuildValue("(i,i,i,i)", sender, group, on, recipient);
-			PyEval_CallObject(callback, arglist);
+			log(command.c_str());
+			gstate = PyGILState_Ensure();
+			arglist = Py_BuildValue("(k, i, k)", sender, on, recipient);
+			ret = PyEval_CallObject(callback, arglist);
+			if (ret == NULL) log("PyEval_CallObject failed");
+            else Py_DECREF(ret);
 			Py_DECREF(arglist);
-			delay(500);
+			PyGILState_Release(gstate);
+			log("sended");
+			delay(100);
+		} else {
+			delay(1);
 		}
-		delay(1);
     	Py_END_ALLOW_THREADS
     }
 	
@@ -185,6 +197,7 @@ static PyObject * ChaconReceiver_setCallback(PyObject *self, PyObject *args) {
         callback = temp;
         Py_INCREF(Py_None);
         result = Py_None;
+        log("Callback defined");
     }
     return result;
 }

@@ -205,13 +205,13 @@ static PyObject * ChaconEmitter_send(PyObject *self, PyObject *args) {
 
 	if(onoff == 1){
 		//printf("envois du signal ON\n");
-		for(int i=0;i<5;i++){
+		for(int i=0;i<3;i++){
 			transmit(true);            // envoyer ON
 			delay(10);                 // attendre 10 ms (sinon le socket nous ignore)
 		}
 	} else {
 		//printf("envois du signal OFF\n");
-		for(int i=0;i<5;i++){
+		for(int i=0;i<3;i++){
 			transmit(false);           // envoyer OFF
 			delay(10);                 // attendre 10 ms (sinon le socket nous ignore)
 		}

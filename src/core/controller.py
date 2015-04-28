@@ -25,9 +25,9 @@ class Controller():
 		#self.init_modules()
 		self.enabled = []				# tableau des modules ACTIFS
 		self.last_cmd = None			# dernière commande executé (pour l'instruction "encore")
-		self._loadConfig(conf_file)
+		self._load_config(conf_file)
 
-	def _loadConfig(self, conf_file):
+	def _load_config(self, conf_file):
 		# Chargement de la configuration (fichier JSON)
 		config = json.loads(open(conf_file).read())
 		if 'debug' in config:
@@ -65,17 +65,6 @@ class Controller():
 		# print(" -> port = " + str(Controller.PORT))
 		self.init_server()
 
-	#def init_modules(self):
-	#	# Recherche des modules dispo
-	#	for name in os.listdir(Controller.MODULES_PATH):
-	#		if name.endswith(".py") and not name.startswith(".") and not name.startswith("__"):
-	#			name = name.replace(".py", "")
-	#			path = Controller.MODULES_PATH + "." + name
-	#			module = importlib.import_module(path)
-	#			if module != None: 
-	#				for m in module.MODULES:
-	#					Controller.MODULES.append(name + "." + m)
-
 	def get_module(self, name):
 		for mod in self.enabled:
 			if mod.module_name == name: return mod
@@ -89,19 +78,13 @@ class Controller():
 		self.app.route('/', callback=self.index)
 		self.app.route('/static/:path#.+#', callback=self.static)
 		self.app.route('/home', callback=self.home)
-		self.app.route('/controls', callback=self.controls)
-		self.app.route('/cam', callback=self.cam)
+		#self.app.route('/controls', callback=self.controls)
+		#self.app.route('/cam', callback=self.cam)
 		self.app.route('/modules', callback=self.modules)
 		self.app.route('/states', callback=self.states)
 		self.app.route('/search/<qry:re:[a-z0-9 _\-]+>', method='GET', callback=self.search)
 		self.app.route('/search', method='POST', callback=self.search)
 		self.app.route('/exec/<cmd:path>', callback=self.execute)
-		self.app.route('/restart', callback=self.restart)
-		self.app.route('/reboot', callback=self.reboot)
-
-	#def init_thread(self):
-	#	t = CtrlThread(self)
-	#	t.start()
 
 	def run(self):
 		#print("Start ",Controller.HOST, Controller.PORT)
@@ -164,22 +147,6 @@ class Controller():
 		result = module.execute(cmd)
 		return result
 
-	def restart(self):
-		logging.debug('CONTROLER:: restart')
-		result = dict(success=True)
-		res = os.system('service piserver restart')
-		logging.debug('CONTROLER:: res: ' + str(res))
-		if res != 0: result = dict(success=False, result=res)
-		return result
-
-	def reboot(self):
-		logging.debug('CONTROLER:: reboot')
-		result = dict(success=True)
-		res = os.system('reboot')
-		logging.debug('CONTROLER:: res: ' + str(res))
-		if res != 0: result = dict(success=False, result=res)
-		return result
-
 	def get_switchers(self):
 		switchers = []
 		for module in self.enabled:
@@ -212,41 +179,3 @@ class Controller():
 		for module in self.enabled:
 			if name == module.name:
 				return module
-
-# class CtrlThread(Thread):
-# 	def __init__(self, ctrl):
-# 		Thread.__init__(self)
-# 		self.ctrl = ctrl
-# 		self.lux = 0
-# 		self.presence = True
-
-# 	def run(self):
-# 		while True:
-# 			# print ('runner')
-# 			now = datetime.datetime.now()
-# 			#if now.hour > 7 and now.hour < 22:
-# 			for module in self.ctrl.enabled:
-# 				mod = module.__module__.replace('modules.', '') + '.' + module.__class__.__name__
-# 				# print('module', mod)
-# 				if 'sensor.BH1750FVI' == mod:
-# 					self.lux = module.get()
-# 					# print('-> lux:', self.lux)
-# 				if 'presence.Presence' == mod:
-# 					self.presence = module.get()
-# 					if not self.presence: module.manual = False
-# 					# print('-> presence:', self.presence)
-# 			for module in self.ctrl.enabled:
-# 				if isinstance(module, Switch):
-# 					state = module.state
-# 					# print(module.name, 'presence' in module.autoswitch)
-# 					if 'presence' in module.autoswitch:
-# 						state = self.presence
-# 					# print(module.name, 'light' in module.autoswitch)
-# 					if 'light' in module.autoswitch:
-# 						state = state and self.lux <= 20
-# 					if state != module.state and not module.manual:
-# 						# print('-->', module.name, state)
-# 						module.execute('on' if state else 'off', True)
-# 					elif state == module.state and module.manual:
-# 						module.manual = False
-# 			time.sleep(60 * 10)

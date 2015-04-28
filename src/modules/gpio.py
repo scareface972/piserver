@@ -17,17 +17,6 @@ class GPIOOutput(modules.Switch):
 	"""Class 'GPIOOutput' pour interagir les sorties GPIO"""
 
 	def __init__(self, conf):
-		self.pin = conf['pin']
-		key = "((\w+\s)?(" + conf['name']
-		if 'where' in conf: key += "|"+conf['where']
-		if 'group' in conf: key += "|"+conf['group']+"s?"
-		key += ")\s?)"
-		# Initialisation des commandes disponibles
-		cmds = {
-			'toggle' : key,
-			'on': "allumer?\s"+key+"+",
-			'off': "(etein(dre|s))\s"+key+"+"
-		}
 		super().__init__(conf, cmds)
 		if self.pin < 200: # do not this for piface
 			wpi.pinMode(self.pin, OUTPUT)
@@ -49,5 +38,3 @@ class GPIOOutput(modules.Switch):
 		except:
 			pass
 		return result
-
-# TODO: Il faudrait également gérer les entrées...

@@ -73,6 +73,19 @@ class Module(dict):
 		return num
 
 class Switch(Module):
+	"""Class 'Switch': classe de base pour les switch physiques"""
+
 	def __init__(self, conf, cmds={}, state=False):
 		self.state = state
+		if 'pin' in conf: self.pin = conf['pin']
+		key = "((\w+\s)?(" + conf['name']
+		if 'where' in conf: key += "|"+conf['where']
+		if 'group' in conf: key += "|"+conf['group']+"s?"
+		key += ")\s?)"
+		# Initialisation des commandes disponibles
+		cmds = {
+			'toggle' : key,
+			'on': "allumer?\s"+key+"+",
+			'off': "(etein(dre|s))\s"+key+"+"
+		}
 		super().__init__(conf, cmds)

@@ -1,5 +1,5 @@
 {
-	"receiver" : {
+	"receivers" : {
 		"plafond": {
 			"where": "salon",
 			"group": "lumiere",
@@ -16,10 +16,14 @@
 			"interruptor": 3
 		}
 	},
-	"emitter": {
+	"emitters": {
 		"cuisine": {
-			"code": 13552350,
-			"interruptor": [0,1]
+			"code": 15530742,
+			"interruptor": 1
+		},
+		"plafond": {
+			"code": 15530742,
+			"interruptor": 0
 		}
 	}
 }
