@@ -14,8 +14,8 @@ using namespace std;
 int pin;
 bool bit2[26]={};              // 26 bit Identifiant emetteur
 bool bit2Interruptor[4]={}; 
-int interruptor;
 int sender;
+int interruptor;
 int onoff;
 
 void log(string a) {
@@ -39,8 +39,6 @@ void scheduler_standard() {
 		perror("Failed to switch to normal scheduler.");
 	}
 }
-
-
 
 //Envois d'une pulsation (passage de l'etat haut a l'etat bas)
 //1 = 310µs haut puis 1340µs bas
@@ -105,6 +103,8 @@ void sendPair(bool b) {
 //Fonction d'envois du signal
 //recoit en parametre un booleen définissant l'arret ou la marche du matos (true = on, false = off)
 void transmit(int blnOn) {
+	if (blnOn) printf("envois du signal ON\n");
+	else printf("envois du signal OFF\n");
 	int i;
 
 	// Sequence de verrou anoncant le départ du signal au recepeteur
@@ -143,7 +143,6 @@ void transmit(int blnOn) {
 	digitalWrite(pin, HIGH);   // coupure données, verrou
 	delayMicroseconds(275);      // attendre 275µs
 	digitalWrite(pin, LOW);    // verrou 2 de 2675µs pour signaler la fermeture du signal
-
 }
 
 static PyObject *ChaconEmitterError;
@@ -181,7 +180,7 @@ static PyObject * ChaconEmitter_send(PyObject *self, PyObject *args) {
 		return NULL;
 	}
 
-	scheduler_realtime();
+	//scheduler_realtime();
 	//printf("Passing in realtime ok\n");
 
 	if (!PyArg_ParseTuple(args, "iiii", &pin, &sender, &interruptor, &onoff)) {
@@ -189,7 +188,7 @@ static PyObject * ChaconEmitter_send(PyObject *self, PyObject *args) {
 		return NULL;
 	}
 
-	//printf("args %d, %d, %d, %s\n", pin, sender, interruptor, onoff);
+	printf("args %d, %d, %d, %d\n", pin, sender, interruptor, onoff);
 
 	if (wiringPiSetup() == -1) {
 		printf("Librairie Wiring PI introuvable, veuillez lier cette librairie...");
@@ -203,8 +202,8 @@ static PyObject * ChaconEmitter_send(PyObject *self, PyObject *args) {
 	itobInterruptor(interruptor,4);
 	//printf("Conversion OK\n");
 
+	Py_BEGIN_ALLOW_THREADS
 	if(onoff == 1){
-		//printf("envois du signal ON\n");
 		for(int i=0;i<3;i++){
 			transmit(true);            // envoyer ON
 			delay(10);                 // attendre 10 ms (sinon le socket nous ignore)
@@ -216,8 +215,8 @@ static PyObject * ChaconEmitter_send(PyObject *self, PyObject *args) {
 			delay(10);                 // attendre 10 ms (sinon le socket nous ignore)
 		}
 	}
+	Py_END_ALLOW_THREADS
+	//scheduler_standard();
 	
-	scheduler_standard();
-
 	return Py_BuildValue("i", onoff);
 }

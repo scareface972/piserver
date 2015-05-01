@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <sstream>
 #include <string>
-#include <curl/curl.h>
 
 using namespace std;
 int pin;
@@ -24,13 +23,6 @@ Interruptor interruptors[2] = {
 	{ "cuisine", 15530742, 1}
 };
 
-static string readBuffer;
-static size_t writeCallback(char *contents, size_t size, size_t nmemb, void *userp) {
-	size_t realsize = size * nmemb;
-	readBuffer.append(contents, realsize);
-	return realsize;
-}
-
 static string getName(long sender, long recipient) {
 	int length = (sizeof(interruptors)/sizeof(*interruptors));
 	for (int i=0; i<length; i++) {
@@ -38,26 +30,6 @@ static string getName(long sender, long recipient) {
 			return interruptors[i].name;
 			break;
 		}
-	}
-}
-
-void send(const char *url) {
-	CURL *curl;
-	CURLcode res;
-	curl = curl_easy_init();
-	if(curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-		// example.com is redirected, so we tell libcurl to follow redirection
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-		readBuffer.clear();
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-		// Perform the request, res will get the return code 
-		res = curl_easy_perform(curl);
-		// Check for errors
-		if(res != CURLE_OK) fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-		// always cleanup
-		curl_easy_cleanup(curl);
-		std::cout << readBuffer << std::endl;
 	}
 }
 
@@ -117,26 +89,6 @@ int pulseIn(int pin, int level, int timeout) {
 	return micros;
 }
 
-size_t writeToString(void *ptr, size_t size, size_t count, void *stream) {
-  ((string*)stream)->append((char*)ptr, 0, size*count);
-  return size*count;
-}
-
-void sendToAPI() {
-	CURL* curl;
-    curl_global_init(CURL_GLOBAL_ALL);
-    curl = curl_easy_init();
-    if (curl) {
-	    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/");
-	    string response;
-	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToString);
-	    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-	    CURLcode res = curl_easy_perform(curl);
-	    curl_easy_cleanup(curl);
-	    curl_global_cleanup();
-	}
-}
-
 int main (int argc, char** argv) {
 	pin = atoi(argv[1]);
 	if(wiringPiSetup() == -1) {
@@ -193,15 +145,9 @@ int main (int argc, char** argv) {
 			else command.append(" off");
 			command.append(" "+longToString(recipient));
 			log(command.c_str());
-			string name = getName(sender, recipient);
-			string url = "http://192.168.0.2/exec/";
-			url.append(name);
-			url.append("/toggle");
-			log(url);
-			send(url.c_str());
-			delay(10000);
-		}
-		delay(1);
+			delay(3000);
+		} else 
+			delay(1);
 	}
 	scheduler_standard();
 }

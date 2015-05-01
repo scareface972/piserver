@@ -5,15 +5,10 @@
 			"group": "lumiere",
 			"interruptor": 1
 		},
-		"lampe": {
-			"where": "salon",
-			"group": "lumiere",
-			"interruptor": 2
-		},
 		"cuisine": {
 			"where": "cuisine",
 			"group": "lumiere",
-			"interruptor": 3
+			"interruptor": 2
 		}
 	},
 	"emitters": {

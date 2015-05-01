@@ -13,8 +13,9 @@ using namespace std;
 int pinIn;
 int pinOut;
 int emitter;
-bool bit2[26]={};              // 26 bit Identifiant emetteur
-bool bit2Interruptor[4]={};
+bool bit2[26] = {};              // 26 bit Identifiant emetteur
+bool bit2Interruptor[4] = {};
+int received[3] = {};
 
 void scheduler_realtime() {
 	struct sched_param p;
@@ -186,6 +187,7 @@ void send(int interruptor, int onoff) {
 	msg.append(", onoff: ");
 	msg.append(intToString(onoff));
 	log(msg);
+	scheduler_realtime();
 	itob(emitter,26);
 	itobInterruptor(interruptor,4);
 	if(onoff == 1){
@@ -199,12 +201,11 @@ void send(int interruptor, int onoff) {
 			delay(10);                 // attendre 10 ms (sinon le socket nous ignore)
 		}
 	}
+	scheduler_standard();
 }
 
-int* receive() {
+void receive() {
 	Py_BEGIN_ALLOW_THREADS
-	int interruptor = -1;
-	bool on = false;
 	for(;;) {
 		int i = 0;
 		unsigned long t = 0;
@@ -212,6 +213,7 @@ int* receive() {
 		int bit = 0;
 		unsigned long sender = 0;
 		unsigned long recipient = 0;
+		int on = 0;
 		string command = "";
     	do t = pulseIn(pinIn, LOW, 1000000);
 		while(t < 2400 || t > 2800);
@@ -244,21 +246,10 @@ int* receive() {
 			++i;
 		}
 		if (i>0) {
-			command.append(longToString(sender));
-			if(on) command.append(" on");
-			else command.append(" off");
-			command.append(" "+longToString(recipient));
-			log(command.c_str());
-			/*gstate = PyGILState_Ensure();
-			arglist = Py_BuildValue("(k, i, k)", sender, on, recipient);
-			ret = PyEval_CallObject(callback, arglist);
-			if (ret == NULL) log("PyEval_CallObject failed");
-            else Py_DECREF(ret);
-			Py_DECREF(arglist);
-			PyGILState_Release(gstate);
-			log("sended");*/
 			if (sender > 0) {
-				if (sender == 15530742 && recipient == 1) interruptor = 2;
+				received[0] = sender;
+				received[1] = recipient;
+			    received[2] = on;
 				break;
 			}
 		} else {
@@ -266,35 +257,37 @@ int* receive() {
 		}
     }
     Py_END_ALLOW_THREADS
-    if (interruptor > -1) return { interruptor, on };
 }
 
-static PyObject *ChaconReceiverError;
-static PyObject * ChaconReceiver_receive(PyObject *self, PyObject *args);
-static PyObject * ChaconReceiver_send(PyObject *self, PyObject *args);
+static PyObject *callback = NULL;
+static PyObject *ChaconError;
+static PyObject * Chacon_setCallback(PyObject *self, PyObject *args);
+static PyObject * Chacon_receive(PyObject *self, PyObject *args);
+static PyObject * Chacon_send(PyObject *self, PyObject *args);
 
-static PyMethodDef ChaconReceiverMethods[] = {
-	{"receive",  ChaconReceiver_receive, METH_VARARGS, "Start listen 433.92MHz Chacon message."},
-	{"send",  ChaconReceiver_send, METH_VARARGS, "Send 433.92MHz Chacon message."}
+static PyMethodDef ChaconMethods[] = {
+	{"setCallback",  Chacon_setCallback, METH_VARARGS, "Callback setter"},
+	{"receive",  Chacon_receive, METH_VARARGS, "Start listen 433.92MHz Chacon message."},
+	{"send",  Chacon_send, METH_VARARGS, "Send 433.92MHz Chacon message."}
 };
 
-static struct PyModuleDef ChaconReceiver_module = { PyModuleDef_HEAD_INIT, "ChaconReceiver", NULL, -1, ChaconReceiverMethods };
+static struct PyModuleDef Chacon_module = { PyModuleDef_HEAD_INIT, "Chacon", NULL, -1, ChaconMethods };
 
 PyMODINIT_FUNC
-PyInit_ChaconReceiver(void) {
+PyInit_Chacon(void) {
 	PyObject *m;
 
-	m = PyModule_Create(&ChaconReceiver_module);
+	m = PyModule_Create(&Chacon_module);
 	if (m == NULL)
 		return NULL;
 
-	ChaconReceiverError = PyErr_NewException("ChaconReceiver.error", NULL, NULL);
-	Py_INCREF(ChaconReceiverError);
-	PyModule_AddObject(m, "error", ChaconReceiverError);
+	ChaconError = PyErr_NewException("Chacon.error", NULL, NULL);
+	Py_INCREF(ChaconError);
+	PyModule_AddObject(m, "error", ChaconError);
 	return m;
 }
 
-static PyObject * ChaconReceiver_send(PyObject *self, PyObject *args) {
+static PyObject * Chacon_send(PyObject *self, PyObject *args) {
 	if (setuid(0)) {
 		printf("setuid error\n");
 		return NULL;
@@ -320,7 +313,7 @@ static PyObject * ChaconReceiver_send(PyObject *self, PyObject *args) {
 	return Py_BuildValue("i", onoff);
 }
 
-static PyObject * ChaconReceiver_receive(PyObject *self, PyObject *args) {
+static PyObject * Chacon_receive(PyObject *self, PyObject *args) {
 	if (setuid(0)) {
 		log("Error: setuid");
 		return NULL;
@@ -337,23 +330,40 @@ static PyObject * ChaconReceiver_receive(PyObject *self, PyObject *args) {
     
     pinMode(pinIn, INPUT);
     pinMode(pinOut, OUTPUT);
-
-	scheduler_realtime();
 	
+	int sended[5] = {};
+	sended[0] = sended[1] = sended[2] = sended[3] = sended[4] = 0;
 	for(;;) {
-		int values[2] = receive();
-		send(values[0], values[1]);
-		delay(3000);
+		received[0] = received[1] = received[2] = 0;
+		receive();
+		//cout << "received " << received[0] << " " << received[1] << " " << received[2] << endl;
+		//cout << "sended " << sended[0] << " " << sended[1] << " " << sended[2] << endl;
+		if (received[0] > 0 && (sended[0] != received[0] || sended[1] != received[1] || sended[2] != received[2])) {
+			string name = "";
+			//PyGILState_STATE gstate = PyGILState_Ensure();
+			PyObject *arglist = Py_BuildValue("(i,i)", received[0], received[1]);
+			PyObject *ret = PyEval_CallObject(callback, arglist);
+			if (ret == NULL) log("PyEval_CallObject failed");
+            else {
+            	PyArg_Parse(ret, "(ii)", &sended[3], &sended[4]);
+            	Py_DECREF(ret);
+            }
+            Py_DECREF(arglist);
+            //PyGILState_Release(gstate);
+            cout << "interruptor " << sended[3] << " " << sended[4] << endl;
+            if (sended[3] > 0) {
+				sended[0] = received[0];
+				sended[1] = received[1];
+				sended[2] = received[2];
+				send(sended[3], sended[4]);
+			}
+		}
     }
-    Py_END_ALLOW_THREADS
-	
-	scheduler_standard();
 
 	return Py_BuildValue("i", 1);
 }
 
-/*
-static PyObject * ChaconReceiver_setCallback(PyObject *self, PyObject *args) {
+static PyObject * Chacon_setCallback(PyObject *self, PyObject *args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -371,4 +381,3 @@ static PyObject * ChaconReceiver_setCallback(PyObject *self, PyObject *args) {
     }
     return result;
 }
-*/

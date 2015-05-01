@@ -5,7 +5,7 @@ process = None
 
 def createProcess():
 	try:
-		process = subprocess.Popen(p, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		process = subprocess.Popen(p, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 	except:
 		print ("Echec de la creation du subprocess", sys.exc_info())
 		exit()

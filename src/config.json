@@ -8,14 +8,11 @@
 	"presence": {
 		"module": "presence.Presence"
 	},
-	"emitter": {
-		"module": "chacon.Emitter",
-		"pin": 0,
-		"sender": 8976434
-	},
-	"receiver": {
-		"module": "chacon.Receiver",
-		"pin": 2
+	"chacon": {
+		"module": "chacon.Chacon",
+		"pinIn": 2,
+		"pinOut": 0,
+		"emitter": 8976434
 	},
 	"freebox": {
 		"module": "freebox.Freebox",
