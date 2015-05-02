@@ -1,5 +1,5 @@
 import bottle
-from modules import Switch, speech, chacon
+from modules import Switch, speech, chacon, freebox
 import sys, os, importlib, re, json, time
 from threading import Thread
 import datetime, logging
@@ -80,7 +80,7 @@ class Controller():
 		self.app.route('/home', callback=self.home)
 		#self.app.route('/controls', callback=self.controls)
 		#self.app.route('/cam', callback=self.cam)
-		self.app.route('/modules', callback=self.modules)
+		#self.app.route('/modules', callback=self.modules)
 		self.app.route('/states', callback=self.states)
 		self.app.route('/search/<qry:re:[a-z0-9 _\-]+>', method='GET', callback=self.search)
 		self.app.route('/search', method='POST', callback=self.search)
@@ -98,11 +98,12 @@ class Controller():
 
 	@bottle.view('home')
 	def home(self):
+		print(self.get_switchers())
 		return bottle.template('home', switchers=self.get_switchers())
 
-	@bottle.view('controls')
-	def controls(self):
-		return bottle.template('controls', switchers=self.get_switchers(), style="black")
+	#@bottle.view('controls')
+	#def controls(self):
+	#	return bottle.template('controls', switchers=self.get_switchers(), style="black")
 
 	def cam(self):
 		name = 'image.jpg'
@@ -112,19 +113,20 @@ class Controller():
 		camera.close()
 		return bottle.static_file(name, 'imgs');	
 
-	def modules(self):
-		mods = []
-		for module in self.enabled:
-			is_switch = True if isinstance(module, Switch) else False
-			mods.append({'name': module.name, 'type': module.get_module_name(), 'group': module.group, 'state': module.state, 'cmds': module.list_cmds(), 'is_switch': is_switch})
-		return dict(success=True, modules=mods)
+	#def modules(self):
+	#	mods = []
+	#	for module in self.enabled:
+	#		is_switch = True if isinstance(module, freebox.Freebox) or isinstance(module, chacon.Chacon) else False
+	#		mods.append({'name': module.name, 'type': module.get_module_name(), 'group': module.group, 'state': module.state, 'cmds': module.list_cmds(), 'is_switch': is_switch})
+	#	print(mods)
+	#	return dict(success=True, modules=mods)
 
 	def states(self):
 		bottle.response.content_type = 'text/event-stream'
 		bottle.response.set_header('Cache-Control', 'no-cache')
 		states = []
 		for module in self.get_switchers():
-			states.append({'name': module.name, 'state': module.state})
+			states.append({'name': module['name'], 'state': module['state']})
 		yield 'data: ' + json.dumps(dict(success=True, states=states)) + '\n\n'
 
 	def search(self, qry=None):
@@ -150,7 +152,10 @@ class Controller():
 	def get_switchers(self):
 		switchers = []
 		for module in self.enabled:
-			if isinstance(module, Switch): switchers.append(module)
+			if isinstance(module, freebox.Freebox): 
+				switchers.append({'name':module.name, 'state': module.state})
+			elif isinstance(module, chacon.Chacon): 
+				switchers.extend(module.get_switchers())
 		return switchers
 
 	def analys(self, qrys):

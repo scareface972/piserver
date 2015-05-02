@@ -221,7 +221,7 @@ Temps.prototype.update = function() {
     });
 };
 
-var states = new EventSource('/states');
+/*var states = new EventSource('/states');
 states.addEventListener('message', function(e) {
     //console.log('data: ' + e.data);
     var result = JSON.parse(e.data);
@@ -235,7 +235,7 @@ states.addEventListener('message', function(e) {
                 $('#'+result.states[i].name).attr('class', 'circle-unchecked');
         }
     }
-}, false);
+}, false);*/
 
 function check(element) {
     var elt = $(element)[0];
@@ -245,7 +245,8 @@ function check(element) {
     if (className == 'checked') className = 'unchecked';
     else { action = 'on'; className = 'checked'; }
     $(element).attr('class', 'circle-' + className);
-    $.get('/exec/' + elt.id + '/' + action);
+    var name = (elt.id != 'freebox' ? 'chacon' : '') + '/' + elt.id;
+    $.get('/exec/' + name + '/' + action);
 }
 
 function roundVal(temp) {

@@ -46,17 +46,22 @@ class Chacon(modules.Module):
 		for e in self.emitters:
 			if e['code'] == code and e['interruptor'] == interruptor: return e
 		return None
+
+	def get_switchers(self):
+		return self.receivers
+
+	def list_cmds(self):
+		return self.cmds
 	
-	def callback(self, code, interruptor):
-		print("callback", "code", code, "interruptor", interruptor)
+	def callback(self, code, interruptor, state):
+		print("callback", code, interruptor, state)
 		emitter = self._find_emitter(code, interruptor)
 		if emitter == None: return 0, 0
-		print(emitter['name'])
+		print("->", emitter['name'])
 		receiver = self._find_interruptor(emitter['name'])
 		if receiver == None: return 0, 0
-		print(receiver)
 		receiver['state'] = not receiver['state']
-		print(receiver)
+		#print(receiver)
 		return (receiver['interruptor'], 1 if receiver['state'] else 0)
 
 	def worker(self):
@@ -65,12 +70,11 @@ class Chacon(modules.Module):
 		rf.receive(self.pinIn, self.pinOut, self.emitter)
 
 	def execute(self, cmd):
-		print("exec", cmd)
+		print("exec", cmd)	
 		name = cmd.split("/")[0]
-		print("name", name)
+		print("-> name", name)
 		result = dict(success=False, name=name)
 		receiver = self._find_interruptor(name)
-		print(receiver)
 		if receiver == None:
 			result['error'] = 'Unknown target'
 		else:

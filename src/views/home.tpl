@@ -42,13 +42,13 @@
                 <td colspan="{{colcount}}" class="label" id="home_temp">Chargement...</td>
             </tr>
             %for module in switchers:
-            %   checked = 'checked' if module.state else 'unchecked'
+            %   checked = 'checked' if module['state'] else 'unchecked'
             %   if cnt%colcount==0:
                     <tr class="switch">
             %   end
             %   cnt += 1
-                    <td class="label">{{module.name}}</td>
-                    <td><div id="{{module.name}}" class="circle-{{checked}}" onclick="check(this);">&nbsp;</div></td>
+                    <td class="label">{{module['name']}}</td>
+                    <td><div id="{{module['name']}}" class="circle-{{checked}}" onclick="check(this);">&nbsp;</div></td>
             %   if cnt%colcount==0:
                     </tr>
             %   end

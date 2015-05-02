@@ -9,6 +9,7 @@ class Module(dict):
 	REPEAT = "(\s(\w+\s)?(?P<repeat>(\d+|un|deux|trois|quatre|cinq|six|sept|huit|neuf|dix))( fois)?)?"
 	
 	def __init__(self, conf, cmds={}):
+		#print(conf)
 		self.controller = None									# le controller
 		self.module_name = conf['module'];
 		if not hasattr(self, 'state'): self.state = None		# état par défaut

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <ctime>
 
 using namespace std;
 int pinIn;
@@ -16,8 +17,14 @@ int emitter;
 bool bit2[26] = {};              // 26 bit Identifiant emetteur
 bool bit2Interruptor[4] = {};
 int received[3] = {};
+bool scheduler_set = false;
+
+void log(string a) {
+	cout << a << endl;
+}
 
 void scheduler_realtime() {
+	log("-> pass to realtime");
 	struct sched_param p;
 	p.__sched_priority = sched_get_priority_max(SCHED_RR);
 	if( sched_setscheduler( 0, SCHED_RR, &p ) == -1 ) {
@@ -26,15 +33,12 @@ void scheduler_realtime() {
 }
 
 void scheduler_standard() {
+	log("-> pass to standard");
 	struct sched_param p;
 	p.__sched_priority = 0;
 	if( sched_setscheduler( 0, SCHED_OTHER, &p ) == -1 ) {
 		perror("Failed to switch to normal scheduler.");
 	}
-}
-
-void log(string a) {
-	cout << a << endl;
 }
 
 string longToString(long mylong) {
@@ -73,25 +77,6 @@ int pulseIn(int pin, int level, int timeout) {
 	return micros;
 }
 
-
-//Envois d'une pulsation (passage de l'etat haut a l'etat bas)
-//1 = 310µs haut puis 1340µs bas
-//0 = 310µs haut puis 310µs bas
-void sendBit(bool b) {
- if (b) {
-   digitalWrite(pinOut, HIGH);
-   delayMicroseconds(310);   //275 orinally, but tweaked.
-   digitalWrite(pinOut, LOW);
-   delayMicroseconds(1340);  //1225 orinally, but tweaked.
- }
- else {
-   digitalWrite(pinOut, HIGH);
-   delayMicroseconds(310);   //275 orinally, but tweaked.
-   digitalWrite(pinOut, LOW);
-   delayMicroseconds(310);   //275 orinally, but tweaked.
- }
-}
-
 //Calcul le nombre 2^chiffre indiqué, fonction utilisé par itob pour la conversion decimal/binaire
 unsigned long power2(int power) {
 	unsigned long integer=1;
@@ -121,6 +106,29 @@ void itobInterruptor(unsigned long integer, int length) {
 	}
 }
 
+int DELAY_DOWN = 275;
+int DELAY_UP   = 1225;
+int DELAY_VEROU1 = 9000;
+int DELAY_VEROU2 = 2600;
+
+//Envois d'une pulsation (passage de l'etat haut a l'etat bas)
+//1 = 310µs haut puis 1340µs bas
+//0 = 310µs haut puis 310µs bas
+void sendBit(bool b) {
+ if (b) {
+   digitalWrite(pinOut, HIGH);
+   delayMicroseconds(DELAY_DOWN);   //275 orinally, but tweaked.
+   digitalWrite(pinOut, LOW);
+   delayMicroseconds(DELAY_UP);  //1225 orinally, but tweaked.
+ }
+ else {
+   digitalWrite(pinOut, HIGH);
+   delayMicroseconds(DELAY_DOWN);   //275 orinally, but tweaked.
+   digitalWrite(pinOut, LOW);
+   delayMicroseconds(DELAY_DOWN);   //275 orinally, but tweaked.
+ }
+}
+
 //Envoie d'une paire de pulsation radio qui definissent 1 bit réel : 0 =01 et 1 =10
 //c'est le codage de manchester qui necessite ce petit bouzin, ceci permet entre autres de dissocier les données des parasites
 void sendPair(bool b) {
@@ -133,61 +141,48 @@ void sendPair(bool b) {
 	}
 }
 
-
 //Fonction d'envois du signal
 //recoit en parametre un booleen définissant l'arret ou la marche du matos (true = on, false = off)
 void transmit(int blnOn) {
-	int i;
+	struct timeval tv;
+	gettimeofday(&tv,NULL);
+	unsigned long tb = 1000000 * tv.tv_sec + tv.tv_usec;
 
 	// Sequence de verrou anoncant le départ du signal au recepeteur
 	digitalWrite(pinOut, HIGH);
-	delayMicroseconds(275);     // un bit de bruit avant de commencer pour remettre les delais du recepteur a 0
+	delayMicroseconds(DELAY_DOWN);     // un bit de bruit avant de commencer pour remettre les delais du recepteur a 0
 	digitalWrite(pinOut, LOW);
-	delayMicroseconds(9900);     // premier verrou de 9900µs
+	delayMicroseconds(DELAY_VEROU1);     // premier verrou de 9900µs
 	digitalWrite(pinOut, HIGH);   // high again
-	delayMicroseconds(275);      // attente de 275µs entre les deux verrous
+	delayMicroseconds(DELAY_DOWN);      // attente de 275µs entre les deux verrous
 	digitalWrite(pinOut, LOW);    // second verrou de 2675µs
-	delayMicroseconds(2675);
+	delayMicroseconds(DELAY_VEROU2);
 	digitalWrite(pinOut, HIGH);  // On reviens en état haut pour bien couper les verrous des données
 
-	// Envoie du code emetteur (272946 = 1000010101000110010  en binaire)
-	for(i=0; i<26;i++) {
-		sendPair(bit2[i]);
-	}
-
-	// Envoie du bit définissant si c'est une commande de groupe ou non (26em bit)
+	int i;
+	for(i=0; i<26;i++) sendPair(bit2[i]);
 	sendPair(false);
-
-	// Envoie du bit définissant si c'est allumé ou eteint 27em bit)
 	sendPair(blnOn);
-
-	// Envoie des 4 derniers bits, qui représentent le code interrupteur, ici 0 (encode sur 4 bit donc 0000)
-	// nb: sur  les télécommandes officielle chacon, les interrupteurs sont logiquement nommés de 0 à x
-	// interrupteur 1 = 0 (donc 0000) , interrupteur 2 = 1 (1000) , interrupteur 3 = 2 (0100) etc...
-	for(i=0; i<4;i++) {
-		if(bit2Interruptor[i]==0) {
-			sendPair(false);
-		} else {
-			sendPair(true);
-		}
-	}
+	for(i=0; i<4;i++) sendPair(bit2Interruptor[i]);
 
 	digitalWrite(pinOut, HIGH);   // coupure données, verrou
-	delayMicroseconds(275);      // attendre 275µs
+	delayMicroseconds(DELAY_DOWN);      // attendre 275µs
 	digitalWrite(pinOut, LOW);    // verrou 2 de 2675µs pour signaler la fermeture du signal
+	
+	gettimeofday(&tv,NULL);
+	unsigned long te = 1000000 * tv.tv_sec + tv.tv_usec;
+    cout << te-tb << " ms" << endl;
 }
 
 void send(int interruptor, int onoff) {
-	if (onoff) printf("envois du signal ON\n");
-	else printf("envois du signal OFF\n");
-	string msg = "emitter: ";
+	string msg = "-> emitter: ";
 	msg.append(intToString(emitter));
 	msg.append(", interruptor: ");
 	msg.append(intToString(interruptor));
 	msg.append(", onoff: ");
 	msg.append(intToString(onoff));
 	log(msg);
-	scheduler_realtime();
+	Py_BEGIN_ALLOW_THREADS
 	itob(emitter,26);
 	itobInterruptor(interruptor,4);
 	if(onoff == 1){
@@ -201,7 +196,7 @@ void send(int interruptor, int onoff) {
 			delay(10);                 // attendre 10 ms (sinon le socket nous ignore)
 		}
 	}
-	scheduler_standard();
+    Py_END_ALLOW_THREADS
 }
 
 void receive() {
@@ -219,7 +214,7 @@ void receive() {
 		while(t < 2400 || t > 2800);
 		while(i < 64) {
 			t = pulseIn(pinIn, LOW, 1000000);
-			if(t > 300 && t < 360) bit = 0;
+			if(t > 270 && t < 360) bit = 0;
 			else if(t > 1200 && t < 1500) bit = 1;
 			else {
 				i = 0;
@@ -301,15 +296,17 @@ static PyObject * Chacon_send(PyObject *self, PyObject *args) {
 		return NULL;
 	}
 
-	printf("args %d, %d, %d, %d\n", pinOut, emitter, interruptor, onoff);
+	//printf("args %d, %d, %d, %d\n", pinOut, emitter, interruptor, onoff);
 
 	if (wiringPiSetup() == -1) {
 		printf("Librairie Wiring PI introuvable, veuillez lier cette librairie...");
 		return NULL;
 	}
 
+	if (!scheduler_set) scheduler_realtime();
 	pinMode(pinOut, OUTPUT);
 	send(interruptor, onoff);
+	if (!scheduler_set) scheduler_standard();
 	return Py_BuildValue("i", onoff);
 }
 
@@ -326,6 +323,10 @@ static PyObject * Chacon_receive(PyObject *self, PyObject *args) {
         log("Error: Librairie Wiring PI introuvable, veuillez lier cette librairie...");
         return NULL;
     }
+
+	scheduler_realtime();
+	scheduler_set = true;
+
     log("Starting thread...");
     
     pinMode(pinIn, INPUT);
@@ -341,7 +342,7 @@ static PyObject * Chacon_receive(PyObject *self, PyObject *args) {
 		if (received[0] > 0 && (sended[0] != received[0] || sended[1] != received[1] || sended[2] != received[2])) {
 			string name = "";
 			//PyGILState_STATE gstate = PyGILState_Ensure();
-			PyObject *arglist = Py_BuildValue("(i,i)", received[0], received[1]);
+			PyObject *arglist = Py_BuildValue("(i,i,i)", received[0], received[1], received[2]);
 			PyObject *ret = PyEval_CallObject(callback, arglist);
 			if (ret == NULL) log("PyEval_CallObject failed");
             else {
@@ -350,7 +351,7 @@ static PyObject * Chacon_receive(PyObject *self, PyObject *args) {
             }
             Py_DECREF(arglist);
             //PyGILState_Release(gstate);
-            cout << "interruptor " << sended[3] << " " << sended[4] << endl;
+            //cout << "interruptor " << sended[3] << " " << sended[4] << endl;
             if (sended[3] > 0) {
 				sended[0] = received[0];
 				sended[1] = received[1];
@@ -359,6 +360,9 @@ static PyObject * Chacon_receive(PyObject *self, PyObject *args) {
 			}
 		}
     }
+
+	scheduler_standard();
+	scheduler_set = false;
 
 	return Py_BuildValue("i", 1);
 }
