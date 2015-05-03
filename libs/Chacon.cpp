@@ -106,8 +106,8 @@ void itobInterruptor(unsigned long integer, int length) {
 	}
 }
 
-int DELAY_DOWN = 275;
-int DELAY_UP   = 1225;
+int DELAY_DOWN = 350;
+int DELAY_UP   = 1400;
 int DELAY_VEROU1 = 9000;
 int DELAY_VEROU2 = 2600;
 
@@ -168,7 +168,7 @@ void transmit(int blnOn) {
 	digitalWrite(pinOut, HIGH);   // coupure données, verrou
 	delayMicroseconds(DELAY_DOWN);      // attendre 275µs
 	digitalWrite(pinOut, LOW);    // verrou 2 de 2675µs pour signaler la fermeture du signal
-	
+
 	gettimeofday(&tv,NULL);
 	unsigned long te = 1000000 * tv.tv_sec + tv.tv_usec;
     cout << te-tb << " ms" << endl;
@@ -326,39 +326,28 @@ static PyObject * Chacon_receive(PyObject *self, PyObject *args) {
 
 	scheduler_realtime();
 	scheduler_set = true;
-
-    log("Starting thread...");
     
     pinMode(pinIn, INPUT);
     pinMode(pinOut, OUTPUT);
-	
-	int sended[5] = {};
-	sended[0] = sended[1] = sended[2] = sended[3] = sended[4] = 0;
+
+	//int transmited[3] = {};
 	for(;;) {
+    	log("Starting receiving...");
 		received[0] = received[1] = received[2] = 0;
 		receive();
-		//cout << "received " << received[0] << " " << received[1] << " " << received[2] << endl;
-		//cout << "sended " << sended[0] << " " << sended[1] << " " << sended[2] << endl;
-		if (received[0] > 0 && (sended[0] != received[0] || sended[1] != received[1] || sended[2] != received[2])) {
-			string name = "";
+		//if (received[0] != transmited[0] && (received[1] != transmited[1] || received[2] != transmited[2])) {
+		//transmited[0] = received[0];
+		//transmited[1] = received[1];
+		//transmited[2] = received[2];
+		if (received[0] != emitter) {
 			//PyGILState_STATE gstate = PyGILState_Ensure();
 			PyObject *arglist = Py_BuildValue("(i,i,i)", received[0], received[1], received[2]);
 			PyObject *ret = PyEval_CallObject(callback, arglist);
 			if (ret == NULL) log("PyEval_CallObject failed");
-            else {
-            	PyArg_Parse(ret, "(ii)", &sended[3], &sended[4]);
-            	Py_DECREF(ret);
-            }
-            Py_DECREF(arglist);
-            //PyGILState_Release(gstate);
-            //cout << "interruptor " << sended[3] << " " << sended[4] << endl;
-            if (sended[3] > 0) {
-				sended[0] = received[0];
-				sended[1] = received[1];
-				sended[2] = received[2];
-				send(sended[3], sended[4]);
-			}
-		}
+	        else Py_DECREF(ret);
+	        Py_DECREF(arglist);
+	        //PyGILState_Release(gstate);
+	    }
     }
 
 	scheduler_standard();

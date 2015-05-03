@@ -20,6 +20,7 @@ class Chacon(modules.Module):
 		super().__init__(conf)
 		self.emitters = []
 		self.receivers = []
+		self.code = self.interruptor = self.state = 0
 		self._load_conf()
 		self.thread = threading.Thread(target=self.worker)
 		self.thread.daemon = True
@@ -54,15 +55,22 @@ class Chacon(modules.Module):
 		return self.cmds
 	
 	def callback(self, code, interruptor, state):
-		print("callback", code, interruptor, state)
-		emitter = self._find_emitter(code, interruptor)
-		if emitter == None: return 0, 0
-		print("->", emitter['name'])
-		receiver = self._find_interruptor(emitter['name'])
-		if receiver == None: return 0, 0
-		receiver['state'] = not receiver['state']
-		#print(receiver)
-		return (receiver['interruptor'], 1 if receiver['state'] else 0)
+		if self.emitter != code: #and (self.code != code or self.interruptor != interruptor or self.state != state):
+			self.code = code
+			self.interruptor = interruptor
+			self.state = state
+			print("callback", code, interruptor, state)
+			emitter = self._find_emitter(code, interruptor)
+			if emitter == None: return
+			print("->", emitter['name'])
+			receiver = self._find_interruptor(emitter['name'])
+			if receiver == None: return
+			receiver['state'] = True if state == 1 else False
+			cmd = emitter['name']+'/'+('on' if receiver['state'] else 'off')
+			print("->", cmd)
+			th = threading.Thread(target=self.execute, args=(cmd,))
+			th.daemon = True
+			th.start()
 
 	def worker(self):
 		print("Start worker...")
