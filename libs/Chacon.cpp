@@ -9,14 +9,15 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <ctime>
+#include <curl/curl.h>
 
 using namespace std;
 int pinIn;
 int pinOut;
-int emitter;
 bool bit2[26] = {};              // 26 bit Identifiant emetteur
 bool bit2Interruptor[4] = {};
-int received[3] = {};
+unsigned int emitter;
+unsigned int received[4] = {};
 bool scheduler_set = false;
 
 void log(string a) {
@@ -24,7 +25,7 @@ void log(string a) {
 }
 
 void scheduler_realtime() {
-	log("-> pass to realtime");
+	//log("-> pass to realtime");
 	struct sched_param p;
 	p.__sched_priority = sched_get_priority_max(SCHED_RR);
 	if( sched_setscheduler( 0, SCHED_RR, &p ) == -1 ) {
@@ -33,7 +34,7 @@ void scheduler_realtime() {
 }
 
 void scheduler_standard() {
-	log("-> pass to standard");
+	//log("-> pass to standard");
 	struct sched_param p;
 	p.__sched_priority = 0;
 	if( sched_setscheduler( 0, SCHED_OTHER, &p ) == -1 ) {
@@ -106,10 +107,10 @@ void itobInterruptor(unsigned long integer, int length) {
 	}
 }
 
-int DELAY_DOWN = 350;
-int DELAY_UP   = 1400;
-int DELAY_VEROU1 = 9000;
-int DELAY_VEROU2 = 2600;
+int DELAY_DOWN = 275;
+int DELAY_UP   = 1225;
+int DELAY_VEROU1 = 9900;
+int DELAY_VEROU2 = 2675;
 
 //Envois d'une pulsation (passage de l'etat haut a l'etat bas)
 //1 = 310µs haut puis 1340µs bas
@@ -144,10 +145,6 @@ void sendPair(bool b) {
 //Fonction d'envois du signal
 //recoit en parametre un booleen définissant l'arret ou la marche du matos (true = on, false = off)
 void transmit(int blnOn) {
-	struct timeval tv;
-	gettimeofday(&tv,NULL);
-	unsigned long tb = 1000000 * tv.tv_sec + tv.tv_usec;
-
 	// Sequence de verrou anoncant le départ du signal au recepeteur
 	digitalWrite(pinOut, HIGH);
 	delayMicroseconds(DELAY_DOWN);     // un bit de bruit avant de commencer pour remettre les delais du recepteur a 0
@@ -168,47 +165,44 @@ void transmit(int blnOn) {
 	digitalWrite(pinOut, HIGH);   // coupure données, verrou
 	delayMicroseconds(DELAY_DOWN);      // attendre 275µs
 	digitalWrite(pinOut, LOW);    // verrou 2 de 2675µs pour signaler la fermeture du signal
-
-	gettimeofday(&tv,NULL);
-	unsigned long te = 1000000 * tv.tv_sec + tv.tv_usec;
-    cout << te-tb << " ms" << endl;
 }
 
 void send(int interruptor, int onoff) {
-	string msg = "-> emitter: ";
-	msg.append(intToString(emitter));
-	msg.append(", interruptor: ");
-	msg.append(intToString(interruptor));
-	msg.append(", onoff: ");
-	msg.append(intToString(onoff));
-	log(msg);
+	//string msg = "-> emitter: ";
+	//msg.append(intToString(emitter));
+	//msg.append(", interruptor: ");
+	//msg.append(intToString(interruptor));
+	//msg.append(", onoff: ");
+	//msg.append(intToString(onoff));
+	//log(msg);
+	if (!scheduler_set) scheduler_realtime();
 	Py_BEGIN_ALLOW_THREADS
+	//struct timeval tv;
+	//gettimeofday(&tv,NULL);
+	//unsigned long tb = 1000000 * tv.tv_sec + tv.tv_usec;
 	itob(emitter,26);
 	itobInterruptor(interruptor,4);
-	if(onoff == 1){
-		for(int i=0;i<3;i++){
-			transmit(true);            // envoyer ON
-			delay(10);                 // attendre 10 ms (sinon le socket nous ignore)
-		}
-	} else {
-		for(int i=0;i<3;i++){
-			transmit(false);           // envoyer OFF
-			delay(10);                 // attendre 10 ms (sinon le socket nous ignore)
-		}
+	int cnt = 3;
+	for(int i=0;i<cnt;i++){
+		transmit(onoff == 1);
+		delay(10);
 	}
+	//gettimeofday(&tv,NULL);
+	//unsigned long te = 1000000 * tv.tv_sec + tv.tv_usec;
+    //cout << cnt << " transmit in " << te-tb << " ms" << endl;
     Py_END_ALLOW_THREADS
+	if (!scheduler_set) scheduler_standard();
 }
 
 void receive() {
-	Py_BEGIN_ALLOW_THREADS
 	for(;;) {
 		int i = 0;
 		unsigned long t = 0;
 		int prevBit = 0;
 		int bit = 0;
-		unsigned long sender = 0;
-		unsigned long recipient = 0;
-		int on = 0;
+		unsigned int sender = 0;
+		unsigned int recipient = 0;
+		unsigned int group = 0, on = 0;
 		string command = "";
     	do t = pulseIn(pinIn, LOW, 1000000);
 		while(t < 2400 || t > 2800);
@@ -228,9 +222,9 @@ void receive() {
 				if(i < 53) {
 					sender <<= 1;
 					sender |= prevBit;
-				}/*else if(i == 53) {
+				} else if(i == 53) {
 					group = prevBit;
-				}*/ else if(i == 55) {
+				} else if(i == 55) {
 					on = prevBit;
 				} else {
 					recipient <<= 1;
@@ -241,17 +235,17 @@ void receive() {
 			++i;
 		}
 		if (i>0) {
-			if (sender > 0) {
+			if (sender > 0 && sender != emitter && (received[0] != sender || received[1] != recipient || received[2] != group || received[3] != on)) {
 				received[0] = sender;
 				received[1] = recipient;
-			    received[2] = on;
+			    received[2] = group;
+			    received[3] = on;
 				break;
 			}
 		} else {
 			delay(1);
 		}
     }
-    Py_END_ALLOW_THREADS
 }
 
 static PyObject *callback = NULL;
@@ -284,29 +278,21 @@ PyInit_Chacon(void) {
 
 static PyObject * Chacon_send(PyObject *self, PyObject *args) {
 	if (setuid(0)) {
-		printf("setuid error\n");
+		log("setuid error\n");
 		return NULL;
 	}
-
 	int interruptor;
 	int onoff;
-
 	if (!PyArg_ParseTuple(args, "iiii", &pinOut, &emitter, &interruptor, &onoff)) {
-		printf("Parsing args error");
+		log("Parsing args error");
 		return NULL;
 	}
-
-	//printf("args %d, %d, %d, %d\n", pinOut, emitter, interruptor, onoff);
-
 	if (wiringPiSetup() == -1) {
-		printf("Librairie Wiring PI introuvable, veuillez lier cette librairie...");
+		log("Error: Librairie Wiring PI introuvable, veuillez lier cette librairie...");
 		return NULL;
 	}
-
-	if (!scheduler_set) scheduler_realtime();
 	pinMode(pinOut, OUTPUT);
 	send(interruptor, onoff);
-	if (!scheduler_set) scheduler_standard();
 	return Py_BuildValue("i", onoff);
 }
 
@@ -323,37 +309,27 @@ static PyObject * Chacon_receive(PyObject *self, PyObject *args) {
         log("Error: Librairie Wiring PI introuvable, veuillez lier cette librairie...");
         return NULL;
     }
-
-	scheduler_realtime();
-	scheduler_set = true;
-    
     pinMode(pinIn, INPUT);
     pinMode(pinOut, OUTPUT);
-
-	//int transmited[3] = {};
+	scheduler_realtime();
+	scheduler_set = true;
+	Py_BEGIN_ALLOW_THREADS
+	//received[0] = received[1] = received[2] = received[3] = 0;
 	for(;;) {
-    	log("Starting receiving...");
-		received[0] = received[1] = received[2] = 0;
+		//log("---> starting receiving <---");
 		receive();
-		//if (received[0] != transmited[0] && (received[1] != transmited[1] || received[2] != transmited[2])) {
-		//transmited[0] = received[0];
-		//transmited[1] = received[1];
-		//transmited[2] = received[2];
-		if (received[0] != emitter) {
-			//PyGILState_STATE gstate = PyGILState_Ensure();
-			PyObject *arglist = Py_BuildValue("(i,i,i)", received[0], received[1], received[2]);
-			PyObject *ret = PyEval_CallObject(callback, arglist);
-			if (ret == NULL) log("PyEval_CallObject failed");
-	        else Py_DECREF(ret);
-	        Py_DECREF(arglist);
-	        //PyGILState_Release(gstate);
-	    }
-    }
-
-	scheduler_standard();
-	scheduler_set = false;
-
-	return Py_BuildValue("i", 1);
+		//cout << "received " << received[0] << " " << received[1] << " " << received[2] << endl;
+		PyGILState_STATE gstate = PyGILState_Ensure();
+		PyObject *arglist = Py_BuildValue("(i,i,i,i)", received[0], received[1], received[2], received[3]);
+		PyEval_CallObject(callback, arglist);
+		//return arglist;
+		Py_DECREF(arglist);
+		PyGILState_Release(gstate);
+	}
+    Py_END_ALLOW_THREADS
+    scheduler_standard();
+    scheduler_set = false;
+	return Py_BuildValue("i", 0);
 }
 
 static PyObject * Chacon_setCallback(PyObject *self, PyObject *args) {

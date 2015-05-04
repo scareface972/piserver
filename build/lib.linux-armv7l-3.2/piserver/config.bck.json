@@ -1,0 +1,110 @@
+{
+	"debug": true,
+	"host": "192.168.0.7",
+	"port": 80,
+	"speech": {
+		"module": "speech.Speech"
+	},
+	"presence": {
+		"module": "presence.Presence"
+	},
+	"receiver": {
+		"module": "chacon.Receiver",
+		"pin": 2
+	},
+	"emitter": {
+		"module": "chacon.Emitter",
+		"pin": 0,
+		"code": 8976434
+	},
+	"freebox": {
+		"module": "freebox.Freebox",
+		"where": "salon",
+		"alias": "tele",
+		"box": "hd1",
+		"code": 99093614
+	},
+	"temp": {
+		"module": "sensor.DHT11",
+		"pin": 1
+	},
+	"light": {
+		"module": "sensor.BH1750FVI",
+		"pin": "i2c"
+	}
+}
+{
+	"debug": true,
+	"host": "192.168.0.7",
+	"port": 80,
+	"speech": {
+		"module": "speech.Speech"
+	},
+	"presence": {
+		"module": "presence.Presence"
+	},
+	"receiver": {
+		"module": "chacon.Receiver",
+		"pin": 2, 
+		"interruptors": [
+			{ "sender": "13552350", "interruptor": "0", "for": "cuisine", "force_va_et_vient": true },
+			{ "sender": "13552350", "interruptor": "1", "for": "plafond", "disabled": true }
+		]
+	},
+	"plafond": {
+		"module": "chacon.Emitter",
+		"where": "salon",
+		"group": "lumiere",
+		"pin": 0,
+		"code": {
+			"sender": "8976434",
+			"interruptor": "1"
+		}
+	},
+	"lampe": {
+		"module": "chacon.Emitter",
+		"where": "salon",
+		"group": "lumiere",
+		"pin": 0,
+		"code": {
+			"sender": "8976434",
+			"interruptor": "2"
+		}
+	},
+	"cuisine": {
+		"module": "chacon.Emitter",
+		"where": "cuisine",
+		"group": "lumiere",
+		"pin": 0,
+		"code": {
+			"sender": "8976434",
+			"interruptor": "3"
+		}
+	},
+	"nada": {
+		"module": "chacon.Emitter",
+		"where": "nada",
+		"group": "nada",
+		"pin": 0,
+		"code": {
+			"sender": "13552350",
+			"interruptor": "0"
+		}
+	},
+	"freebox": {
+		"module": "freebox.Freebox",
+		"where": "salon",
+		"alias": "tele",
+		"version": "6",
+		"box": "hd1",
+		"code": "99093614"
+	},
+	"temp": {
+		"module": "sensor.DHT11",
+		"pin": 1
+	},
+	"light": {
+		"module": "sensor.BH1750FVI",
+		"pin": "i2c"
+	}
+}

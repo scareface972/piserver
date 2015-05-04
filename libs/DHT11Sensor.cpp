@@ -5,7 +5,7 @@
 #include <stdint.h>
 #define MAX_TIME 85
 
-static int DEFAULT_VALUES[5] = {0,0,0,0,0};
+//static int DEFAULT_VALUES[5] = {0,0,0,0,0};
 
 static PyObject *DHT11SensorError;
 static PyObject * DHT11Sensor_get(PyObject *self, PyObject *args);
@@ -41,10 +41,7 @@ static PyObject * DHT11Sensor_get(PyObject *self, PyObject *args) {
 	uint8_t lststate = HIGH;
 	uint8_t counter = 0;
 	uint8_t j = 0, i;
-	float farenheit;
-	int checksum = -1;
-	int dht11_val[5] = {0,0,0,0,0};
-	float celcius = 0;
+	float celcius = 0, humidity = 0, fahrenheit = 0;
 
 	if (!PyArg_ParseTuple(args, "i", &pin))
 		return NULL;
@@ -52,7 +49,10 @@ static PyObject * DHT11Sensor_get(PyObject *self, PyObject *args) {
 	if (wiringPiSetup() == -1) 
 		return NULL;
 
-	while (checksum != dht11_val[4] && celcius == 0) {
+	//do {
+		int checksum = -1;
+		int dht11_val[5] = {0,0,0,0,0};
+
 		pinMode(pin, OUTPUT);
 		digitalWrite(pin, LOW);
 		delay(18);
@@ -82,19 +82,17 @@ static PyObject * DHT11Sensor_get(PyObject *self, PyObject *args) {
 		checksum = (dht11_val[0]+dht11_val[1]+dht11_val[2]+dht11_val[3]) & 0xFF;
 		// printf("dht11[4]: %d\n", dht11_val[4]);
 		// printf("Checksum: %d\n", checksum);
-		if(j>=40 && (dht11_val[4] == checksum)) {
-			farenheit = dht11_val[2] * 9.0 / 5.0 + 32;
-			// printf("Humidity = %d.%d %% Temperature = %d.%d *C (%.1f *F)\n",dht11_val[0],dht11_val[1],dht11_val[2],dht11_val[3],farenheit);
+		if (j >= 40 && dht11_val[4] == checksum && (dht11_val[0] > 0 || dht11_val[1] > 0)) {
 			char h[20], c[20], f[20];
 			sprintf(h, "%d.%d", dht11_val[0], dht11_val[1]);
 			sprintf(c, "%d.%d", dht11_val[2], dht11_val[3]);
-			sprintf(f, "%.1f", farenheit);
+			sprintf(f, "%.1f", celcius * 9.0 / 5.0 + 32);
+			humidity = atof(h);
 			celcius = atof(c);
-			if (celcius > 0) 
-				return Py_BuildValue("(f, f, f)", atof(h), atof(c), atof(f));
+			fahrenheit = atof(f);
 		}
-		// delay(100);
-		memcpy(dht11_val, DEFAULT_VALUES, 5*sizeof(int));
-	}
-	return Py_BuildValue("(f, f, f)", 0, 0, 0);
+		//delay(500);
+		//memcpy(dht11_val, DEFAULT_VALUES, 5*sizeof(int));
+	//} while (celcius == 0 || humidity == 0);
+	return Py_BuildValue("(f, f, f)", humidity, celcius, fahrenheit);
 }

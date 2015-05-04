@@ -3,6 +3,9 @@ import os, sys, fileinput, site
 from setuptools.command.install import install as installer
 from setuptools import setup, Extension
 
+os.environ["CC"]  = "g++-4.6"
+os.environ["CXX"] = "g++-4.6"
+
 def read(fname):
 	return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -45,7 +48,7 @@ setup(name='PiServer',
 			'imgs':['src/imgs/*']
 		},
 		ext_modules=[dht11, chacon],
-		data_files=[('piserver', ['src/config.json', 'src/rules.json']),
+		data_files=[('piserver', ['src/config.json', 'src/rules.json', 'src/chacon.json']),
 					('/etc/init.d', ['src/piserver'])],
 		cmdclass={'install': install},
 	)

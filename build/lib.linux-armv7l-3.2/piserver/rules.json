@@ -1,0 +1,25 @@
+[
+	
+	{
+		"name": "Shutdown when empty",
+		"conditions": [
+			{ "module": "presence", "prop": "*", "condition": "==", "value": false }
+		],
+		"actions": [
+			{ "module": "lampe", "value": "off" },
+			{ "module": "plafond", "value": "off" },
+			{ "module": "freebox", "value": "off" }
+		]
+	},
+	{
+		"name": "Light on night if presence",
+		"conditions": [
+			{ "module": "presence", "prop": "*", "condition": "==", "value": true },
+			{ "module": "light", "prop": "lux", "condition": "<", "value":"15" }
+		],
+		"actions": [
+			{ "module": "lampe", "value": "on" },
+			{ "module": "plafond", "value": "on" }
+		]
+	}
+]

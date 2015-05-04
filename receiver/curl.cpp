@@ -46,8 +46,7 @@ void send(const char *url) {
 		res = curl_easy_perform(curl);
 		// Check for errors
 		if(res != CURLE_OK)
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-				curl_easy_strerror(res));
+			fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 		// always cleanup
 		curl_easy_cleanup(curl);
 		std::cout << readBuffer << std::endl;
@@ -58,7 +57,7 @@ int main(void) {
 	long cs = 13552350, cr = 0;
 	std::string name = getName(cs, cr);
 	std::cout << name << std::endl;
-	std::string url = "http://192.168.0.2/exec/";
+	std::string url = "http://192.168.0.2/exec/chacon/";
 	url.append(name);
 	url.append("/toggle");
 	std::cout << url << std::endl;
