@@ -1,3 +1,4 @@
+import core.controller
 import modules.gpio
 import wiringpi2 as wpi
 from time import sleep, time
@@ -29,7 +30,7 @@ class Chacon(modules.Module):
 		
 
 	def _load_conf(self):
-		path = 'chacon.json' if Controller.DEBUG else '/usr/local/piserver/chacon.json'
+		path = 'chacon.json' if core.controller.Controller.DEBUG else '/usr/local/piserver/chacon.json'
 		config = json.loads(open(path).read())
 		mod_name = self.get_module_name()
 		if 'receivers' in config:
