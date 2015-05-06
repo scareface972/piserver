@@ -28,7 +28,6 @@ class Chacon(modules.Module):
 		self.thread.daemon = True
 		self.thread.start()
 		
-
 	def _load_conf(self):
 		path = 'chacon.json' if core.controller.Controller.DEBUG else '/usr/local/piserver/chacon.json'
 		config = json.loads(open(path).read())

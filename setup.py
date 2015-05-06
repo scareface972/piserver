@@ -48,7 +48,7 @@ setup(name='PiServer',
 			'imgs':['src/imgs/*']
 		},
 		ext_modules=[dht11, chacon],
-		data_files=[('piserver', ['src/config.json', 'src/rules.json', 'src/chacon.json']),
+		data_files=[('piserver', ['src/config.json', 'src/rules.json', 'src/chacon.json', 'src/alarms.json']),
 					('/etc/init.d', ['src/piserver'])],
 		cmdclass={'install': install},
 	)

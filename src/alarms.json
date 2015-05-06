@@ -1,11 +1,27 @@
 [
 	{
 		"name": "Réveil",
-		"time": 1426019081.68,
+		"time": "01:36",
+		"recursive":[0, 1, 2, 3, 4, 5],
 		"actions": [
-			{ "plafond": "on" },
-			{ "lampe": "on" },
-			{ "freebox": "on", "channel": 16, "volume": 100 }
+			{ "module": "chacon", "cmd": "plafond/on" },
+			{ "module": "chacon", "cmd": "lampe/on" }
+		]
+	},
+	{
+		"name": "Coiffeur",
+		"date": "2015-05-07",
+		"time": "15:30",
+		"actions": [
+			{ "module": null, "play": "/path/to/my/song.mp3", "continuous": true }
+		]
+	},
+	{
+		"name": "Papa & Zoé",
+		"date": "2015-05-10",
+		"time": "20:00",
+		"actions": [
+			{ "module": null, "play": "/path/to/my/song.mp3", "continuous": true }
 		]
 	}
 ]
