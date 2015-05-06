@@ -94,7 +94,7 @@ class Controller():
 			if cmd.startswith(module.name):
 				return module
 
-	def _get_module_by_name(self, name):
+	def get_module_by_name(self, name):
 		for module in self.enabled:
 			if name == module.name:
 				return module
