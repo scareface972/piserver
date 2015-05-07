@@ -19,7 +19,8 @@
 		"where": "salon",
 		"alias": "tele",
 		"box": "hd1",
-		"code": 99093614
+		"code": 99093614,
+		"version": 6
 	},
 	"temp": {
 		"module": "sensor.DHT11",

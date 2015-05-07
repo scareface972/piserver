@@ -245,7 +245,8 @@ function check(element) {
     if (className == 'checked') className = 'unchecked';
     else { action = 'on'; className = 'checked'; }
     $(element).attr('class', 'circle-' + className);
-    var name = (elt.id != 'freebox' ? 'chacon' : '') + '/' + elt.id;
+    var name = (elt.id != 'freebox' ? 'chacon/' : '') + elt.id;
+    //console.log('/exec/' + name + '/' + action)
     $.get('/exec/' + name + '/' + action);
 }
 

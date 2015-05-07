@@ -898,3 +898,351 @@
 05/07/2015 01:34:00  Presence::load rules: rules.json
 05/07/2015 01:34:44  Presence::load rules: rules.json
 05/07/2015 01:35:30  Presence::load rules: rules.json
+05/07/2015 01:49:32  Presence::load rules: /usr/local/piserver/rules.json
+05/07/2015 01:49:32  Chacon::load emitters and receivers: /usr/local/piserver/chacon.json
+05/07/2015 01:49:57  Presence::load rules: /usr/local/piserver/rules.json
+05/07/2015 01:49:57  Chacon::load emitters and receivers: /usr/local/piserver/chacon.json
+05/07/2015 01:49:57  Alarm::load alarms: /usr/local/piserver/alarms.json
+05/07/2015 02:08:00  Presence::load rules: rules.json
+05/07/2015 02:08:00  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:08:00  Alarm::load alarms: alarms.json
+05/07/2015 02:08:17  Presence::load rules: rules.json
+05/07/2015 02:08:17  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:08:17  Alarm::load alarms: alarms.json
+05/07/2015 02:08:29  Presence::load rules: rules.json
+05/07/2015 02:08:29  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:08:29  Alarm::load alarms: alarms.json
+05/07/2015 02:08:29  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:08:31  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:08:49  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:08:50  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:08:50  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:08:50  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:08:50  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:08:50  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:08:50  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:08:51  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:08:51  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:08:51  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:10:05  Presence::load rules: rules.json
+05/07/2015 02:10:05  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:10:05  Alarm::load alarms: alarms.json
+05/07/2015 02:10:05  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:10:06  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:10:06  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:10:06  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:10:06  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:10:06  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:10:06  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:10:07  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:10:07  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:10:07  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:10:07  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:10:07  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:16:38  Presence::load rules: rules.json
+05/07/2015 02:16:38  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:16:38  Alarm::load alarms: alarms.json
+05/07/2015 02:17:36  Presence::load rules: rules.json
+05/07/2015 02:17:36  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:17:36  Alarm::load alarms: alarms.json
+05/07/2015 02:17:49  Presence::load rules: rules.json
+05/07/2015 02:17:49  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:17:49  Alarm::load alarms: alarms.json
+05/07/2015 02:17:49  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:17:49  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:18:21  Presence::load rules: rules.json
+05/07/2015 02:18:21  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:18:21  Alarm::load alarms: alarms.json
+05/07/2015 02:18:21  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:18:21  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:18:21  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:18:22  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:18:22  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:18:22  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:18:51  Presence::load rules: rules.json
+05/07/2015 02:18:51  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:18:51  Alarm::load alarms: alarms.json
+05/07/2015 02:18:51  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:18:51  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:18:51  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:18:51  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:18:51  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:18:51  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:30  Presence::load rules: rules.json
+05/07/2015 02:19:30  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:19:30  Alarm::load alarms: alarms.json
+05/07/2015 02:19:30  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:30  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:30  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:31  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:31  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:31  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:31  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:31  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:31  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:31  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:31  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:31  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:43  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:43  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:43  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:43  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:57  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:57  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:19:57  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:19:57  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:13  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:13  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:13  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:13  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:47  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:47  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:47  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:47  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:51  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:51  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:51  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:51  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:54  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:54  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:54  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:54  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:55  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:55  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:55  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:56  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:59  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:59  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:20:59  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:20:59  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:22:48  Presence::load rules: rules.json
+05/07/2015 02:22:48  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:22:48  Alarm::load alarms: alarms.json
+05/07/2015 02:22:48  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:22:48  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:22:48  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:22:49  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:22:49  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:22:49  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:22:49  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:22:49  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:22:49  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:22:49  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:22:49  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:22:49  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:23:52  Presence::load rules: rules.json
+05/07/2015 02:23:52  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:23:52  Alarm::load alarms: alarms.json
+05/07/2015 02:23:52  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:23:52  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:23:52  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:23:52  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:23:52  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:23:52  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:23:52  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:24:01  Presence::load rules: rules.json
+05/07/2015 02:24:01  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:24:01  Alarm::load alarms: alarms.json
+05/07/2015 02:24:01  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:24:01  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:24:01  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:24:02  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:24:02  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:24:02  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:24:02  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:24:02  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:24:02  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:24:02  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:24:02  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:24:02  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:27:56  Presence::load rules: rules.json
+05/07/2015 02:27:56  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:27:56  Alarm::load alarms: alarms.json
+05/07/2015 02:27:56  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:27:56  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:27:56  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:27:56  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:27:56  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:27:57  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:27:57  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:27:57  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:27:57  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:27:57  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:27:57  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:27:57  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:31:25  Presence::load rules: rules.json
+05/07/2015 02:31:25  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:31:25  Alarm::load alarms: alarms.json
+05/07/2015 02:31:26  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:31:26  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:31:26  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:31:27  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:31:27  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:31:27  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:31:27  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:31:27  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:31:27  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:31:28  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:31:28  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:31:28  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:31:31  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:31:31  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:31:31  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:31:31  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:32:01  Presence::load rules: rules.json
+05/07/2015 02:32:01  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:32:01  Alarm::load alarms: alarms.json
+05/07/2015 02:32:01  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:32:02  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:32:02  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:32:02  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:32:02  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:32:02  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:32:02  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:32:03  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:32:03  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:32:03  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:32:03  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:32:03  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:32:10  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:32:10  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:32:10  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:32:10  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:02  Presence::load rules: rules.json
+05/07/2015 02:33:02  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:33:02  Alarm::load alarms: alarms.json
+05/07/2015 02:33:02  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:03  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:03  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:03  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:03  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:03  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:03  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:04  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:04  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:04  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:04  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:04  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:10  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:10  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:10  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:10  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:42  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:42  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:33:42  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:33:42  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:00  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:00  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:00  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:00  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:07  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:07  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:07  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:07  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:33  Presence::load rules: rules.json
+05/07/2015 02:35:33  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:35:33  Alarm::load alarms: alarms.json
+05/07/2015 02:35:33  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:33  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:33  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:33  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:33  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:33  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:33  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:34  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:34  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:34  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:34  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:34  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:35  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:35  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:35  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:35  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:40  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:40  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:35:40  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:35:40  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:36:40  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:36:40  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:36:40  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:36:40  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:36:48  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:36:48  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:36:48  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:36:48  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:37:08  Presence::load rules: rules.json
+05/07/2015 02:37:08  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:37:08  Alarm::load alarms: alarms.json
+05/07/2015 02:37:08  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:37:09  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:37:09  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:37:09  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:37:09  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:37:09  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:37:09  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:37:10  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:37:10  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:37:10  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:37:10  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:37:10  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:37:13  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:37:13  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:37:13  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:37:13  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:39:46  Presence::load rules: rules.json
+05/07/2015 02:39:46  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:39:46  Alarm::load alarms: alarms.json
+05/07/2015 02:39:57  Presence::load rules: rules.json
+05/07/2015 02:39:57  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:39:58  Alarm::load alarms: alarms.json
+05/07/2015 02:39:58  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:39:58  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:39:58  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:39:58  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:39:58  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:39:58  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:39:58  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:39:59  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:39:59  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:39:59  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:39:59  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:39:59  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:40:00  Alarm::execute alarm: Test
+05/07/2015 02:40:00  -> execute action: chacon plafond/on
+05/07/2015 02:40:00  -> execute action: chacon lampe/on
+05/07/2015 02:40:00  -> execute action: freebox on/canal/16
+05/07/2015 02:40:00  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:40:00  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:40:00  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:40:00  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:44:39  Presence::load rules: rules.json
+05/07/2015 02:44:39  Chacon::load emitters and receivers: chacon.json
+05/07/2015 02:44:39  Alarm::load alarms: alarms.json
+05/07/2015 02:44:39  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:44:39  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:44:39  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:44:40  "GET /api/v1/login/authorize/6 ('HTTP/1.1',)" 200 None
+05/07/2015 02:44:40  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:44:40  "GET /api/v1/login/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:44:40  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:44:40  "POST /api/v1/login/session/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:44:40  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:44:40  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:44:40  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:44:40  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:44:42  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:44:42  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:44:42  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:44:42  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:45:12  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:45:12  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:45:12  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:45:12  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:45:14  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:45:14  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:45:14  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:45:14  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:45:20  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:45:20  "GET /api/v3/airmedia/receivers/ ('HTTP/1.1',)" 200 None
+05/07/2015 02:45:20  Starting new HTTP connection (1): mafreebox.freebox.fr
+05/07/2015 02:45:20  "POST /api/v3/airmedia/receivers/Freebox%20Player/ ('HTTP/1.1',)" 200 None

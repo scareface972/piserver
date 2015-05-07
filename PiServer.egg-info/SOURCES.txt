@@ -14,11 +14,13 @@ src/alarms.json
 src/chacon.json
 src/config.bck.json
 src/config.json
+src/freebox.json
 src/piserver
 src/piserver.py
 src/rules.json
 src/test_alarm.py
 src/test_alarm2.py
+src/test_fbx.py
 src/core/__init__.py
 src/core/controller.py
 src/modules/__init__.py

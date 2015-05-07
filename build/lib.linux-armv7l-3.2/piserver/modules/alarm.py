@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import core, modules
-import time, threading, sys
+import time, threading, sys, logging
 from datetime import datetime
 import json
+
+logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
 MODULES = ['Manager']
@@ -14,13 +16,15 @@ class Manager(modules.Module):
 	def __init__(self, conf):
 		super().__init__(conf)
 		self.alarms = self._load_conf()
-		print(self.alarms)
+		for alarm in self.alarms: print("->", alarm['name'])
+		#print(self.alarms)
 		self.thread = threading.Thread(target=self.worker)
 		self.thread.daemon = True
 		self.thread.start()
 
 	def _load_conf(self):
 		path = 'alarms.json' if core.controller.Controller.DEBUG else '/usr/local/piserver/alarms.json'
+		logging.debug('Alarm::load alarms: ' + path)
 		return json.loads(open(path).read())
 
 	def worker(self):
@@ -50,11 +54,13 @@ class Manager(modules.Module):
 
 	def execute(self, alarm):
 		print("execute alarm", alarm['name'])
+		logging.debug('Alarm::execute alarm: ' + alarm['name'])
 		for action in alarm['actions']:
 			if action['module'] == None: continue
 			module = self.controller.get_module_by_name(action['module'])
 			if module != None and 'cmd' in action:
 				print("-> execute", action['module'], action['cmd'])
+				logging.debug('-> execute action: ' + action['module'] + ' ' + action['cmd'])
 				module.execute(action['cmd'])
 
 class Alarm(threading.Thread):

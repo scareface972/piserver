@@ -84,7 +84,7 @@ class Controller():
 		switchers = []
 		for module in self.enabled:
 			if isinstance(module, freebox.Freebox): 
-				switchers.append({'name':module.name, 'state': module.state})
+				switchers.append({'name':module.name, 'state': module.get_state()})
 			elif isinstance(module, chacon.Chacon): 
 				switchers.extend(module.get_switchers())
 		return switchers

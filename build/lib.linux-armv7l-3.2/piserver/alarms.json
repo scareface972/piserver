@@ -5,23 +5,18 @@
 		"recursive":[0, 1, 2, 3, 4, 5],
 		"actions": [
 			{ "module": "chacon", "cmd": "plafond/on" },
-			{ "module": "chacon", "cmd": "lampe/on" }
+			{ "module": "chacon", "cmd": "lampe/on" },
+			{ "module": "freebox", "cmd": "on/canal/16" }
 		]
 	},
 	{
-		"name": "Coiffeur",
+		"name": "Test",
 		"date": "2015-05-07",
-		"time": "15:30",
+		"time": "14:40",
 		"actions": [
-			{ "module": null, "play": "/path/to/my/song.mp3", "continuous": true }
-		]
-	},
-	{
-		"name": "Papa & Zoé",
-		"date": "2015-05-10",
-		"time": "20:00",
-		"actions": [
-			{ "module": null, "play": "/path/to/my/song.mp3", "continuous": true }
+			{ "module": "chacon", "cmd": "plafond/on" },
+			{ "module": "chacon", "cmd": "lampe/on" },
+			{ "module": "freebox", "cmd": "on/canal/16" }
 		]
 	}
 ]

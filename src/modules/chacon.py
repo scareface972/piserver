@@ -30,6 +30,7 @@ class Chacon(modules.Module):
 		
 	def _load_conf(self):
 		path = 'chacon.json' if core.controller.Controller.DEBUG else '/usr/local/piserver/chacon.json'
+		logging.debug('Chacon::load emitters and receivers: ' + path)
 		config = json.loads(open(path).read())
 		mod_name = self.get_module_name()
 		if 'receivers' in config:
