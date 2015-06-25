@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-import urllib.request, json, time, sys, locale
+# -*- coding: utf-8 -*-
+
+import urllib.request, json, time, sys, locale, os
 
 from core import controller
 from core import *

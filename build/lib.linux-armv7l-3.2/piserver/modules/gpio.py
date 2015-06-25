@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import modules
 import wiringpi2 as wpi
 

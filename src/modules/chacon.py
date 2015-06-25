@@ -1,22 +1,31 @@
+# -*- coding: utf-8 -*-
+
 import core.controller
 import modules.gpio
 import wiringpi2 as wpi
 from time import sleep, time
-import re, json, pycurl
+import re, json, pycurl, os
 from io import BytesIO
 import threading, logging
 import Chacon as rf
 
-logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+log_dir = '/var/log/piserver'
+if not os.path.isdir(log_dir): os.mkdir(log_dir)
+logging.basicConfig(filename=log_dir+'/piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
 MODULES = ['Chacon']
 
-class Chacon(modules.Module):
+def log(value):
+	print(value)
+	logging.debug(value)
+
+class Chacon(modules.Threadable):
 	"""Class Chacon RF 433.92MHz"""
 
 	def __init__(self, conf):
-		super().__init__(conf)
+		self.cmds = {}
+		self.module_name = conf['module']
 		self.pinIn = conf['pinIn']
 		self.pinOut = conf['pinOut']
 		self.emitter = conf['emitter']
@@ -24,20 +33,28 @@ class Chacon(modules.Module):
 		self.receivers = []
 		self.code = self.interruptor = self.state = 0
 		self._load_conf()
-		self.thread = threading.Thread(target=self.worker)
-		self.thread.daemon = True
-		self.thread.start()
+		super().__init__(conf, self.cmds)
+		if not 'enable_receiver' in conf or conf['enable_receiver']:
+			self.thread.start()
 		
 	def _load_conf(self):
 		path = 'chacon.json' if core.controller.Controller.DEBUG else '/usr/local/piserver/chacon.json'
-		logging.debug('Chacon::load emitters and receivers: ' + path)
+		log('Chacon::load emitters and receivers: ' + path)
 		config = json.loads(open(path).read())
 		mod_name = self.get_module_name()
 		if 'receivers' in config:
 			for name in config['receivers']:
 				rc = config['receivers'][name]
-				cmds = ['on', 'toggle', 'off']
-				self.receivers.append({'name': name, 'where': rc['where'], 'group': rc['group'], 'interruptor': rc['interruptor'], 'state': False, 'type': mod_name, 'is_switch': True, 'cmds': cmds})
+				key = "((\w+\s)?("+name
+				if 'where' in rc: key += "|"+rc['where']
+				if 'alias' in rc: key += "|"+rc['alias']
+				if 'group' in rc: key += "|"+rc['group']
+				key += ")\s?)"
+				self.cmds[name+'/toggle'] = name
+				self.cmds[name+'/on'] = "allumer?\s"+key+"+"
+				self.cmds[name+'/off'] = "(etein(dre|s))\s"+key+"+"
+				self.cmds[name+'/associate'] = None
+				self.receivers.append({'name': name, 'interruptor': rc['interruptor'], 'state': False, 'type': mod_name, 'is_switch': True, 'cmds': ['on', 'off', 'toggle', 'associate']})
 		if 'emitters' in config:
 			for name in config['emitters']:
 				em = config['emitters'][name]
@@ -62,11 +79,8 @@ class Chacon(modules.Module):
 				return receiver['name']
 		return None
 
-	def list_cmds(self):
-		return self.cmds
-
 	def execute(self, cmd):
-		print("exec", cmd)
+		log("Chacon::execute: " + cmd)
 		name = cmd.split("/")[0]
 		result = dict(success=False, name=name)
 		receiver = self._find_interruptor(name)
@@ -82,124 +96,35 @@ class Chacon(modules.Module):
 				if cmd == 'toggle': new_state = not receiver['state']
 				elif cmd == 'on': new_state = True
 				elif cmd == 'off': new_state = False
-				#if receiver['state'] != new_state:
 				rf.send(self.pinOut, self.emitter, receiver['interruptor'], int(new_state))
 				result['state'] = receiver['state'] = new_state
 				result['success'] = True
 		return result
 	
-	def get_receiver_name(self, code, interruptor, group, state):
-		print("emitter callback", code, interruptor, group, state)
-		emitter = self._find_emitter(code, interruptor)
-		if emitter == None: return
-		#print("-> emitter", emitter['name'])
-		receiver = self._find_interruptor(emitter['name'])
-		if receiver == None: return
-		#print("-> receiver", receiver['name'])
-		cmd = receiver['name'] + '/toggle' # + ('on' if state == 1 else 'off')
-		sleep(2)
-		self.execute(cmd)
+	def receive_callback(self, code, interruptor, group, state):
+		log("Chacon::callback: " + str(code) + ", " + str(interruptor) + ", " + str(group) + ", " + str(state))
+		if self.get_running():
+			emitter = self._find_emitter(code, interruptor)
+			if emitter == None: return
+			#log("-> emitter: " + emitter['name'])
+			receiver = self._find_interruptor(emitter['name'])
+			if receiver == None: return
+			log("-> receiver: " + receiver['name'] + " toggle")
+			cmd = receiver['name'] + '/toggle' # + ('on' if state == 1 else 'off')
+			self.execute(cmd)
 
 	def worker(self):
-		#print("Start worker...")
-		while True:
-			rf.setCallback(self.get_receiver_name)
+		print("-> Chacon worker start...")
+		self.set_running(True)
+		while self.get_running():
+			rf.setCallback(self.receive_callback)
 			rf.receive(self.pinIn, self.pinOut, self.emitter)
+		print("-> Chacon worker stopped")
 
-#class Manager(threading.Thread):
-#
-#	def __init__(self, parent):
-#		threading.Thread.__init__(self)
-#		self.cmds = []
-#		self.event = threading.Event()
-#		self.t1 = Producer(parent, self.cmds, self.event)
-#		self.t2 = Consumer(parent, self.cmds, self.event)
-#
-#	def run(self):
-#		self.t1.start()
-#		self.t2.start()
-#		self.t1.join()
-#		self.t2.join()
-#
-#class Producer(threading.Thread):
-#	"""
-#	Listen for 433.92MHz message
-#	"""
-#
-#	def __init__(self, parent, cmds, event):
-#		"""
-#		Constructor.
-#
-#		@param cmds list of commands
-#		@param condition condition synchronization object
-#		"""
-#		threading.Thread.__init__(self)
-#		self.parent = parent
-#		self.cmds = cmds
-#		#self.condition = condition
-#		self.event = event
-#
-#	def callback(self, code, interruptor, group, state):
-#		print("callback", code, interruptor, group, state)
-#		emitter = self.parent._find_emitter(code, interruptor)
-#		if emitter == None: return
-#		print("-> emitter", emitter['name'])
-#		receiver = self.parent._find_interruptor(emitter['name'])
-#		if receiver == None: return
-#		print("-> receiver", receiver['name'])
-#		cmd = receiver['name'] + '/' + ('on' if state == 1 else 'off')
-#		self.cmds.append(cmd)
-#		print('%s appended to list by %s' % (cmd, self.name))
-#		self.event.set()
-#		self.event.clear()
-#
-#	def run(self):
-#		rf.setCallback(self.callback)
-#		rf.receive(self.parent.pinIn, self.parent.pinOut, self.parent.emitter)
-#		#print('condition notified by %s' % self.name)
-#		#self.condition.notify()
-#		#print('condition released by %s' % self.name)
-#		#self.condition.release()
-#		#sleep(1)
-#
-#class Consumer(threading.Thread):
-#	"""
-#	Consumes commands in list
-#	"""
-#
-#	def __init__(self, parent, cmds, event):
-#		"""
-#		Constructor.
-#
-#		@param cmds list of commands
-#		@param condition condition synchronization object
-#		"""
-#		threading.Thread.__init__(self)
-#		self.parent = parent
-#		self.cmds = cmds
-#		self.event = event
-#
-#	def run(self):
-#		"""
-#		Thread run method. Consumes integers from list
-#		"""
-#		while True:
-#			self.event.wait()
-#			sleep(2)
-#			try:
-#				cmd = self.cmds.pop()
-#				print('%s popped from list by %s' % (cmd, self.name))
-#				self.parent.execute(cmd)
-#			except IndexError:
-#				#time.sleep(1)
-#				pass
-#			#print('condition acquired by %s' % self.name)
-#			#while True:
-#			#	if self.cmds:
-#			#		cmd = self.cmds.pop()
-#			#		print('%s popped from list by %s' % (cmd, self.name))
-#			#		break
-#			#	print('condition wait by %s' % self.name)
-#			#	self.condition.wait()
-#			#print('condition released by %s' % self.name)
-#			#self.condition.release()
+	def get_running(self):
+		return super().get_running()
+
+	def set_running(self, value):
+		#print("set_running", super().get_running(), value)
+		if not value: rf.stop()
+		super().set_running(value)

@@ -19,9 +19,10 @@ bool bit2Interruptor[4] = {};
 unsigned int emitter;
 unsigned int received[4] = {};
 bool scheduler_set = false;
+bool receive_active = false;
 
 void log(string a) {
-	cout << a << endl;
+	//cout << a << endl;
 }
 
 void scheduler_realtime() {
@@ -168,13 +169,13 @@ void transmit(int blnOn) {
 }
 
 void send(int interruptor, int onoff) {
-	//string msg = "-> emitter: ";
-	//msg.append(intToString(emitter));
-	//msg.append(", interruptor: ");
-	//msg.append(intToString(interruptor));
-	//msg.append(", onoff: ");
-	//msg.append(intToString(onoff));
-	//log(msg);
+	string msg = "-> emitter: ";
+	msg.append(intToString(emitter));
+	msg.append(", interruptor: ");
+	msg.append(intToString(interruptor));
+	msg.append(", onoff: ");
+	msg.append(intToString(onoff));
+	log(msg);
 	if (!scheduler_set) scheduler_realtime();
 	Py_BEGIN_ALLOW_THREADS
 	//struct timeval tv;
@@ -182,9 +183,9 @@ void send(int interruptor, int onoff) {
 	//unsigned long tb = 1000000 * tv.tv_sec + tv.tv_usec;
 	itob(emitter,26);
 	itobInterruptor(interruptor,4);
-	int cnt = 3;
+	int cnt = 5;
 	for(int i=0;i<cnt;i++){
-		transmit(onoff == 1);
+		transmit(onoff);
 		delay(10);
 	}
 	//gettimeofday(&tv,NULL);
@@ -192,22 +193,22 @@ void send(int interruptor, int onoff) {
     //cout << cnt << " transmit in " << te-tb << " ms" << endl;
     Py_END_ALLOW_THREADS
 	if (!scheduler_set) scheduler_standard();
+	log("-> message sent");
 }
 
 void receive() {
-	for(;;) {
+	while (receive_active){
 		int i = 0;
 		unsigned long t = 0;
 		int prevBit = 0;
 		int bit = 0;
 		unsigned int sender = 0;
-		unsigned int recipient = 0;
+		unsigned int interrupter = 0;
 		unsigned int group = 0, on = 0;
-		string command = "";
-    	do t = pulseIn(pinIn, LOW, 1000000);
-		while(t < 2400 || t > 2800);
-		while(i < 64) {
-			t = pulseIn(pinIn, LOW, 1000000);
+    	do t = pulseIn(pinIn, LOW, 100000);
+		while(receive_active && (t < 2400 || t > 2800));
+		while(receive_active && i < 64) {
+			t = pulseIn(pinIn, LOW, 10000);
 			if(t > 270 && t < 360) bit = 0;
 			else if(t > 1200 && t < 1500) bit = 1;
 			else {
@@ -222,41 +223,49 @@ void receive() {
 				if(i < 53) {
 					sender <<= 1;
 					sender |= prevBit;
+					if (sender == emitter) {
+						i = 0;
+						break;
+					}
 				} else if(i == 53) {
 					group = prevBit;
 				} else if(i == 55) {
 					on = prevBit;
 				} else {
-					recipient <<= 1;
-					recipient |= prevBit;
+					interrupter <<= 1;
+					interrupter |= prevBit;
 				}
 			}
 			prevBit = bit;
 			++i;
 		}
 		if (i>0) {
-			if (sender > 0 && sender != emitter && (received[0] != sender || received[1] != recipient || received[2] != group || received[3] != on)) {
+			if (sender > 0 && sender != emitter && (received[0] != sender || received[1] != interrupter || received[2] != group || received[3] != on)) {
 				received[0] = sender;
-				received[1] = recipient;
+				received[1] = interrupter;
 			    received[2] = group;
 			    received[3] = on;
+			    delay(2000);
 				break;
 			}
 		} else {
 			delay(1);
 		}
     }
+	log("receive disabled");
 }
 
 static PyObject *callback = NULL;
 static PyObject *ChaconError;
 static PyObject * Chacon_setCallback(PyObject *self, PyObject *args);
 static PyObject * Chacon_receive(PyObject *self, PyObject *args);
+static PyObject * Chacon_stop(PyObject *self, PyObject *args);
 static PyObject * Chacon_send(PyObject *self, PyObject *args);
 
 static PyMethodDef ChaconMethods[] = {
-	{"setCallback",  Chacon_setCallback, METH_VARARGS, "Callback setter"},
+	{"setCallback",  Chacon_setCallback, METH_VARARGS, "Define callback for 433.98MHz input."},
 	{"receive",  Chacon_receive, METH_VARARGS, "Start listen 433.92MHz Chacon message."},
+	{"stop",  Chacon_stop, METH_VARARGS, "Stop 433.92MHz listening."},
 	{"send",  Chacon_send, METH_VARARGS, "Send 433.92MHz Chacon message."}
 };
 
@@ -313,23 +322,26 @@ static PyObject * Chacon_receive(PyObject *self, PyObject *args) {
     pinMode(pinOut, OUTPUT);
 	scheduler_realtime();
 	scheduler_set = true;
+	receive_active = true;
 	Py_BEGIN_ALLOW_THREADS
-	//received[0] = received[1] = received[2] = received[3] = 0;
-	for(;;) {
+	while (receive_active) {
 		//log("---> starting receiving <---");
 		receive();
-		//cout << "received " << received[0] << " " << received[1] << " " << received[2] << endl;
 		PyGILState_STATE gstate = PyGILState_Ensure();
 		PyObject *arglist = Py_BuildValue("(i,i,i,i)", received[0], received[1], received[2], received[3]);
 		PyEval_CallObject(callback, arglist);
-		//return arglist;
 		Py_DECREF(arglist);
 		PyGILState_Release(gstate);
 	}
-    Py_END_ALLOW_THREADS
+	Py_END_ALLOW_THREADS
     scheduler_standard();
     scheduler_set = false;
 	return Py_BuildValue("i", 0);
+}
+static PyObject * Chacon_stop(PyObject *self, PyObject *args) {
+	//log("---> Stop !!! <---");
+	receive_active = false;
+	return Py_None;
 }
 
 static PyObject * Chacon_setCallback(PyObject *self, PyObject *args) {

@@ -9,6 +9,7 @@
 		"module": "presence.Presence"
 	},
 	"chacon": {
+		"enable_receiver": false,
 		"module": "chacon.Chacon",
 		"pinIn": 2,
 		"pinOut": 0,
@@ -31,6 +32,14 @@
 		"pin": "i2c"
 	},
 	"alarm": {
-		"module": "alarm.Manager"
+		"module": "alarm.Alarms"
+	},
+	"recognition": {
+		"enable": true,
+		"module": "recognition.Recognition",
+		"mic_index": 0,
+		"threshold": 6200,
+		"lang": "fr-FR",
+		"api_key": "AIzaSyCL1V54VOyfI9RR3vR5Luadc18PcYv9wpg"
 	}
 }

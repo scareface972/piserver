@@ -1,13 +1,33 @@
+# -*- coding: utf-8 -*-
+
 from core.controller import Controller
 import modules
 from time import sleep
-import json
-import logging
+import os, json, logging
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
 
-logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+log_dir = '/var/log/piserver'
+if not os.path.isdir(log_dir): os.mkdir(log_dir)
+logging.basicConfig(filename='/var/log/piserver/piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
 MODULES = ['Presence']
+
+def log(value):
+	print(value)
+	logging.debug(value)
+
+class ConfFileHandler(PatternMatchingEventHandler):
+	def __init__(self, callback, file):
+		super(ConfFileHandler, self).__init__(None, None, True, False)
+		self.callback = callback
+		self.file = file
+
+	def dispatch(self, event):
+		#print(event.event_type, event.is_directory, event.src_path)
+		if event.src_path == self.file and event.event_type == 'modified':
+			self.callback()
 
 class Presence(modules.Module):
 	"""Class 'Presence' pour la présence au domicile (via phone)"""
@@ -18,81 +38,89 @@ class Presence(modules.Module):
 		self.rules = []
 		self.has_owner = False
 		self.first_time = True
-		self.loadRules()
-		#print("debug: " + str(Controller.DEBUG))
+		self.rules_path = './' if Controller.DEBUG else '/usr/local/piserver/'
+		self.rules_file = self.rules_path + 'rules.json'
+		self._set_observer()
+
+	def _set_observer(self):
+		#print('Set observer: ' + self.rules_path)
+		observer = Observer()
+		observer.schedule(ConfFileHandler(self._load_rules, self.rules_file), path=self.rules_path)
+		observer.start()
+		self._load_rules()
 
 	def get(self):
 		return self.has_owner or self.first_time
 
 	def execute(self, cmd):
-		# print('-> execute: ', cmd)
+		log('Presence::execute: ' + cmd)
 		result = dict(success=False)
 		if cmd == 'list':
-			result['list'] = self.presence
+			presence = []
+			for uid in self.presence:
+				#log('--> uid: ' + uid + ', present: ' + str(self.presence[uid]['present']))
+				if self.presence[uid]['present']:
+					presence.append({'uid':uid, 'name':self.presence[uid]['name'], 'present':self.presence[uid]['present']})
+			result['results'] = presence
 			result['success'] = True
 		else:
-			logging.debug('Presence::execute: ' + cmd)
-			name, state = cmd.split('/')
+			uid, state, name = cmd.split('/')
 			state = True if state == 'true' else False
-			current = False if not name in self.presence else self.presence[name]
-			# logging.debug("Presence::name: " + name + " > " + str(state))
-			# logging.debug('Presence::current: ' + str(current))
+			current = None if not uid in self.presence else self.presence[uid]['present']
+			#log("-> uid: " + uid + ", name: " + name + " > " + str(state))
+			#log('-> current: ' + str(current))
 			if current != state or self.first_time:
-				self.presence[name] = state
-				logging.debug('Presence::change: ' + name + ' > ' + str(state))
-				# print('-> name: ', name, "state: ", state)
-				self.checkChange()
+				if not uid in self.presence: self.presence[uid] = {}
+				self.presence[uid]['name'] = name
+				self.presence[uid]['present'] = state
+				log('-> change: ' + uid + ", name: " + name + ' > ' + str(state))
+				self._check_change()
 				self.first_time = False
 			result['success'] = True
 		return result
 
-	def checkChange(self):
+	def _check_change(self):
+		#log('Presence::_check_change')
 		if not len(self.presence) > 0: return
 		has_owner = False
-		for name in self.presence:
-			# print(name, self.presence[name])
-			if self.presence[name] == True:
+		for uid in self.presence:
+			# print(uid, self.presence[uid])
+			if self.presence[uid]['present'] == True:
 				has_owner = True
 				break
-		#print("has owner: " + str(has_owner))
+		#log('-> has owner: ' + str(has_owner))
 		if has_owner != self.has_owner or self.first_time:
 			self.has_owner = has_owner
-			self.checkRules()
-			#switchers = self.controller.get_switchers()
-			#if not self.has_owner:
-			#	cmd = 'off' # 'on' if self.has_owner else 'off'
-			#	for s in switchers:
-			#		if not Controller.DEBUG or s.name == 'lampe':
-			#			# if s.name == 'freebox' and cmd == 'on': continue
-			#			print('-> ' + s.name + ': ' + cmd)
-			#			self.controller.execute(s.name + '/' + cmd)
+			self._check_rules()
 
-	def loadRules(self):
-		path = 'rules.json' if Controller.DEBUG else '/usr/local/piserver/rules.json'
-		logging.debug('Presence::load rules: ' + path)
-		self.rules = json.loads(open(path).read())
+	def _load_rules(self):
+		log('Presence::load rules: ' + self.rules_file)
+		self.rules = json.loads(open(self.rules_file).read())
+		for rule in self.rules: 
+			log('-> rule: ' + rule['name'])
 
-	def checkRules(self):
+	def _check_rules(self):
+		#log('Presence::_check_rules')
 		for rule in self.rules:
+			#log('-> rule: ' + rule['name'])
 			execute = True
 			for condition in rule['conditions']:
+				#log('--> condition: ' + str(condition))
 				mod = self.controller.get_module(condition['module'])
 				if mod != None:
-					value = mod.evalRule(condition['prop'], condition['condition'], condition['value'])
+					value = mod.eval_rule(condition['prop'], condition['condition'], condition['value'])
+					#log('--> result: ' + str(value))
 					execute = execute and value
 					if not execute: break
-			# print(rule['name'], execute)
-			logging.debug('Presence::checkRules: ' + rule['name'] + ' > ' + str(execute))
+			#log('-> rule: ' + rule['name'] + ' > ' + str(execute))
 			if execute:
 				for action in rule['actions']:
-					# print(action['module'], action['value'])
-					# if Controller.DEBUG and action['module'] != 'lampe': continue
-					logging.debug('Presence::exec: ' + action['module'] + '/' + action['value'])
+					log('Presence::execute: ' + action['module'] + '/' + action['value'])
 					self.controller.execute(action['module'] + '/' + action['value'])
 
-	def evalRule(self, prop, condition, value):
-		# print("evalRule", self.module_name, prop, condition, value)
+	def eval_rule(self, prop, condition, value):
+		# print("eval_rule", self.module_name, prop, condition, value)
 		if prop == "*" or prop in self.presence:
-			v = self.has_owner if prop == "*" else self.presence[prop]
+			v = self.has_owner if prop == "*" else self.presence[prop]['present']
 			return eval(str(v) + " " + condition + " " + str(value))
 		return False

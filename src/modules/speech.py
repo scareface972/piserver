@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import modules
 import urllib, os, pycurl, time, json, re
 from threading import Thread
@@ -19,15 +21,20 @@ class Speech(modules.Module):
 			'weather/now' : "quel temps fait-il",
 			'weather/day0' : "quel temps fait-il autjourd'hui",
 			'weather/day1' : "quel temps fera-t-il demain",
-			'weather/day2' : "quel temps fera-t-il dans 2 jours",
-			'weather/day3' : "quel temps fera-t-il dans 3 jours",
-			'weather/day4' : "quel temps fera-t-il dans 4 jours",
+			'weather/day2' : "quel temps fera-t-il dans deux jours",
+			'weather/day3' : "quel temps fera-t-il dans trois jours",
+			'weather/day4' : "quel temps fera-t-il dans quatre jours",
+			'tv/night/1' : "qu'y a-t-il ce soir sur tf1",
+			'tv/night/2' : "qu'y a-t-il ce soir sur france 2",
 		}
 		super().__init__(conf, cmds)
 
 	def execute(self, cmd):
 		result = dict(success=False, name=self.name)
-		if cmd == 'time' or cmd == 'date':
+		text = None
+		if 'say/' in cmd:
+			cmd, text = cmd.split('/')
+		elif cmd == 'time' or cmd == 'date':
 			# Commande date ou heure, pas bien méchant, on demande au système et un peu de mise en forme :)
 			if cmd == 'time':
 				text = time.strftime('%H:%M',time.localtime())
@@ -42,9 +49,6 @@ class Speech(modules.Module):
 				if add_dodo: text += ", tu devrais aller dormir !"		# Quand il est tôt faut faire dodo :)
 			elif cmd == 'date':
 				text = time.strftime('nous somme le %A %d %B',time.localtime())
-			result['success'] = True
-			t = SpeechThread(self.controller, text)
-			t.start()
 		elif cmd.startswith("weather"):
 			# Interrogation du webservice open weather map
 			url = "http://api.openweathermap.org/data/2.5/"
@@ -61,28 +65,30 @@ class Speech(modules.Module):
 				p = urllib.request.urlopen(req)
 				rs = p.read().decode('utf-8')
 				res = json.loads(rs)
-				weather = None
 				if day == -1:
-					weather = "le temps est " + res["weather"][0]["description"]
-					weather += ", il fait " + str(int(res["main"]["temp"])) + " degrés"
+					text = "le temps est " + res["weather"][0]["description"]
+					text += ", il fait " + str(int(res["main"]["temp"])) + " degrés"
 				else:
 					res = res["list"][day]
-					weather = "le temps sera " + res["weather"][0]["description"]
-					weather += ", il fera " + str(int(res["temp"]["day"])) + " degrés"
-				result['success'] = weather != None
-				if weather != None: 
-					result['weather'] = weather
-					t = SpeechThread(self.controller, weather)
-					t.start()
+					text = "le temps sera " + res["weather"][0]["description"]
+					text += ", il fera " + str(int(res["temp"]["day"])) + " degrés"
+		elif cmd.startswith("tv"):
+			s = cmd.split('/')
+			when = cmd[1]
+			canal = cmd[2]
+		result['success'] = text != None
+		if text != None: 
+			result['weather'] = text
+			t = SpeechThread(self.controller, text)
+			t.start()
 		return result
 
-# Thread de synthétisation vocale, encore merci a Google :)
-# > thread séparé pour ne pas bloquer le serveur ...
 class SpeechThread(Thread):
 	def __init__(self, controller, phrase):
 		Thread.__init__(self)
 		self.controller = controller
 		self.phrase = phrase
+		print ('phrase', self.phrase)
 
 	def run(self):
 		self.speakSpeechFromText(self.phrase)
@@ -111,6 +117,6 @@ class SpeechThread(Thread):
 		if fbx != None and not fbx.muted: 
 			restore = True
 			fbx.execute('mute')
-		os.system("mpg123 -q " + filename) # mplayer tts.mp3 -af extrastereo=0 &
+		os.system("mpg123 -a btspeaker -f 10000 -q " + filename) # mplayer tts.mp3 -af extrastereo=0 &
 		if restore: fbx.execute('mute')
-		os.remove(filename)
+		#os.remove(filename)

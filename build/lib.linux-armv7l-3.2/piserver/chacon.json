@@ -6,6 +6,7 @@
 			"interruptor": 1
 		},
 		"lampe": {
+			"alias": "ampoule",
 			"where": "salon",
 			"group": "lumiere",
 			"interruptor": 2

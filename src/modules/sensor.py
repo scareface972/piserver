@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import modules
 import DHT11Sensor
 import time
@@ -30,8 +32,8 @@ class DHT11(modules.Module):
 			self.value['humidity'] = h
 		return self.value
 
-	def evalRule(self, prop, condition, value):
-		# print("evalRule", self.module_name, prop, condition, value)
+	def eval_rule(self, prop, condition, value):
+		# print("eval_rule", self.module_name, prop, condition, value)
 		if prop in self.value:
 			v = self.value[condition]
 			return eval(str(v) + " " + condition + " " + str(value))
@@ -63,8 +65,8 @@ class BH1750FVI(modules.Module):
 		except:
 			pass
 
-	def evalRule(self, prop, condition, value):
-		# print("evalRule", self.module_name, prop, condition, value)
+	def eval_rule(self, prop, condition, value):
+		# print("eval_rule", self.module_name, prop, condition, value)
 		if prop == 'lux':
 			return eval(str(self.lux) + " " + condition + " " + str(value))
 		return False

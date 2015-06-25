@@ -20,7 +20,10 @@ src/piserver.py
 src/rules.json
 src/test_alarm.py
 src/test_alarm2.py
+src/test_alsa.py
 src/test_fbx.py
+src/test_recognition.py
+src/test_sphinx.py
 src/core/__init__.py
 src/core/controller.py
 src/modules/__init__.py
@@ -30,6 +33,8 @@ src/modules/freebox.py
 src/modules/gpio.py
 src/modules/piface.py
 src/modules/presence.py
+src/modules/recognition.bck.py
+src/modules/recognition.py
 src/modules/sensor.py
 src/modules/speech.py
 src/modules/ultrasonic.py

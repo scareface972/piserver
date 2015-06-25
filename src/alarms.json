@@ -1,7 +1,8 @@
 [
 	{
 		"name": "Réveil",
-		"time": "01:36",
+		"enable": false,
+		"time": "11:00",
 		"recursive":[0, 1, 2, 3, 4, 5],
 		"actions": [
 			{ "module": "chacon", "cmd": "plafond/on" },
@@ -11,12 +12,11 @@
 	},
 	{
 		"name": "Test",
-		"date": "2015-05-07",
-		"time": "14:40",
+		"enable": false,
+		"date": "2015-05-14",
+		"time": "23:27",
 		"actions": [
-			{ "module": "chacon", "cmd": "plafond/on" },
-			{ "module": "chacon", "cmd": "lampe/on" },
-			{ "module": "freebox", "cmd": "on/canal/16" }
+			{ "module": "speech", "cmd": "say/Bonjour, il est l'heure de se lever !" }
 		]
 	}
 ]

@@ -1,11 +1,17 @@
+# -*- coding: utf-8 -*-
+
 import bottle
-from modules import Switch, speech, chacon, freebox
+from modules import Threadable, Switch, speech, chacon, freebox
 import sys, os, importlib, re, json, time
 from threading import Thread
 import datetime, logging
 import picamera
+from multiprocessing import Process
 
-logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+log_dir = '/var/log/piserver'
+if not os.path.isdir(log_dir): os.mkdir(log_dir)
+
+logging.basicConfig(filename='/var/log/piserver/piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 class Controller():
 	"""Class 'Controller', singleton du controleur principal"""
@@ -24,10 +30,12 @@ class Controller():
 	def __init__(self, conf_file):
 		#self.init_modules()
 		self.enabled = []				# tableau des modules ACTIFS
+		self.threads = []				# tableau des modules avec threads
 		self.last_cmd = None			# dernière commande executé (pour l'instruction "encore")
-		self._load_config(conf_file)
+		self._load_conf(conf_file)
+		self._init_server()
 
-	def _load_config(self, conf_file):
+	def _load_conf(self, conf_file):
 		# Chargement de la configuration (fichier JSON)
 		config = json.loads(open(conf_file).read())
 		if 'debug' in config:
@@ -61,9 +69,10 @@ class Controller():
 				# Le module Speech a besoin du controller pour répondre (enfin pour couper le son de la freebox lors d'une réponse vocale)
 				inst.controller = self
 				self.enabled.append(inst)
+				if isinstance(inst, Threadable):
+					self.threads.append(inst)
 		# print(" -> host = " + str(Controller.HOST))
 		# print(" -> port = " + str(Controller.PORT))
-		self._init_server()
 
 	def _init_server(self):
 		# Initialisation du serveur web (Bottle)
@@ -100,8 +109,21 @@ class Controller():
 				return module
 
 	def run(self):
-		#print("Start ",Controller.HOST, Controller.PORT)
-		self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False)
+		print("Start ",Controller.HOST, Controller.PORT)
+		try:
+			t = Process(target=self.app.run, kwargs=dict(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False))
+			t.daemon = True
+			t.start()
+			t.join()
+			self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False)
+		except KeyboardInterrupt:
+			print('')
+			for module in self.threads:
+				print("kill thread in", module.name, module.get_running())
+				if module.get_running():
+					module.set_running(False)
+					module.thread.join()
+					print("-> Thread", module.name, "killed")
 
 	def static(self, path):
 		return bottle.static_file(path, root='static')
@@ -126,7 +148,7 @@ class Controller():
 		mods = []
 		for module in self.enabled:
 			if isinstance(module, freebox.Freebox): 
-				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.state, 'is_switch': True, 'cmds': module.list_cmds()})
+				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.get_state(), 'is_switch': True, 'cmds': module.list_cmds()})
 			elif isinstance(module, chacon.Chacon): 
 				mods.extend(module.get_switchers())
 			else:
@@ -141,17 +163,6 @@ class Controller():
 			states.append({'name': module['name'], 'state': module['state']})
 		yield 'data: ' + json.dumps(dict(success=True, states=states)) + '\n\n'
 
-	def search(self, qry=None):
-		# Extration de la ou des requête vocale (Google pouvant renvoyé 1 ou plusieurs réponse avec son service speech2text)
-		# > Le donnée arrive normalement en post, mais aussi en get pour débug :)
-		qrys = []
-		if bottle.request.method == 'POST': qrys = json.loads(bottle.request.body.readline().decode("utf-8"))
-		elif qry != None: qrys = [qry]
-		if len(qrys) > 0: cmds = self.analys(qrys)
-		if cmds == None: cmds = []
-		success = True if len(cmds) > 0 else False
-		return dict(success=success, cmds=cmds)
-
 	def execute(self, cmd):
 		self.last_cmd = cmd
 		module = self.get_module(cmd)
@@ -160,6 +171,18 @@ class Controller():
 		# print(module.name, cmd)
 		result = module.execute(cmd)
 		return result
+
+	def search(self, qry=None):
+		# Extration de la ou des requête vocale (Google pouvant renvoyé 1 ou plusieurs réponse avec son service speech2text)
+		# > Le donnée arrive normalement en post, mais aussi en get pour débug :)
+		qrys = []
+		if qry != None: qrys = [qry]
+		elif bottle.request.method == 'POST': qrys = json.loads(bottle.request.body.readline().decode("utf-8"))
+		#print(qrys)
+		if len(qrys) > 0: cmds = self.analys(qrys)
+		if cmds == None: cmds = []
+		success = True if len(cmds) > 0 else False
+		return dict(success=success, cmds=cmds)
 
 	def analys(self, qrys):
 		# Recherche de commande correspondant à une phrase

@@ -2,6 +2,7 @@
 import os, sys, fileinput, site
 from setuptools.command.install import install as installer
 from setuptools import setup, Extension
+from subprocess import call
 
 os.environ["CC"]  = "g++-4.6"
 os.environ["CXX"] = "g++-4.6"
@@ -22,7 +23,8 @@ class install(installer):
 		f.close()
 		filename = path + '/piserver/piserver.py'
 		os.chmod(filename, 0o755)
-		
+		#call(["update-rc.d", "piserver", "remove"])
+		call(["update-rc.d", "piserver", "defaults", "20", "1"])
 
 dht11 = Extension('DHT11Sensor',
 					sources = ['libs/DHT11Sensor.cpp'],
