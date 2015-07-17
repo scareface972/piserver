@@ -8,8 +8,14 @@
 	"presence": {
 		"module": "presence.Presence"
 	},
+	"homeeasy": {
+		"enabled": true,
+		"module": "homeeasy.HomeEasy",
+		"emitter": 8976434
+	},
 	"chacon": {
-		"enable_receiver": false,
+		"enabled": false,
+		"enabled_receiver": false,
 		"module": "chacon.Chacon",
 		"pinIn": 2,
 		"pinOut": 0,
@@ -24,18 +30,21 @@
 		"version": 6
 	},
 	"temp": {
+		"enabled": true,
 		"module": "sensor.DHT11",
 		"pin": 1
 	},
 	"light": {
+		"enabled": true,
 		"module": "sensor.BH1750FVI",
 		"pin": "i2c"
 	},
 	"alarm": {
+		"enabled": false,
 		"module": "alarm.Alarms"
 	},
 	"recognition": {
-		"enable": true,
+		"enabled": true,
 		"module": "recognition.Recognition",
 		"mic_index": 0,
 		"threshold": 6200,

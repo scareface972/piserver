@@ -18,6 +18,8 @@ class Speech(modules.Module):
 		cmds = {
 			'time': "quelle heure est-il",
 			'date': "quel jour sommes-nous",
+			'temp': 'combien fait-il|quelle est la température', 
+			'humidity': 'quelle est l\'humidité', 
 			'weather/now' : "quel temps fait-il",
 			'weather/day0' : "quel temps fait-il autjourd'hui",
 			'weather/day1' : "quel temps fera-t-il demain",
@@ -49,6 +51,14 @@ class Speech(modules.Module):
 				if add_dodo: text += ", tu devrais aller dormir !"		# Quand il est tôt faut faire dodo :)
 			elif cmd == 'date':
 				text = time.strftime('nous somme le %A %d %B',time.localtime())
+		elif cmd == 'temp' or cmd == 'humidity':
+			module = self.controller.get_module('temp/all')
+			rs = module.execute('all')
+			text = '';
+			if cmd == 'temp' and rs['temp_c'] > 0:
+				text += 'Il fait ' + str(int(rs['temp_c'])) + ' degrés.'
+			if cmd == 'humidity' and rs['humidity'] > 0:
+				text += 'Il y a ' + str(int(rs['humidity'])) + '% d\'humidité.'
 		elif cmd.startswith("weather"):
 			# Interrogation du webservice open weather map
 			url = "http://api.openweathermap.org/data/2.5/"

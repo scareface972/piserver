@@ -4,8 +4,7 @@ import core.controller
 import modules.gpio
 import wiringpi2 as wpi
 from time import sleep, time
-import re, json, pycurl, os
-from io import BytesIO
+import re, json, os
 import threading, logging
 import Chacon as rf
 
@@ -34,7 +33,7 @@ class Chacon(modules.Threadable):
 		self.code = self.interruptor = self.state = 0
 		self._load_conf()
 		super().__init__(conf, self.cmds)
-		if not 'enable_receiver' in conf or conf['enable_receiver']:
+		if not 'enabled_receiver' in conf or conf['enabled_receiver']:
 			self.thread.start()
 		
 	def _load_conf(self):

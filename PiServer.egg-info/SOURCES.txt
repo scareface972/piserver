@@ -14,7 +14,7 @@ src/alarms.json
 src/chacon.json
 src/config.bck.json
 src/config.json
-src/freebox.json
+src/homeeasy.json
 src/piserver
 src/piserver.py
 src/rules.json
@@ -22,6 +22,7 @@ src/test_alarm.py
 src/test_alarm2.py
 src/test_alsa.py
 src/test_fbx.py
+src/test_i2c.py
 src/test_recognition.py
 src/test_sphinx.py
 src/core/__init__.py
@@ -31,6 +32,7 @@ src/modules/alarm.py
 src/modules/chacon.py
 src/modules/freebox.py
 src/modules/gpio.py
+src/modules/homeeasy.py
 src/modules/piface.py
 src/modules/presence.py
 src/modules/recognition.bck.py

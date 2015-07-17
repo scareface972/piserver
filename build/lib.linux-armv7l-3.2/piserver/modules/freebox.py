@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+# controle vocale mode zapping
+# say zapping > passe sur tf1, et quelques secondes par chaines
+# et STOP pour arréter le zapping
+
 import modules
 import re, urllib, logging
 from threading import Thread
@@ -114,14 +118,14 @@ class Freebox(modules.Module):
 		log("Freebox::execute: " + key + " (" + str(longPress) + ")")
 		is_power_key = key.startswith('on') or key.startswith('off') or key.startswith('toggle')
 		result = dict(success=False, name=self.name, state=self.state)
-		if self.fbx_ok and is_power_key:
-			self.state = self.fbx.getTvStatus()
-			if self.state == None: 
-				result['error'] = 'Box inaccessible !'
-				return result
-			else:
-				result['state'] = self.state
-			log("-> Tv is " + ("ON" if self.state else "OFF"))
+		#if self.fbx_ok and is_power_key:
+		#	self.state = self.fbx.getTvStatus()
+		#	if self.state == None: 
+		#		result['error'] = 'Box inaccessible !'
+		#		return result
+		#	else:
+		#		result['state'] = self.state
+		#	log("-> Tv is " + ("ON" if self.state else "OFF"))
 		repeat = 1
 		canal = None
 		if '/' in key:

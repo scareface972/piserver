@@ -24,7 +24,7 @@ class install(installer):
 		filename = path + '/piserver/piserver.py'
 		os.chmod(filename, 0o755)
 		#call(["update-rc.d", "piserver", "remove"])
-		call(["update-rc.d", "piserver", "defaults", "20", "1"])
+		#call(["update-rc.d", "piserver", "defaults", "20", "1"])
 
 dht11 = Extension('DHT11Sensor',
 					sources = ['libs/DHT11Sensor.cpp'],
@@ -36,7 +36,7 @@ chacon = Extension('Chacon',
 
 setup(name='PiServer',
 		version='1.1',
-		description='PiServer is domotic server for Chacon Interruptor, Freebox, Temp Sensor that expose data by web interface and api',
+		description='PiServer is domotic server for RF433, Freebox, Temp & Light Sensor that expose data by web interface and api',
 		long_description=read('README.md'),
 		author='Benjamin Touchard',
 		author_email='benjamin@kolapsis.com',

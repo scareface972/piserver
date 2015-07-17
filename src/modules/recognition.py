@@ -23,11 +23,19 @@ SILENCE_LIMIT = 1
 THRESHOLD = 10000
 FLAC_CONV = 'flac -f'
 
+def log(value):
+	print(value)
+	logging.debug(value)
+
 class Recognition(modules.Threadable):
 	"""Class Recognition for Voice recognition with Google"""
 
 	def __init__(self, conf):
-		super().__init__(conf)
+		cmds = {
+			'on': "active la reconnaissance vocale",
+			'off': "desactive la reconnaissance vocale",
+		}
+		super().__init__(conf, cmds)
 		self.mic_index = conf['mic_index'] if 'mic_index' in conf else -1
 		self.threshold = conf['threshold'] if 'threshold' in conf else 10000
 		self.lang = conf['lang'] if 'lang' in conf else 'en-US'
@@ -37,51 +45,77 @@ class Recognition(modules.Threadable):
 			print('Error mic_index:', self.mic_index,'undefined')
 			return
 		if 'enable' not in conf or conf['enable']:
+			self._is_listening = True
 			self.thread.start()
 
+	def execute(self, cmd):
+		log("Recognition::execute: " + cmd)
+		result = dict(success=False, cmd=cmd)
+		if cmd == 'on' and not self._is_listening:
+			self._is_listening = True
+			#self.controller.execute('speech/say/La reconnaissance vocale est activée')
+			result['success'] = True
+		elif cmd == 'off' and self._is_listening:
+			self._is_listening = False
+			self.thread.join()
+			#self.controller.execute('speech/say/La reconnaissance vocale est désactivée')
+			result['success'] = True
+		return result
+
+	def is_listening(self):
+		return self._is_listening
+
 	def worker(self):
-		print("-> Recognition worker start...")
+		log("Recognition::worker start...")
 		self.set_running(True)
-		audio = aa.PCM(aa.PCM_CAPTURE, aa.PCM_NONBLOCK, 'default')
-		audio.setchannels(CHANNELS)
-		audio.setrate(RATE)
-		audio.setformat(FORMAT)
-		audio.setperiodsize(CHUNK)
+		try:
+			audio = aa.PCM(aa.PCM_CAPTURE, aa.PCM_NONBLOCK, 'default')
+			audio.setchannels(CHANNELS)
+			audio.setrate(RATE)
+			audio.setformat(FORMAT)
+			audio.setperiodsize(CHUNK)
+			ready = True
+		except Exception as e:
+			log(str(e))
+			self.set_running(False)
+			self._is_listening = False
+			return
 
 		recording = False
 		audio2send = []
 		prev_audio = deque(maxlen=int(PREV_AUDIO * (RATE/CHUNK)))
 
 		while self.get_running():
-			l,data = audio.read()
-			if l:
-				try:
-					energy = audioop.rms(data, 2)
-					if not recording and energy > THRESHOLD:
-						#print("* Start recording")
-						recording = True
-						audio2send.append(data)
-						duration = 0
-					if recording:
-						audio2send.append(data)
-						duration += .001
-						if energy > THRESHOLD:
+			if self._is_listening:
+				l,data = audio.read()
+				if l:
+					try:
+						energy = audioop.rms(data, 2)
+						if not recording and energy > THRESHOLD:
+							#print("* Start recording")
+							recording = True
+							audio2send.append(data)
 							duration = 0
-						# record
-						#print('duration',duration)
-						if duration > SILENCE_LIMIT:
-							#print("* Stop recording")
-							recording = False
-							audio2send = list(prev_audio) + audio2send
-							self.recognize(audio2send)
-							audio2send = []
-							prev_audio.clear()
-					else:
-						prev_audio.append(data)
-				except audioop.error as e:
-					if str(e) != "not a whole number of frames":
-						raise e
-			time.sleep(.001)
+						if recording:
+							audio2send.append(data)
+							duration += .001
+							if energy > THRESHOLD:
+								duration = 0
+							# record
+							#print('duration',duration)
+							if duration > SILENCE_LIMIT:
+								#print("* Stop recording")
+								recording = False
+								audio2send = list(prev_audio) + audio2send
+								self.recognize(audio2send)
+								audio2send = []
+								prev_audio.clear()
+						else:
+							prev_audio.append(data)
+					except audioop.error as e:
+						if str(e) != "not a whole number of frames":
+							raise e
+				time.sleep(.001)
 
 	def samples_to_flac(self, frame_data):
 		with io.BytesIO() as wav_file:
@@ -143,6 +177,12 @@ class Recognition(modules.Threadable):
 				if cmds['success'] and len(cmds['cmds']) > 0:
 					for cmd in cmds['cmds']:
 						self.controller.execute(cmd)
+						if cmd == 'homeeasy/ventilo/on':
+							rnd = random.randrange(10)
+							if rnd == 0:
+								self.controller.execute("speech/say/Il devrait faire plus frais maintenant !")
+							if rnd == 1:
+								self.controller.execute("speech/say/C'est fait !")
 					executed = True
 					break
 			#if not executed:

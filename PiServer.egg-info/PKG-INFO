@@ -1,7 +1,7 @@
 Metadata-Version: 1.0
 Name: PiServer
 Version: 1.1
-Summary: PiServer is domotic server for Chacon Interruptor, Freebox, Temp Sensor that expose data by web interface and api
+Summary: PiServer is domotic server for RF433, Freebox, Temp & Light Sensor that expose data by web interface and api
 Home-page: http://www.kolapsis.com/
 Author: Benjamin Touchard
 Author-email: benjamin@kolapsis.com

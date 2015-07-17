@@ -54,8 +54,8 @@ class Module(dict):
 		#if len(results) > 0: print('--->', len(results), 'commands found')
 		return results
 
-	def execute(self, cmd, automatic=True):
-		return dict(success=False, automatic=automatic)	
+	def execute(self, cmd):
+		return dict(success=False, cmd=cmd)	
 
 	def _get_repeat(self, value):
 		num = 0

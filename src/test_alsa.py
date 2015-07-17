@@ -111,41 +111,45 @@ def recognize(audio_data, show_all = False):
 			spoken_text.append({"text": prediction["transcript"], "confidence": 1 if i == 0 else 0})
 	return spoken_text
 
-while True:
-	# Read data from device
-	l,data = data_in.read()
-	if l:
-		# Return the maximum of the absolute value of all samples in a fragment.
-		try:
-			energy = audioop.rms(data, 2)
-			if not recording and energy > THRESHOLD:
-				#print("* Start recording")
-				recording = True
-				audio2send = []
-				audio2send.append(data)
-				duration = 0
-			if recording:
-				audio2send.append(data)
-				duration += .001
-				if energy > THRESHOLD:
+def __main__():
+	pass
+
+def __main__old():
+	while True:
+		# Read data from device
+		l,data = data_in.read()
+		if l:
+			# Return the maximum of the absolute value of all samples in a fragment.
+			try:
+				energy = audioop.rms(data, 2)
+				if not recording and energy > THRESHOLD:
+					#print("* Start recording")
+					recording = True
+					audio2send = []
+					audio2send.append(data)
 					duration = 0
-				# record
-				#print('duration',duration)
-				if duration > SILENCE_LIMIT:
-					#print("* Stop recording")
-					recording = False
-					audio2send = list(prev_audio) + audio2send
-					#filename = save_speech(audio2send)
-					#print('Saved to', filename)
-					flac_data = samples_to_flac(audio2send)
-					#print(len(flac_data))
-					text = recognize(flac_data)
-					if text != None:
-						text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode('utf-8')
-						print('You said:', text)
-			else:
-				prev_audio.append(data)
-		except audioop.error as e:
-			if str(e) != "not a whole number of frames":
-				raise e
-	time.sleep(.001)
+				if recording:
+					audio2send.append(data)
+					duration += .001
+					if energy > THRESHOLD:
+						duration = 0
+					# record
+					#print('duration',duration)
+					if duration > SILENCE_LIMIT:
+						#print("* Stop recording")
+						recording = False
+						audio2send = list(prev_audio) + audio2send
+						#filename = save_speech(audio2send)
+						#print('Saved to', filename)
+						flac_data = samples_to_flac(audio2send)
+						#print(len(flac_data))
+						text = recognize(flac_data)
+						if text != None:
+							text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode('utf-8')
+							print('You said:', text)
+				else:
+					prev_audio.append(data)
+			except audioop.error as e:
+				if str(e) != "not a whole number of frames":
+					raise e
+		time.sleep(.001)

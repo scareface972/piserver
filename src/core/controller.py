@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import bottle
-from modules import Threadable, Switch, speech, chacon, freebox
+from modules import Threadable, Switch, speech, freebox, homeeasy, recognition
 import sys, os, importlib, re, json, time
 from threading import Thread
 import datetime, logging
@@ -49,7 +49,7 @@ class Controller():
 				Controller.PORT = config[name]
 			else:
 				conf = config[name]
-				#print(conf)
+				# print(conf)
 				if 'enabled' in conf and conf['enabled'] == False: continue
 				mod = conf['module']
 				conf['name'] = name
@@ -94,7 +94,9 @@ class Controller():
 		for module in self.enabled:
 			if isinstance(module, freebox.Freebox): 
 				switchers.append({'name':module.name, 'state': module.get_state()})
-			elif isinstance(module, chacon.Chacon): 
+			elif isinstance(module, recognition.Recognition): 
+				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.is_listening()})
+			elif isinstance(module, homeeasy.HomeEasy): 
 				switchers.extend(module.get_switchers())
 		return switchers
 
@@ -105,18 +107,20 @@ class Controller():
 
 	def get_module_by_name(self, name):
 		for module in self.enabled:
+			# print(module.name)
 			if name == module.name:
 				return module
 
 	def run(self):
 		print("Start ",Controller.HOST, Controller.PORT)
 		try:
-			t = Process(target=self.app.run, kwargs=dict(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False))
-			t.daemon = True
-			t.start()
-			t.join()
-			self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False)
+			self.thread = Process(target=self.app.run, kwargs=dict(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False))
+			self.thread.daemon = True
+			self.thread.start()
+			self.thread.join()
 		except KeyboardInterrupt:
+			pass
+		finally:
 			print('')
 			for module in self.threads:
 				print("kill thread in", module.name, module.get_running())
@@ -124,6 +128,9 @@ class Controller():
 					module.set_running(False)
 					module.thread.join()
 					print("-> Thread", module.name, "killed")
+
+	def stop(self):
+		self.app.close()
 
 	def static(self, path):
 		return bottle.static_file(path, root='static')
@@ -149,8 +156,10 @@ class Controller():
 		for module in self.enabled:
 			if isinstance(module, freebox.Freebox): 
 				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.get_state(), 'is_switch': True, 'cmds': module.list_cmds()})
-			elif isinstance(module, chacon.Chacon): 
+			elif isinstance(module, homeeasy.HomeEasy): 
 				mods.extend(module.get_switchers())
+			elif isinstance(module, recognition.Recognition): 
+				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.is_listening(), 'is_switch': True, 'cmds': module.list_cmds()})
 			else:
 				mods.append({'name':module.name, 'type': module.get_module_name(), 'cmds': module.list_cmds()})
 		return json.dumps(dict(success=True, modules=mods))

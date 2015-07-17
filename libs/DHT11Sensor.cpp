@@ -6,6 +6,7 @@
 #define MAX_TIME 85
 
 //static int DEFAULT_VALUES[5] = {0,0,0,0,0};
+float celcius = 0, humidity = 0, fahrenheit = 0;
 
 static PyObject *DHT11SensorError;
 static PyObject * DHT11Sensor_get(PyObject *self, PyObject *args);
@@ -41,7 +42,6 @@ static PyObject * DHT11Sensor_get(PyObject *self, PyObject *args) {
 	uint8_t lststate = HIGH;
 	uint8_t counter = 0;
 	uint8_t j = 0, i;
-	float celcius = 0, humidity = 0, fahrenheit = 0;
 
 	if (!PyArg_ParseTuple(args, "i", &pin))
 		return NULL;
@@ -87,9 +87,14 @@ static PyObject * DHT11Sensor_get(PyObject *self, PyObject *args) {
 			sprintf(h, "%d.%d", dht11_val[0], dht11_val[1]);
 			sprintf(c, "%d.%d", dht11_val[2], dht11_val[3]);
 			sprintf(f, "%.1f", celcius * 9.0 / 5.0 + 32);
-			humidity = atof(h);
-			celcius = atof(c);
-			fahrenheit = atof(f);
+			float hu = atof(h);
+			float cl = atof(c);
+			float fa = atof(f);
+			if (cl > 0 && hu > 0) {
+				humidity = hu;
+				celcius = cl;
+				fahrenheit = fa;
+			}
 		}
 		//delay(500);
 		//memcpy(dht11_val, DEFAULT_VALUES, 5*sizeof(int));
