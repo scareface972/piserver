@@ -12,7 +12,6 @@ Requirements
 
 * A RaspberryPi (with Raspbian not tested with other distrib)
 * Python3 (with Bottle, http://bottlepy.org)
-* WiringPi library (http://wiringpi.com)
 
 Installation
 ------------
