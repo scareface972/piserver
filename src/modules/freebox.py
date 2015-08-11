@@ -1,28 +1,37 @@
+# -*- coding: utf-8 -*-
+
+# controle vocale mode zapping
+# say zapping > passe sur tf1, et quelques secondes par chaines
+# et STOP pour arréter le zapping
+
 import modules
-import re, urllib
+import re, urllib, logging
 from threading import Thread
 from time import sleep
 import hmac, os, json, requests
 from hashlib import sha1
 
+log_dir = '/var/log/piserver'
+if not os.path.isdir(log_dir): os.mkdir(log_dir)
+logging.basicConfig(filename='/var/log/piserver/piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.getLogger("requests").setLevel(logging.WARNING)
+
 # Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
 MODULES = ['Freebox']
 
-START_TV_DELAY = 10
-FREEBOX_PASSWD = "lapsikopass"
+START_TV_DELAY = 6
 PISERVER_VERSION = 1
-appDesc = {
-	"app_id": "fr.freebox.piserver",
-	"app_name": "PiServer by Benjamin",
-	"app_version": PISERVER_VERSION,
-	"device_name": "FbxOS PiServer Client"
-}
 
-class Freebox(modules.Switch):
+def log(value):
+	print(value)
+	logging.debug(value)
+
+class Freebox(modules.Module):
 	"""Class 'Freebox', télécommande de la Freebox"""
 
 	def __init__(self, conf):
 		self.muted = False
+		self.state = False
 		key = "((\w+\s)?("+conf['name']
 		if 'where' in conf: key += "|"+conf['where']
 		if 'alias' in conf: key += "|"+conf['alias']
@@ -31,7 +40,6 @@ class Freebox(modules.Switch):
 		# Initialisation des commandes disponibles
 		cmds = {
 			'toggle' : toggle,
-			#'power': "(allumer?|etein(dre|s))\s("+key+")+",
 			'on': "allumer?\s"+key+"+",
 			'off': "(etein(dre|s))\s"+key+"+",
 			'home': "accueil",
@@ -55,20 +63,39 @@ class Freebox(modules.Switch):
 			'pause': "mettre en pause",
 			'forward': "avancer" + modules.Module.REPEAT
 		}
-		super().__init__(conf, cmds, True)
-		self.url = "http://" + conf['box'] + ".freebox.fr/pub/remote_control?code=" + str(conf['code']);
-#		if int(conf['version']) >= 6:
-#			self.fbxAddress = "http://mafreebox.freebox.fr"
-#			self.registrationSaveFile = "freebox.conf"
-#			self.isLoggedIn = False
-#			self.registration = {'app_token': '', 'track_id': None }
-#			self.challenge = None
-#			self.sessionToken = None
-#			self.permissions = None
-#			self._loadRegistrationParams()
-#			if not self.isRegistered():
-#				self.registerApp()
+		super().__init__(conf, cmds)
+		self.url = "http://" + conf['box'] + ".freebox.fr/pub/remote_control?code=" + str(conf['code'])
+		if conf['version'] >= 6:
+			self.fbx = FreeboxOSCtrl(False)
+			self.verify_fbx()
 
+	def verify_fbx(self):
+		self.fbx_ok = False
+		th = Thread(target=self._check_fbx)
+		th.daemon = True
+		th.start()
+
+	def _check_fbx(self):
+		self.fbx_status = self.fbx.getRegistrationStatus()
+		self.fbx_ok = 'granted' == self.fbx_status
+		if not self.fbx_ok :
+			log("Freebox::check: WARNING: Veuillez autoriser PiServer à accéder à l'API de votre box.\n         Cliquez sur OUI (flèche vers la droite) sur l'écran LCD de la box serveur, merci.")
+			while (not self.fbx.isRegistered()):
+				self.fbx_status = self.fbx.registerApp()
+				if 'grandted' == self.fbx_status: 
+					self.fbx_ok = True
+				if 'pending' != self.fbx_status: 
+					log("Freebox::check: WARNING: PiServer non authorisé, status:" + self.fbx_status)
+					break;
+		self.get_state()
+
+	def get_state(self):
+		self.fbx_status = self.fbx.getRegistrationStatus()
+		self.fbx_ok = 'granted' == self.fbx_status
+		if self.fbx_ok:
+			self.state = self.fbx.getTvStatus()
+			if self.state == None: self.state = False
+		return self.state
 
 	def analys(self, qry):
 		cmds = super().analys(qry)
@@ -88,31 +115,46 @@ class Freebox(modules.Switch):
 
 	def execute(self, key, longPress=False):
 		# Execution de la requete sur l'api télécommande de la box
+		log("Freebox::execute: " + key + " (" + str(longPress) + ")")
+		is_power_key = key.startswith('on') or key.startswith('off') or key.startswith('toggle')
 		result = dict(success=False, name=self.name, state=self.state)
-		if key == 'on' and self.state:
-			return result
-		elif key == 'off' and not self.state:
-			return result
+		#if self.fbx_ok and is_power_key:
+		#	self.state = self.fbx.getTvStatus()
+		#	if self.state == None: 
+		#		result['error'] = 'Box inaccessible !'
+		#		return result
+		#	else:
+		#		result['state'] = self.state
+		#	log("-> Tv is " + ("ON" if self.state else "OFF"))
+		repeat = 1
+		canal = None
 		if '/' in key:
 			k = key.split('/')
 			key = k[0]
-			repeat = int(k[1])
-		else: repeat = 1
-		if (key == 'vol_inc' or key == 'vol_down') and repeat == 1:
+			if k[1].isdigit():
+				repeat = int(k[1])
+			elif k[1] == 'canal' and k[2].isdigit():
+				canal = k[2]
+				log("--> switch to canal after on:" + str(canal))
+		if (key.startswith('on') and self.state) or (key.startswith('off') and not self.state):
+			result['error'] = 'Freebox is already ' + key
+			return result
+		if (key == 'vol_inc' or key == 'vol_dec') and repeat == 1:
 			repeat = 10
 		longPress = str(1 if longPress else 0)
-		if key == 'on' or key == 'off': key = 'power'
+		if key.startswith('on') or key.startswith('off'): 
+			key = 'power'
 		if key == 'power' or key == 'toggle' or self.state:
 			if key.isdigit():
 				for k in key:
 					url = self.url + '&key=' + k + '&long=' + longPress
-					print(url)
+					#print(url)
 					req = urllib.request.Request(url)
 					try: p = urllib.request.urlopen(req)
 					except: pass
 			else:
 				url = self.url + '&key=' + key + '&long=' + longPress
-				print(url)
+				#print(url)
 				for r in range(repeat):
 					req = urllib.request.Request(url)
 					try: p = urllib.request.urlopen(req)
@@ -120,227 +162,274 @@ class Freebox(modules.Switch):
 			result['success'] = True
 			if key == 'power' or key == 'toggle':
 				self.state = not self.state
+				result['state'] = self.state
 				if self.state:
-					t = StartTV(self)
+					t = StartTV(self, canal)
 					t.start()
 			elif key == 'mute':
 				self.muted = not self.muted
 		return result
 
-#	def _saveRegistrationParams(self):
-#		""" Save registration parameters (app_id/token) to a local file """
-#		print(">>> _saveRegistrationParams")
-#		with open(self.registrationSaveFile, 'wb') as outfile:
-#			json.dump(self.registration, outfile)
-#
-#	def _loadRegistrationParams(self):
-#		print(">>> _loadRegistrationParams")
-#		if os.path.exists(self.registrationSaveFile):
-#			with open(self.registrationSaveFile) as infile:
-#				self.registration = json.load(infile)
-#
-#	def _login(self):
-#		""" Login to FreeboxOS using API credentials """
-#		print(">>> _login")
-#		if not self.isLoggedIn:
-#			if not self.isRegistered():
-#				raise FbxOSException("This app is not registered yet: you have to register it first!")
-#
-#			# 1st stage: get challenge
-#			url = self.fbxAddress + "/api/v3/login/"
-#			# GET
-#			print("GET url: %s" % url)
-#			r = requests.get(url, timeout=3)
-#			print("GET response: %s" % r.text)
-#			# ensure status_code is 200, else raise exception
-#			if requests.codes.ok != r.status_code:
-#				raise FbxOSException("Get error: %s" % r.text)
-#			# rc is 200 but did we really succeed?
-#			resp = json.loads(r.text)
-#			#print("Obj resp: %s" % resp)
-#			if resp['success']:
-#				if not resp['result']['logged_in']:
-#					self.challenge = resp['result']['challenge']
-#			else:
-#				raise FbxOSException("Challenge failure: %s" % resp)
-#
-#			# 2nd stage: open a session
-#			global appDesc
-#			apptoken = self.registration['app_token']
-#			key = self.challenge
-#			print("challenge: " + key + ", apptoken: " + apptoken)
-#			# Hashing token with key
-#			h = hmac.new(apptoken, key, sha1)
-#			password = h.hexdigest()
-#			url = self.fbxAddress + "/api/v3/login/session/"
-#			headers = {'Content-type': 'application/json',
-#					   'charset': 'utf-8', 'Accept': 'text/plain'}
-#			payload = {'app_id': appDesc['app_id'], 'password': password}
-#			#print("Payload: %s" % payload)
-#			data = json.dumps(payload)
-#			print("POST url: %s  data: %s" % (url, data))
-#			# post it
-#			r = requests.post(url, data, headers=headers, timeout=3)
-#			# ensure status_code is 200, else raise exception
-#			print("POST response: %s" % r.text)
-#			if requests.codes.ok != r.status_code:
-#				raise FbxOSException("Post response error: %s" % r.text)
-#			# rc is 200 but did we really succeed?
-#			resp = json.loads(r.text)
-#			#print("Obj resp: %s" % resp)
-#			if resp['success']:
-#				self.sessionToken = resp['result']['session_token']
-#				self.permissions = resp['result']['permissions']
-#				print("Permissions: %s" % self.permissions)
-#				if not self.permissions['settings']:
-#					print("Warning: permission 'settings' has not been allowed yet in FreeboxOS server. This script may fail!")
-#			else:
-#				raise FbxOSException("Session failure: %s" % resp)
-#			self.isLoggedIn = True
-#
-#	def _logout(self):
-#		""" logout from FreeboxOS """
-#		# Not documented yet in the API
-#		print(">>> _logout")
-#		if self.isLoggedIn:
-#			url = self.fbxAddress + "/api/v3/login/logout/"
-#			# POST
-#			print("POST url: %s" % url)
-#			r = requests.post(url, timeout=3)
-#			print("POST response: %s" % r.text)
-#			# ensure status_code is 200, else raise exception
-#			if requests.codes.ok != r.status_code:
-#				raise FbxOSException("Post error: %s" % r.text)
-#			# rc is 200 but did we really succeed?
-#			resp = json.loads(r.text)
-#			#print("Obj resp: %s" % resp)
-#			if not resp['success']:
-#				raise FbxOSException("Logout failure: %s" % resp)
-#		self.isLoggedIn = False
-#
-#	def hasRegistrationParams(self):
-#		""" Indicate whether registration params look initialized """
-#		print(">>> hasRegistrationParams")
-#		return None != self.registration['track_id'] and '' != self.registration['app_token']
-#
-#	def getRegistrationStatus(self):
-#		""" Get the current registration status thanks to the track_id """
-#		print(">>> getRegistrationStatus")
-#		if self.hasRegistrationParams():
-#			url = self.fbxAddress + \
-#				"/api/v3/login/authorize/%s" % self.registration['track_id']
-#			print(url)
-#			# GET
-#			print("GET url: %s" % url)
-#			r = requests.get(url, timeout=3)
-#			print("GET response: %s" % r.text)
-#			# ensure status_code is 200, else raise exception
-#			if requests.codes.ok != r.status_code:
-#				raise FbxOSException("Get error: %s" % r.text)
-#			resp = json.loads(r.text)
-#			return resp['result']['status']
-#		else:
-#			return "Not registered yet!"
-#
-#	def isRegistered(self):
-#		""" Check that the app is currently registered (granted) """
-#		print(">>> isRegistered")
-#		if self.hasRegistrationParams() and 'granted' == self.getRegistrationStatus():
-#			return True
-#		else:
-#			return False
-#
-#	def registerApp(self):
-#		""" Register this app to FreeboxOS to that user grants this apps via Freebox Server
-#		LCD screen. This command shall be executed only once. """
-#		print(">>> registerApp")
-#		register = True
-#		if self.hasRegistrationParams():
-#			status = self.getRegistrationStatus()
-#			if 'granted' == status:
-#				print("This app is already granted on Freebox Server (app_id = %s). You can now dialog with it." % self.registration['track_id'])
-#				register = False
-#			elif 'pending' == status:
-#				print("This app grant is still pending: user should grant it on Freebox Server lcd/touchpad (app_id = %s)." % self.registration['track_id'])
-#				register = False
-#			elif 'unknown' == status:
-#				print("This app_id (%s) is unknown by Freebox Server: you have to register again to Freebox Server to get a new app_id." % self.registration['track_id'])
-#			elif 'denied' == status:
-#				print("This app has been denied by user on Freebox Server (app_id = %s)." % self.registration['track_id'])
-#				register = False
-#			elif 'timeout' == status:
-#				print("Timeout occured for this app_id: you have to register again to Freebox Server to get a new app_id (current app_id = %s)." % self.registration['track_id'])
-#				register = False
-#			else:
-#				print("Unexpected response: %s" % status)
-#
-#		if register:
-#			global appDesc
-#			url = self.fbxAddress + "/api/v3/login/authorize/"
-#			headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-#			# post it
-#			print("POST url: %s  data: %s" % (url, appDesc))
-#			r = requests.post(url, data=json.dumps(appDesc), headers=headers, timeout=3)
-#			print("POST response: %s" % r.text)
-#			# ensure status_code is 200, else raise exception
-#			if requests.codes.ok != r.status_code:
-#				raise FbxOSException("Post error: %s" % r.text)
-#			# rc is 200 but did we really succeed?
-#			resp = json.loads(r.text)
-#			#print("Obj resp: %s" % resp)
-#			if True == resp['success']:
-#				self.registration['app_token'] = resp['result']['app_token']
-#				self.registration['track_id'] = resp['result']['track_id']
-#				self._saveRegistrationParams()
-#				print("Now you have to accept this app on your Freebox server: take a look on its lcd screen.")
-#			else:
-#				print("NOK")
-#
-#	def reboot(self):
-#		""" Reboot the freebox server now! """
-#		print(">>> reboot")
-#		self._login()
-#		headers = {'X-Fbx-App-Auth': self.sessionToken, 'Accept': 'text/plain'}
-#		url = self.fbxAddress + "/api/v3/system/reboot/"
-#		# POST
-#		print("POST url: %s" % url)
-#		r = requests.post(url, headers=headers, timeout=3)
-#		print("POST response: %s" % r.text)
-#		# ensure status_code is 200, else raise exception
-#		if requests.codes.ok != r.status_code:
-#			raise FbxOSException("Post error: %s" % r.text)
-#		# rc is 200 but did we really succeed?
-#		resp = json.loads(r.text)
-#		#print("Obj resp: %s" % resp)
-#		if not resp['success']:
-#			raise FbxOSException("Rebooting failure: %s" % resp)
-#		print("Freebox Server is rebooting")
-#		self.isLoggedIn = False
-#		return True
-#
-#	def testTv(self):
-#		""" Test TV the freebox server now! """
-#		print(">>> testTV")
-#		self._login()
-#		headers = {'X-Fbx-App-Auth': self.sessionToken, 'Accept': 'text/plain'}
-#		url = self.fbxAddress + "/api/v3/airmedia/receivers/Freebox%20Player/"
-#		data = {'action': 'stop'}
-#		# POST
-#		print("POST url: %s" % url)
-#		r = requests.post(url, data=json.dumps(data), headers=headers, timeout=3)
-#		print("POST status: %i" % r.status_code)
-#		print("POST response: %s" % r.text)
-#		return True
-
 class StartTV(Thread):
-	def __init__(self, callback):
+	def __init__(self, callback, canal=None):
 		Thread.__init__(self)
 		self.callback = callback
+		self.canal = canal
 
 	def run(self):
 		# print("StartTV")
 		sleep(START_TV_DELAY)
 		self.callback.execute('ok')
+		if self.canal != None:
+			sleep(START_TV_DELAY)
+			self.callback.execute(self.canal)
+
+
+class FbxOSException(Exception):
+
+	""" Exception for FreeboxOS domain """
+
+	def __init__(self, reason):
+		self.reason = reason
+
+	def __str__(self):
+		return self.reason
+
+
+class FreeboxOSCtrl:
+
+	""" This class handles connection and dialog with FreeboxOS thanks to
+	its exposed REST API """
+
+	gAppDesc = {
+		"app_id": "fr.freebox.piserver",
+		"app_name": "PiServer by Benjamin",
+		"app_version": PISERVER_VERSION,
+		"device_name": "FbxOS PiServer Client"
+	}
+
+	def __init__(self, debug=False):
+		""" Constructor """
+		self.debug = debug
+		self.fbxAddress = "http://mafreebox.freebox.fr"
+		self.isLoggedIn = False
+		self.registrationSaveFile = "/usr/local/piserver/freebox.json"
+		self.registration = {'app_token': '', 'track_id': None}
+		self.challenge = None
+		self.sessionToken = None
+		self.permissions = None
+		self._loadRegistrationParams()
+
+	def _log(self, what):
+		if self.debug:
+			print("Freebox::msg", what)
+			logging.debug("Freebox::debug -> " + what)
+
+	def _saveRegistrationParams(self):
+		""" Save registration parameters (app_id/token) to a local file """
+		self._log(">>> _saveRegistrationParams")
+		with open(self.registrationSaveFile, 'w') as outfile:
+			json.dump(self.registration, outfile)
+
+	def _loadRegistrationParams(self):
+		self._log(">>> _loadRegistrationParams")
+		if os.path.exists(self.registrationSaveFile):
+			with open(self.registrationSaveFile) as infile:
+				data = infile.read()
+				if bool(data.strip()): 
+					self.registration = json.loads(data)
+
+	def _login(self):
+		""" Login to FreeboxOS using API credentials """
+		self._log(">>> self._login")
+		#if not self.isLoggedIn:
+		if not self.isRegistered():
+			raise FbxOSException("This app is not registered yet: you have to register it first!")
+
+		# 1st stage: get challenge
+		url = self.fbxAddress + "/api/v1/login/"
+		# GET
+		self._log("GET url: %s" % url)
+		r = requests.get(url, timeout=3)
+		self._log("GET response: %s" % r.text)
+		# ensure status_code is 200, else raise exception
+		if requests.codes.ok != r.status_code:
+			raise FbxOSException("Get error: %s" % r.text)
+		# rc is 200 but did we really succeed?
+		resp = json.loads(r.text)
+		#self._log("Obj resp: %s" % resp)
+		if resp['success']:
+			if not resp['result']['logged_in']:
+				self.challenge = resp['result']['challenge']
+		else:
+			raise FbxOSException("Challenge failure: %s" % resp)
+
+		# 2nd stage: open a session
+		apptoken = self.registration['app_token']
+		key = self.challenge
+		self._log("challenge: " + key + ", apptoken: " + apptoken)
+		# Hashing token with key
+		h = hmac.new(apptoken.encode(), key.encode(), sha1)
+		password = h.hexdigest()
+		url = self.fbxAddress + "/api/v1/login/session/"
+		headers = {'Content-type': 'application/json',
+				   'charset': 'utf-8', 'Accept': 'text/plain'}
+		payload = {'app_id': FreeboxOSCtrl.gAppDesc['app_id'], 'password': password}
+		#self._log("Payload: %s" % payload)
+		data = json.dumps(payload)
+		self._log("POST url: %s  data: %s" % (url, data))
+		# post it
+		r = requests.post(url, data, headers=headers, timeout=3)
+		# ensure status_code is 200, else raise exception
+		self._log("POST response: %s" % r.text)
+		if requests.codes.ok != r.status_code:
+			raise FbxOSException("Post response error: %s" % r.text)
+		# rc is 200 but did we really succeed?
+		resp = json.loads(r.text)
+		#self._log("Obj resp: %s" % resp)
+		if resp['success']:
+			self.sessionToken = resp['result']['session_token']
+			self.permissions = resp['result']['permissions']
+			self._log("Permissions: %s" % self.permissions)
+			#if not self.permissions['settings']:
+			#	print("Warning: permission 'settings' has not been allowed yet in FreeboxOS server. This script may fail!")
+		else:
+			raise FbxOSException("Session failure: %s" % resp)
+		self.isLoggedIn = True
+
+	def hasRegistrationParams(self):
+		""" Indicate whether registration params look initialized """
+		self._log(">>> hasRegistrationParams")
+		return None != self.registration['track_id'] and '' != self.registration['app_token']
+
+	def getRegistrationStatus(self):
+		""" Get the current registration status thanks to the track_id """
+		self._log(">>> getRegistrationStatus")
+		if self.hasRegistrationParams():
+			url = self.fbxAddress + \
+				"/api/v1/login/authorize/%s" % self.registration['track_id']
+			self._log(url)
+			# GET
+			self._log("GET url: %s" % url)
+			r = requests.get(url, timeout=3)
+			self._log("GET response: %s" % r.text)
+			# ensure status_code is 200, else raise exception
+			if requests.codes.ok != r.status_code:
+				raise FbxOSException("Get error: %s" % r.text)
+			resp = json.loads(r.text)
+			return resp['result']['status']
+		else:
+			return None
+
+	def isRegistered(self):
+		""" Check that the app is currently registered (granted) """
+		self._log(">>> isRegistered")
+		if self.hasRegistrationParams() and 'granted' == self.getRegistrationStatus():
+			return True
+		else:
+			return False
+
+	def registerApp(self):
+		""" Register this app to FreeboxOS to that user grants this apps via Freebox Server
+		LCD screen. This command shall be executed only once. """
+		self._log(">>> registerApp")
+		register = True
+		if self.hasRegistrationParams():
+			status = self.getRegistrationStatus()
+			if 'granted' == status:
+				print("This app is already granted on Freebox Server (app_id = %s). You can now dialog with it." % self.registration['track_id'])
+				register = False
+			elif 'pending' == status:
+				print("This app grant is still pending: user should grant it on Freebox Server lcd/touchpad (app_id = %s)." % self.registration['track_id'])
+				register = False
+			elif 'unknown' == status:
+				print("This app_id (%s) is unknown by Freebox Server: you have to register again to Freebox Server to get a new app_id." % self.registration['track_id'])
+			elif 'denied' == status:
+				print("This app has been denied by user on Freebox Server (app_id = %s)." % self.registration['track_id'])
+				register = False
+			elif 'timeout' == status:
+				print("Timeout occured for this app_id: you have to register again to Freebox Server to get a new app_id (current app_id = %s)." % self.registration['track_id'])
+			else:
+				print("Unexpected response: %s" % status)
+
+		if register:
+			url = self.fbxAddress + "/api/v1/login/authorize/"
+			headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+			# post it
+			self._log("POST url: %s  data: %s" % (url, FreeboxOSCtrl.gAppDesc))
+			r = requests.post(url, data=json.dumps(FreeboxOSCtrl.gAppDesc), headers=headers, timeout=3)
+			self._log("POST response: %s" % r.text)
+			# ensure status_code is 200, else raise exception
+			if requests.codes.ok != r.status_code:
+				raise FbxOSException("Post error: %s" % r.text)
+			# rc is 200 but did we really succeed?
+			resp = json.loads(r.text)
+			#self._log("Obj resp: %s" % resp)
+			if True == resp['success']:
+				self.registration['app_token'] = resp['result']['app_token']
+				self.registration['track_id'] = resp['result']['track_id']
+				self._saveRegistrationParams()
+				sleep(1)
+				status = self.getRegistrationStatus()
+				#print("Now you have to accept this app on your Freebox server: take a look on its lcd screen.")
+			#else:
+			#	print("NOK")
+		return status
+
+#	def getTvStatus(self):
+#		""" Get the current tv status: 1 means ON, 0 means OFF """
+#		self._log(">>> getTvStatus")
+#		self._login()
+#		# GET airplay status
+#		headers = {
+#			'X-Fbx-App-Auth': self.sessionToken, 'Accept': 'text/plain'}
+#		url = self.fbxAddress + "/api/v3/airmedia/receivers/"
+#		# GET
+#		self._log("GET url: %s" % url)
+#		r = requests.get(url, headers=headers, timeout=1)
+#		self._log("GET response: %s" % r.text)
+#		# ensure status_code is 200, else raise exception
+#		if requests.codes.ok != r.status_code:
+#			raise FbxOSException("Get error: %s" % r.text)
+#		# rc is 200 but did we really succeed?
+#		resp = json.loads(r.text)
+#		self._log("Obj resp: %s" % resp)
+#		isOn = True
+#		if True == resp['success']:
+#			found = False
+#			for receiver in resp['result']:
+#				if receiver['name'] == "Freebox Player":
+#					found = True
+#					isOn = self._stopAirplayReceiver(receiver['name'])
+#					self._log("TV is %s" % "ON" if isOn else "OFF")
+#			if not found:
+#				raise FbxOSException("No Freebox Player Airplay Receiver !")
+#		else:
+#			raise FbxOSException("Challenge failure: %s" % resp)
+#		#self._logout()
+#		return isOn
+
+	def getTvStatus(self, name="Freebox%20Player"):
+		""" Try to stop airplay receiver """
+		self._log(">>> _stopAirplayReceiver")
+		self._login()
+		# GET airplay status
+		headers = {
+			'X-Fbx-App-Auth': self.sessionToken, 'Accept': 'text/plain'}
+		url = self.fbxAddress + "/api/v3/airmedia/receivers/" + name + "/"
+		# GET
+		data = {'action': 'stop', 'media_type': 'video'}
+		self._log("POST url: %s, data: %s" % (url, json.dumps(data)))
+		r = requests.post(url, data=json.dumps(data), headers=headers, timeout=1)
+		#self._log("POST response: %s" % r.text)
+		# ensure status_code is 200, else raise exception
+		if requests.codes.ok != r.status_code:
+			#raise FbxOSException("Get error: %s" % r.text)
+			return None
+		# rc is 200 but did we really succeed?
+		resp = json.loads(r.text)
+		#self._log("Obj resp: %s" % resp)
+		return resp['success']
 
 CHAINES = {
 	"tf 1": 1,

@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 import os, sys, fileinput, site
 from setuptools.command.install import install as installer
-from setuptools import setup, Extension
+from setuptools import setup
+from subprocess import call
+
+os.environ["CC"]  = "g++-4.6"
+os.environ["CXX"] = "g++-4.6"
 
 def read(fname):
 	return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -19,23 +23,12 @@ class install(installer):
 		f.close()
 		filename = path + '/piserver/piserver.py'
 		os.chmod(filename, 0o755)
-		
-
-dht11 = Extension('DHT11Sensor',
-					sources = ['libs/DHT11Sensor.cpp'],
-					libraries = ['wiringPi'])
-
-emitter = Extension('ChaconEmitter',
-					sources = ['libs/ChaconEmitter.cpp'],
-					libraries = ['wiringPi'])
-
-receiver = Extension('ChaconReceiver',
-					sources = ['libs/ChaconReceiver.cpp'],
-					libraries = ['wiringPi'])
+		call(["update-rc.d", "piserver", "remove"])
+		call(["update-rc.d", "piserver", "defaults", "99"])
 
 setup(name='PiServer',
 		version='1.1',
-		description='PiServer is domotic server for Chacon Interruptor, Freebox, Temp Sensor that expose data by web interface and api',
+		description='PiServer is domotic server for RF433, Freebox, Temp & Light Sensor that expose data by web interface and api',
 		long_description=read('README.md'),
 		author='Benjamin Touchard',
 		author_email='benjamin@kolapsis.com',
@@ -48,9 +41,7 @@ setup(name='PiServer',
 			'views':['src/views/*'],
 			'imgs':['src/imgs/*']
 		},
-		ext_modules=[dht11, emitter, receiver],
-		data_files=[('piserver', ['src/config.json', 'src/rules.json']),
-#					('piserver/bin/', 'receiver/receiver'),
+		data_files=[('piserver', ['src/config.json', 'src/rules.json', 'src/chacon.json', 'src/alarms.json']),
 					('/etc/init.d', ['src/piserver'])],
 		cmdclass={'install': install},
 	)

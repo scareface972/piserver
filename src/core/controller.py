@@ -1,11 +1,21 @@
-import bottle
-from modules import Switch, speech, chacon
+# -*- coding: utf-8 -*-
+
+import bottle, signal
+from multiprocessing import Process
+from modules import Threadable, Switch, speech, freebox, chacon, recognition, serial
 import sys, os, importlib, re, json, time
 from threading import Thread
 import datetime, logging
 import picamera
 
-logging.basicConfig(filename='piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+log_dir = '/var/log/piserver'
+if not os.path.isdir(log_dir): os.mkdir(log_dir)
+
+logging.basicConfig(filename='/var/log/piserver/piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+def log(value):
+	print(value)
+	logging.debug(value)
 
 class Controller():
 	"""Class 'Controller', singleton du controleur principal"""
@@ -14,7 +24,7 @@ class Controller():
 	HOST = "*"
 	PORT = 80
 	
-	DEBUG = True
+	DEBUG = False
 
 	# chemin relatif du dossier des modules
 	MODULES_PATH = "modules"
@@ -22,12 +32,26 @@ class Controller():
 	MODULES = []
 
 	def __init__(self, conf_file):
+		signal.signal(signal.SIGTERM, self.stop)
+		log("")
+		log("####################################################")
+		log("####################################################")
+		log("########                                     #######")
+		log("########            PiServer v1              #######")
+		log("########                                     #######")
+		log("####################################################")
+		log("####################################################")
+		log("")
 		#self.init_modules()
 		self.enabled = []				# tableau des modules ACTIFS
+		self.threads = []				# tableau des modules avec threads
 		self.last_cmd = None			# dernière commande executé (pour l'instruction "encore")
-		self._loadConfig(conf_file)
+		self.atmega = serial.ATMega328()
+		self.threads.append(self.atmega)
+		self._load_conf(conf_file)
+		self._init_server()
 
-	def _loadConfig(self, conf_file):
+	def _load_conf(self, conf_file):
 		# Chargement de la configuration (fichier JSON)
 		config = json.loads(open(conf_file).read())
 		if 'debug' in config:
@@ -41,7 +65,7 @@ class Controller():
 				Controller.PORT = config[name]
 			else:
 				conf = config[name]
-				#print(conf)
+				# print(conf)
 				if 'enabled' in conf and conf['enabled'] == False: continue
 				mod = conf['module']
 				conf['name'] = name
@@ -61,27 +85,12 @@ class Controller():
 				# Le module Speech a besoin du controller pour répondre (enfin pour couper le son de la freebox lors d'une réponse vocale)
 				inst.controller = self
 				self.enabled.append(inst)
+				if isinstance(inst, Threadable):
+					self.threads.append(inst)
 		# print(" -> host = " + str(Controller.HOST))
 		# print(" -> port = " + str(Controller.PORT))
-		self.init_server()
 
-	#def init_modules(self):
-	#	# Recherche des modules dispo
-	#	for name in os.listdir(Controller.MODULES_PATH):
-	#		if name.endswith(".py") and not name.startswith(".") and not name.startswith("__"):
-	#			name = name.replace(".py", "")
-	#			path = Controller.MODULES_PATH + "." + name
-	#			module = importlib.import_module(path)
-	#			if module != None: 
-	#				for m in module.MODULES:
-	#					Controller.MODULES.append(name + "." + m)
-
-	def get_module(self, name):
-		for mod in self.enabled:
-			if mod.module_name == name: return mod
-		return None
-
-	def init_server(self):
+	def _init_server(self):
 		# Initialisation du serveur web (Bottle)
 		# > les route définise la relation entre un chemin d'url et la fonction locale à executer
 		self.app = bottle.Bottle()
@@ -89,23 +98,59 @@ class Controller():
 		self.app.route('/', callback=self.index)
 		self.app.route('/static/:path#.+#', callback=self.static)
 		self.app.route('/home', callback=self.home)
-		self.app.route('/controls', callback=self.controls)
-		self.app.route('/cam', callback=self.cam)
+		#self.app.route('/cam', callback=self.cam)
 		self.app.route('/modules', callback=self.modules)
 		self.app.route('/states', callback=self.states)
 		self.app.route('/search/<qry:re:[a-z0-9 _\-]+>', method='GET', callback=self.search)
 		self.app.route('/search', method='POST', callback=self.search)
 		self.app.route('/exec/<cmd:path>', callback=self.execute)
-		self.app.route('/restart', callback=self.restart)
-		self.app.route('/reboot', callback=self.reboot)
 
-	#def init_thread(self):
-	#	t = CtrlThread(self)
-	#	t.start()
+	def _get_switchers(self):
+		switchers = []
+		for module in self.enabled:
+			if isinstance(module, freebox.Freebox): 
+				switchers.append({'name':module.name, 'state': module.get_state()})
+			elif isinstance(module, recognition.Recognition): 
+				switchers.append({'name':module.name, 'type': module.get_module_name(), 'state': module.is_listening()})
+			#elif isinstance(module, homeeasy.HomeEasy): 
+			#	switchers.extend(module.get_switchers())
+			elif isinstance(module, chacon.Chacon): 
+				switchers.extend(module.get_switchers())
+		return switchers
+
+	def get_module(self, cmd):
+		for module in self.enabled:
+			if cmd.startswith(module.name):
+				return module
+
+	def get_module_by_name(self, name):
+		for module in self.enabled:
+			# print(module.name)
+			if name == module.name:
+				return module
 
 	def run(self):
-		#print("Start ",Controller.HOST, Controller.PORT)
-		self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False)
+		log(">>> Start " + str(Controller.HOST) + ":" + str(Controller.PORT) + " <<<")
+		try:
+			self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=True)
+			#self.thread = Process(target=self.app.run, kwargs=dict(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=True))
+			#self.thread.daemon = True
+			#self.thread.start()
+			#self.thread.join()
+		except KeyboardInterrupt:
+			pass
+		finally:
+			print('Closing all threads...')
+			for module in self.threads:
+				print("kill thread in", module.name, module.get_running())
+				if module.get_running():
+					module.set_running(False)
+					module.thread.join()
+					print("-> Thread", module.name, "killed")
+
+	def stop(self):
+		log(">>> Stop App Server <<<")
+		self.app.close()
 
 	def static(self, path):
 		return bottle.static_file(path, root='static')
@@ -115,11 +160,8 @@ class Controller():
 
 	@bottle.view('home')
 	def home(self):
-		return bottle.template('home', switchers=self.get_switchers())
-
-	@bottle.view('controls')
-	def controls(self):
-		return bottle.template('controls', switchers=self.get_switchers(), style="black")
+		#print(self._get_switchers())
+		return bottle.template('home', switchers=self._get_switchers())
 
 	def cam(self):
 		name = 'image.jpg'
@@ -127,33 +169,30 @@ class Controller():
 		camera.resolution = (1024, 768)
 		camera.capture('imgs/' + name, format='jpeg')
 		camera.close()
-		return bottle.static_file(name, 'imgs');	
+		return bottle.static_file(name, 'imgs');
 
 	def modules(self):
 		mods = []
 		for module in self.enabled:
-			is_switch = True if isinstance(module, Switch) else False
-			mods.append({'name': module.name, 'type': module.get_module_name(), 'group': module.group, 'state': module.state, 'cmds': module.list_cmds(), 'is_switch': is_switch})
-		return dict(success=True, modules=mods)
+			if isinstance(module, freebox.Freebox): 
+				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.get_state(), 'is_switch': True, 'cmds': module.list_cmds()})
+			#elif isinstance(module, homeeasy.HomeEasy): 
+			#	mods.extend(module.get_switchers())
+			elif isinstance(module, chacon.Chacon): 
+				mods.extend(module.get_switchers())
+			elif isinstance(module, recognition.Recognition): 
+				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.is_listening(), 'is_switch': True, 'cmds': module.list_cmds()})
+			else:
+				mods.append({'name':module.name, 'type': module.get_module_name(), 'cmds': module.list_cmds()})
+		return json.dumps(dict(success=True, modules=mods))
 
 	def states(self):
 		bottle.response.content_type = 'text/event-stream'
 		bottle.response.set_header('Cache-Control', 'no-cache')
 		states = []
-		for module in self.get_switchers():
-			states.append({'name': module.name, 'state': module.state})
+		for module in self._get_switchers():
+			states.append({'name': module['name'], 'state': module['state']})
 		yield 'data: ' + json.dumps(dict(success=True, states=states)) + '\n\n'
-
-	def search(self, qry=None):
-		# Extration de la ou des requête vocale (Google pouvant renvoyé 1 ou plusieurs réponse avec son service speech2text)
-		# > Le donnée arrive normalement en post, mais aussi en get pour débug :)
-		qrys = []
-		if bottle.request.method == 'POST': qrys = json.loads(bottle.request.body.readline().decode("utf-8"))
-		elif qry != None: qrys = [qry]
-		if len(qrys) > 0: cmds = self.analys(qrys)
-		if cmds == None: cmds = []
-		success = True if len(cmds) > 0 else False
-		return dict(success=success, cmds=cmds)
 
 	def execute(self, cmd):
 		self.last_cmd = cmd
@@ -164,27 +203,17 @@ class Controller():
 		result = module.execute(cmd)
 		return result
 
-	def restart(self):
-		logging.debug('CONTROLER:: restart')
-		result = dict(success=True)
-		res = os.system('service piserver restart')
-		logging.debug('CONTROLER:: res: ' + str(res))
-		if res != 0: result = dict(success=False, result=res)
-		return result
-
-	def reboot(self):
-		logging.debug('CONTROLER:: reboot')
-		result = dict(success=True)
-		res = os.system('reboot')
-		logging.debug('CONTROLER:: res: ' + str(res))
-		if res != 0: result = dict(success=False, result=res)
-		return result
-
-	def get_switchers(self):
-		switchers = []
-		for module in self.enabled:
-			if isinstance(module, Switch): switchers.append(module)
-		return switchers
+	def search(self, qry=None):
+		# Extration de la ou des requête vocale (Google pouvant renvoyé 1 ou plusieurs réponse avec son service speech2text)
+		# > Le donnée arrive normalement en post, mais aussi en get pour débug :)
+		qrys = []
+		if qry != None: qrys = [qry]
+		elif bottle.request.method == 'POST': qrys = json.loads(bottle.request.body.readline().decode("utf-8"))
+		#print(qrys)
+		if len(qrys) > 0: cmds = self.analys(qrys)
+		if cmds == None: cmds = []
+		success = True if len(cmds) > 0 else False
+		return dict(success=success, cmds=cmds)
 
 	def analys(self, qrys):
 		# Recherche de commande correspondant à une phrase
@@ -202,51 +231,3 @@ class Controller():
 				rs = module.analys(qry)
 				for rw in rs: cmds.append(rw)
 			if len(cmds) > 0: return cmds
-
-	def get_module(self, cmd):
-		for module in self.enabled:
-			if cmd.startswith(module.name):
-				return module
-
-	def get_module_by_name(self, name):
-		for module in self.enabled:
-			if name == module.name:
-				return module
-
-# class CtrlThread(Thread):
-# 	def __init__(self, ctrl):
-# 		Thread.__init__(self)
-# 		self.ctrl = ctrl
-# 		self.lux = 0
-# 		self.presence = True
-
-# 	def run(self):
-# 		while True:
-# 			# print ('runner')
-# 			now = datetime.datetime.now()
-# 			#if now.hour > 7 and now.hour < 22:
-# 			for module in self.ctrl.enabled:
-# 				mod = module.__module__.replace('modules.', '') + '.' + module.__class__.__name__
-# 				# print('module', mod)
-# 				if 'sensor.BH1750FVI' == mod:
-# 					self.lux = module.get()
-# 					# print('-> lux:', self.lux)
-# 				if 'presence.Presence' == mod:
-# 					self.presence = module.get()
-# 					if not self.presence: module.manual = False
-# 					# print('-> presence:', self.presence)
-# 			for module in self.ctrl.enabled:
-# 				if isinstance(module, Switch):
-# 					state = module.state
-# 					# print(module.name, 'presence' in module.autoswitch)
-# 					if 'presence' in module.autoswitch:
-# 						state = self.presence
-# 					# print(module.name, 'light' in module.autoswitch)
-# 					if 'light' in module.autoswitch:
-# 						state = state and self.lux <= 20
-# 					if state != module.state and not module.manual:
-# 						# print('-->', module.name, state)
-# 						module.execute('on' if state else 'off', True)
-# 					elif state == module.state and module.manual:
-# 						module.manual = False
-# 			time.sleep(60 * 10)

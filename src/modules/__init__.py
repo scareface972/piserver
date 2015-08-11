@@ -1,5 +1,34 @@
 # -*- coding: utf-8 -*-
-import re
+import re, threading
+
+class EventManager:
+	class Event:
+		def __init__(self,functions):
+			if type(functions) is not list:
+				raise ValueError("functions parameter has to be a list")
+			self.functions = functions
+
+		def __iadd__(self,func):
+			self.functions.append(func)
+			return self
+
+		def __isub__(self,func):
+			self.functions.remove(func)
+			return self
+
+		def __call__(self,*args,**kvargs):
+			for func in self.functions : func(*args,**kvargs)
+
+	@classmethod
+	def addEvent(cls,**kvargs):
+		for key in kvargs.keys():
+			if type(kvargs[key]) is not list:
+				raise ValueError("value has to be a list")
+			else:
+				kvargs[key] = cls.Event(kvargs[key])
+				setattr(cls, key, kvargs[key])
+
+		#cls.__dict__.update(kvargs)
 
 class Module(dict):
 	"""Class 'Module': classe de base pour les modules du serveur"""
@@ -9,8 +38,9 @@ class Module(dict):
 	REPEAT = "(\s(\w+\s)?(?P<repeat>(\d+|un|deux|trois|quatre|cinq|six|sept|huit|neuf|dix))( fois)?)?"
 	
 	def __init__(self, conf, cmds={}):
+		#print(conf)
 		self.controller = None									# le controller
-		self.module_name = conf['module'];
+		self.module_name = conf['module']
 		if not hasattr(self, 'state'): self.state = None		# état par défaut
 		self.name = conf['name']								# nom de référence du module (ex: "salon" pour allume le "salon")
 		if 'group' in conf: self.group = conf['group']			# groupe de référence du module (ex: "lumiere" pour allume les "lumières")
@@ -37,25 +67,26 @@ class Module(dict):
 	def analys(self, qry):
 		# Recherche de commande
 		# > parcour des commandes et recherche de correspondance avec les expressions régulères
-		print('-->', self.name, 'search', "'"+qry+"'")
+		#print('-->', self.name, 'search', "'"+qry+"'")
 		results = []
 		for (cmd, rex) in self.cmds.items():
+			#print(cmd, rex)
 			if rex == None: continue
 			rs = re.match(rex, qry)
 			if rs:
 				path = self.name + '/' + cmd
 				try:
-					v = self.getRepeat(rs.group('repeat'))
+					v = self._get_repeat(rs.group('repeat'))
 					if v > 0: path += '/' + str(v)
 				except: pass
 				results.append(path)
-		if len(results) > 0: print('--->', len(results), 'commands found')
+		#if len(results) > 0: print('--->', len(results), 'commands found')
 		return results
 
-	def execute(self, cmd, automatic=True):
-		return dict(success=False, automatic=automatic)	
+	def execute(self, cmd):
+		return dict(success=False, cmd=cmd)	
 
-	def getRepeat(self, value):
+	def _get_repeat(self, value):
 		num = 0
 		try:
 			num = int(value)
@@ -72,7 +103,40 @@ class Module(dict):
 			elif value == 'dix': num = 10
 		return num
 
+class Threadable(Module):
+	"""Class 'Threadable': classe de base pour les module with async thread"""
+
+	def __init__(self, conf, cmds={}):
+		super().__init__(conf, cmds)
+		self.set_running(False)
+		self.thread = threading.Thread(target=self.worker)
+		self.daemon = True
+
+	#@property
+	def get_running(self):
+		return self.__running
+
+	#@running.setter
+	def set_running(self, value):
+		self.__running = value
+
+	def worker(self):
+		raise Exception('Not implemented')
+
 class Switch(Module):
+	"""Class 'Switch': classe de base pour les switch physiques"""
+
 	def __init__(self, conf, cmds={}, state=False):
 		self.state = state
+		if 'pin' in conf: self.pin = conf['pin']
+		key = "((\w+\s)?(" + conf['name']
+		if 'where' in conf: key += "|"+conf['where']
+		if 'group' in conf: key += "|"+conf['group']+"s?"
+		key += ")\s?)"
+		# Initialisation des commandes disponibles
+		cmds = {
+			'toggle' : key,
+			'on': "allumer?\s"+key+"+",
+			'off': "(etein(dre|s))\s"+key+"+"
+		}
 		super().__init__(conf, cmds)

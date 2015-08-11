@@ -1,4 +1,0 @@
-piserver
-DHT11Sensor
-ChaconEmitter
-ChaconReceiver

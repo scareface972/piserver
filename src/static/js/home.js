@@ -210,13 +210,13 @@ var Temps = function() {
     this.timer = setInterval(function(){t.update();}, 30*60000);
 }
 Temps.prototype.update = function() {
-    $.getJSON('/exec/temp/all', this.params, function(json, textStatus) {
+    $.getJSON('/exec/sensors/all', this.params, function(json, textStatus) {
         //console.log('json: ' + json);
         //console.log('textStatus: ' + textStatus);
         if (textStatus == 'success') {
-            console.log('temp: ' + json['temp_c'] + '°C');
+            console.log('temp: ' + json['temp'] + '°C');
             console.log('humidity: ' + json['humidity'] + '%');
-            $('#home_temp').html(json['temp_c'] + '°C / ' + json['humidity'] + '% d\'humidité');
+            $('#home_temp').html(json['temp'] + '°C / ' + json['humidity'] + '% d\'humidité');
         }
     });
 };
@@ -245,7 +245,9 @@ function check(element) {
     if (className == 'checked') className = 'unchecked';
     else { action = 'on'; className = 'checked'; }
     $(element).attr('class', 'circle-' + className);
-    $.get('/exec/' + elt.id + '/' + action);
+    var name = (elt.id != 'freebox' ? 'chacon/' : '') + elt.id;
+    //console.log('/exec/' + name + '/' + action)
+    $.get('/exec/' + name + '/' + action);
 }
 
 function roundVal(temp) {
