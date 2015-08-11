@@ -1,6 +1,35 @@
 # -*- coding: utf-8 -*-
 import re, threading
 
+class EventManager:
+	class Event:
+		def __init__(self,functions):
+			if type(functions) is not list:
+				raise ValueError("functions parameter has to be a list")
+			self.functions = functions
+
+		def __iadd__(self,func):
+			self.functions.append(func)
+			return self
+
+		def __isub__(self,func):
+			self.functions.remove(func)
+			return self
+
+		def __call__(self,*args,**kvargs):
+			for func in self.functions : func(*args,**kvargs)
+
+	@classmethod
+	def addEvent(cls,**kvargs):
+		for key in kvargs.keys():
+			if type(kvargs[key]) is not list:
+				raise ValueError("value has to be a list")
+			else:
+				kvargs[key] = cls.Event(kvargs[key])
+				setattr(cls, key, kvargs[key])
+
+		#cls.__dict__.update(kvargs)
+
 class Module(dict):
 	"""Class 'Module': classe de base pour les modules du serveur"""
 
@@ -81,7 +110,7 @@ class Threadable(Module):
 		super().__init__(conf, cmds)
 		self.set_running(False)
 		self.thread = threading.Thread(target=self.worker)
-		self.thread.daemon = True
+		self.daemon = True
 
 	#@property
 	def get_running(self):

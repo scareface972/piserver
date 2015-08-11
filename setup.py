@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, sys, fileinput, site
 from setuptools.command.install import install as installer
-from setuptools import setup, Extension
+from setuptools import setup
 from subprocess import call
 
 os.environ["CC"]  = "g++-4.6"
@@ -23,16 +23,8 @@ class install(installer):
 		f.close()
 		filename = path + '/piserver/piserver.py'
 		os.chmod(filename, 0o755)
-		#call(["update-rc.d", "piserver", "remove"])
-		#call(["update-rc.d", "piserver", "defaults", "20", "1"])
-
-dht11 = Extension('DHT11Sensor',
-					sources = ['libs/DHT11Sensor.cpp'],
-					libraries = ['wiringPi'])
-
-chacon = Extension('Chacon',
-					sources = ['libs/Chacon.cpp'],
-					libraries = ['wiringPi'])
+		call(["update-rc.d", "piserver", "remove"])
+		call(["update-rc.d", "piserver", "defaults", "99"])
 
 setup(name='PiServer',
 		version='1.1',
@@ -49,7 +41,6 @@ setup(name='PiServer',
 			'views':['src/views/*'],
 			'imgs':['src/imgs/*']
 		},
-		ext_modules=[dht11, chacon],
 		data_files=[('piserver', ['src/config.json', 'src/rules.json', 'src/chacon.json', 'src/alarms.json']),
 					('/etc/init.d', ['src/piserver'])],
 		cmdclass={'install': install},

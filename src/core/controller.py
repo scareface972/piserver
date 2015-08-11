@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 
-import bottle
-from modules import Threadable, Switch, speech, freebox, homeeasy, recognition
+import bottle, signal
+from multiprocessing import Process
+from modules import Threadable, Switch, speech, freebox, chacon, recognition, serial
 import sys, os, importlib, re, json, time
 from threading import Thread
 import datetime, logging
 import picamera
-from multiprocessing import Process
 
 log_dir = '/var/log/piserver'
 if not os.path.isdir(log_dir): os.mkdir(log_dir)
 
 logging.basicConfig(filename='/var/log/piserver/piserver.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+def log(value):
+	print(value)
+	logging.debug(value)
 
 class Controller():
 	"""Class 'Controller', singleton du controleur principal"""
@@ -20,7 +24,7 @@ class Controller():
 	HOST = "*"
 	PORT = 80
 	
-	DEBUG = True
+	DEBUG = False
 
 	# chemin relatif du dossier des modules
 	MODULES_PATH = "modules"
@@ -28,10 +32,22 @@ class Controller():
 	MODULES = []
 
 	def __init__(self, conf_file):
+		signal.signal(signal.SIGTERM, self.stop)
+		log("")
+		log("####################################################")
+		log("####################################################")
+		log("########                                     #######")
+		log("########            PiServer v1              #######")
+		log("########                                     #######")
+		log("####################################################")
+		log("####################################################")
+		log("")
 		#self.init_modules()
 		self.enabled = []				# tableau des modules ACTIFS
 		self.threads = []				# tableau des modules avec threads
 		self.last_cmd = None			# dernière commande executé (pour l'instruction "encore")
+		self.atmega = serial.ATMega328()
+		self.threads.append(self.atmega)
 		self._load_conf(conf_file)
 		self._init_server()
 
@@ -95,8 +111,10 @@ class Controller():
 			if isinstance(module, freebox.Freebox): 
 				switchers.append({'name':module.name, 'state': module.get_state()})
 			elif isinstance(module, recognition.Recognition): 
-				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.is_listening()})
-			elif isinstance(module, homeeasy.HomeEasy): 
+				switchers.append({'name':module.name, 'type': module.get_module_name(), 'state': module.is_listening()})
+			#elif isinstance(module, homeeasy.HomeEasy): 
+			#	switchers.extend(module.get_switchers())
+			elif isinstance(module, chacon.Chacon): 
 				switchers.extend(module.get_switchers())
 		return switchers
 
@@ -112,16 +130,17 @@ class Controller():
 				return module
 
 	def run(self):
-		print("Start ",Controller.HOST, Controller.PORT)
+		log(">>> Start " + str(Controller.HOST) + ":" + str(Controller.PORT) + " <<<")
 		try:
-			self.thread = Process(target=self.app.run, kwargs=dict(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=False))
-			self.thread.daemon = True
-			self.thread.start()
-			self.thread.join()
+			self.app.run(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=True)
+			#self.thread = Process(target=self.app.run, kwargs=dict(host=Controller.HOST, port=Controller.PORT, debug=False, quiet=True))
+			#self.thread.daemon = True
+			#self.thread.start()
+			#self.thread.join()
 		except KeyboardInterrupt:
 			pass
 		finally:
-			print('')
+			print('Closing all threads...')
 			for module in self.threads:
 				print("kill thread in", module.name, module.get_running())
 				if module.get_running():
@@ -130,6 +149,7 @@ class Controller():
 					print("-> Thread", module.name, "killed")
 
 	def stop(self):
+		log(">>> Stop App Server <<<")
 		self.app.close()
 
 	def static(self, path):
@@ -156,7 +176,9 @@ class Controller():
 		for module in self.enabled:
 			if isinstance(module, freebox.Freebox): 
 				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.get_state(), 'is_switch': True, 'cmds': module.list_cmds()})
-			elif isinstance(module, homeeasy.HomeEasy): 
+			#elif isinstance(module, homeeasy.HomeEasy): 
+			#	mods.extend(module.get_switchers())
+			elif isinstance(module, chacon.Chacon): 
 				mods.extend(module.get_switchers())
 			elif isinstance(module, recognition.Recognition): 
 				mods.append({'name':module.name, 'type': module.get_module_name(), 'state': module.is_listening(), 'is_switch': True, 'cmds': module.list_cmds()})

@@ -1,34 +1,47 @@
 {
+	"reset": 4,
 	"receivers" : {
 		"plafond": {
+			"protocole": 2,
 			"where": "salon",
 			"group": "lumiere",
-			"interruptor": 1
+			"unit": 1,
+			"emitters": [
+				{ "protocole": 2, "code": 13552350, "unit": 1, "toggle": true, "repeat": 5 },
+				{ "protocole": 2, "code": 17144714, "unit": 1 }
+			]
 		},
 		"lampe": {
+			"protocole": 2,
 			"alias": "ampoule",
 			"where": "salon",
 			"group": "lumiere",
-			"interruptor": 2
+			"unit": 2,
+			"emitters": [
+				{ "protocole": 2, "code": 17144714, "unit": 2 },
+				{ "protocole": 1, "on": 513944, "off": 513942 },
+				{ "protocole": 2, "code": 15530742, "unit": 0, "toggle": true, "repeat": 5 }
+			]
 		},
 		"cuisine": {
+			"protocole": 2,
 			"where": "cuisine",
 			"group": "lumiere",
-			"interruptor": 3
-		}
-	},
-	"emitters": {
-		"cuisine": {
-			"code": 13552350,
-			"interruptor": 0
+			"unit": 3,
+			"emitters": [
+				{ "protocole": 2, "code": 13552350, "unit": 0, "toggle": true, "repeat": 5 },
+				{ "protocole": 2, "code": 17144714, "unit": 0 }
+			]
 		},
-		"plafond": {
-			"code": 13552350,
-			"interruptor": 1
-		},
-		"lampe": {
-			"code": 15530742,
-			"interruptor": 1
+		"ventilo": {
+			"protocole": 1,
+			"where": "salon",
+			"on": 172772,
+			"off": 172770,
+			"unit": 4,
+			"emitters": [
+				{ "protocole": 1, "on": 516860, "off": 516858 }
+			]
 		}
 	}
 }

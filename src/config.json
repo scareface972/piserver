@@ -9,16 +9,13 @@
 		"module": "presence.Presence"
 	},
 	"homeeasy": {
-		"enabled": true,
+		"enabled": false,
 		"module": "homeeasy.HomeEasy",
 		"emitter": 8976434
 	},
 	"chacon": {
-		"enabled": false,
-		"enabled_receiver": false,
+		"enabled": true,
 		"module": "chacon.Chacon",
-		"pinIn": 2,
-		"pinOut": 0,
 		"emitter": 8976434
 	},
 	"freebox": {
@@ -29,25 +26,19 @@
 		"code": 99093614,
 		"version": 6
 	},
-	"temp": {
+	"sensors": {
 		"enabled": true,
-		"module": "sensor.DHT11",
-		"pin": 1
-	},
-	"light": {
-		"enabled": true,
-		"module": "sensor.BH1750FVI",
-		"pin": "i2c"
+		"module": "sensors.Sensors"
 	},
 	"alarm": {
 		"enabled": false,
 		"module": "alarm.Alarms"
 	},
 	"recognition": {
-		"enabled": true,
+		"enabled": false,
 		"module": "recognition.Recognition",
 		"mic_index": 0,
-		"threshold": 6200,
+		"threshold": 5200,
 		"lang": "fr-FR",
 		"api_key": "AIzaSyCL1V54VOyfI9RR3vR5Luadc18PcYv9wpg"
 	}

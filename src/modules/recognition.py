@@ -115,6 +115,8 @@ class Recognition(modules.Threadable):
 					except audioop.error as e:
 						if str(e) != "not a whole number of frames":
 							raise e
+					except Exception as e:
+						log(str(e))
 				time.sleep(.001)
 
 	def samples_to_flac(self, frame_data):
@@ -145,7 +147,8 @@ class Recognition(modules.Threadable):
 		request = Request(url, data = flac_data, headers = {"Content-Type": "audio/x-flac; rate=%s" % RATE})
 		try:
 			response = urlopen(request)
-		except URLError:
+		except URLError as e:
+			log(str(e))
 			raise IndexError("No internet connection available to transfer audio data")
 		except:
 			raise KeyError("Server wouldn't respond (invalid key or quota has been maxed out)")

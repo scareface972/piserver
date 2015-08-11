@@ -14,7 +14,7 @@
 		"name": "Light on night if presence",
 		"conditions": [
 			{ "module": "presence", "prop": "*", "condition": "==", "value": true },
-			{ "module": "light", "prop": "lux", "condition": "<", "value":"15" }
+			{ "module": "sensors", "prop": "lux", "condition": "<", "value":"15" }
 		],
 		"actions": [
 			{ "module": "chacon", "value": "lampe/on" },

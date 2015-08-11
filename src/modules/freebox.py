@@ -85,7 +85,7 @@ class Freebox(modules.Module):
 				if 'grandted' == self.fbx_status: 
 					self.fbx_ok = True
 				if 'pending' != self.fbx_status: 
-					log("Freebox::check: WARNING: PiServer non authorisé, status:", self.fbx_status)
+					log("Freebox::check: WARNING: PiServer non authorisé, status:" + self.fbx_status)
 					break;
 		self.get_state()
 
