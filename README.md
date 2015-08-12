@@ -20,18 +20,19 @@ Installation
 ------------
 
 * PiServer App (Python)
-- cd /tmp
-- git clone https://github.com/btouchard/piserver.git
-- cd piserver
+ - cd /tmp
+ - git clone https://github.com/btouchard/piserver.git
+ - cd piserver
 Ensure dependencies
-- sudo ./setup.py develop 
+ - sudo ./setup.py develop 
 Install
-- suo ./setup.py install
+ - sudo ./setup.py install
 
 * Compile and upload atmega328 sketch to ATMega328 using Arduino IDE and board
 * Or upload .hex with avrdude
 
 * Wire :
+```
 	Component			| ATMega328 Pin
 	--------------------|---------------------------
 	RPi TX 				| Digital Pin 0 (RX)
@@ -45,6 +46,7 @@ Install
 	--------------------|---------------------------
 	LED (Input RF)		| Digital Pin 7
 	LED (Output RF)		| Digital Pin 8
+```
 
 * And for uninstall server (from extract directory)
 	sudo pip-3 uninstall piserver -r requirements.txt
