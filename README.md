@@ -20,16 +20,18 @@ Installation
 ------------
 
 * PiServer App (Python)
- - cd /tmp
- - git clone https://github.com/btouchard/piserver.git
- - cd piserver
-Ensure dependencies
- - sudo ./setup.py develop 
-Install
- - sudo ./setup.py install
+```
+$ cd /tmp
+$ git clone https://github.com/btouchard/piserver.git
+$ cd piserver
+# Ensure dependencies
+$ sudo ./setup.py develop 
+# And finally install
+$ sudo ./setup.py install
+```
 
 * Compile and upload atmega328 sketch to ATMega328 using Arduino IDE and board
-* Or upload .hex with avrdude
+  Or upload .hex with avrdude
 
 * Wire :
 ```
