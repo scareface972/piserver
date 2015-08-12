@@ -12,16 +12,40 @@ Requirements
 
 * A RaspberryPi (with Raspbian not tested with other distrib)
 * Python3 (with Bottle, http://bottlepy.org)
+* ATMega328 (with Arduino bootloader)
+* DHT11, BH1750, RF receiver/transmiter
+* Logic Level Converter (rpi <--serial--> atmega328)
 
 Installation
 ------------
 
-* Download distribution PiServer-X.X.tar.gz
-* Extract archive and go to directory
-	tar -xzf PiServer-X.X.tar.gz && cd PiServer-X.X
-* Now, install server (from extract directory)
-	1. sudo ./configure.sh
-	2. sudo python3 setup.py install
+* PiServer App (Python)
+- cd /tmp
+- git clone https://github.com/btouchard/piserver.git
+- cd piserver
+Ensure dependencies
+- sudo ./setup.py develop 
+Install
+- suo ./setup.py install
+
+* Compile and upload atmega328 sketch to ATMega328 using Arduino IDE and board
+* Or upload .hex with avrdude
+
+* Wire :
+	Component			| ATMega328 Pin
+	--------------------|---------------------------
+	RPi TX 				| Digital Pin 0 (RX)
+	RPi RX 				| Digital Pin 1 (TX)
+	RF receiver			| Digital Pin 2
+	RF transmiter		| Digital Pin 3
+	DHT11				| Digital Pin 4
+	BH1750 (I²C)		| Analog Input 4 and 5 (I²C)
+	--------------------|---------------------------
+	Component (Option)	| ATMega328 Pin
+	--------------------|---------------------------
+	LED (Input RF)		| Digital Pin 7
+	LED (Output RF)		| Digital Pin 8
+
 * And for uninstall server (from extract directory)
 	sudo pip-3 uninstall piserver -r requirements.txt
 

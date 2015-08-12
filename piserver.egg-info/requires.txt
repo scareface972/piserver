@@ -1,0 +1,5 @@
+bottle>=0.12
+pycurl>=7.19
+pyalsaaudio>=0.8
+watchdog>=0.8
+picamera>=1.6

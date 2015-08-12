@@ -1,0 +1,45 @@
+{
+	"debug": false,
+	"host": "192.168.0.2",
+	"port": 80,
+	"speech": {
+		"module": "speech.Speech"
+	},
+	"presence": {
+		"module": "presence.Presence"
+	},
+	"homeeasy": {
+		"enabled": false,
+		"module": "homeeasy.HomeEasy",
+		"emitter": 8976434
+	},
+	"chacon": {
+		"enabled": true,
+		"module": "chacon.Chacon",
+		"emitter": 8976434
+	},
+	"freebox": {
+		"module": "freebox.Freebox",
+		"where": "salon",
+		"alias": "tele",
+		"box": "hd1",
+		"code": 99093614,
+		"version": 6
+	},
+	"sensors": {
+		"enabled": true,
+		"module": "sensors.Sensors"
+	},
+	"alarm": {
+		"enabled": false,
+		"module": "alarm.Alarms"
+	},
+	"recognition": {
+		"enabled": false,
+		"module": "recognition.Recognition",
+		"mic_index": 0,
+		"threshold": 5200,
+		"lang": "fr-FR",
+		"api_key": "AIzaSyCL1V54VOyfI9RR3vR5Luadc18PcYv9wpg"
+	}
+}

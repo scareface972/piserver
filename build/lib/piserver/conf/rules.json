@@ -1,0 +1,24 @@
+[
+	{
+		"name": "Shutdown when empty",
+		"conditions": [
+			{ "module": "presence", "prop": "*", "condition": "==", "value": false }
+		],
+		"actions": [
+			{ "module": "chacon", "value": "lampe/off" },
+			{ "module": "chacon", "value": "plafond/off" },
+			{ "module": "freebox", "value": "freebox/off" }
+		]
+	},
+	{
+		"name": "Light on night if presence",
+		"conditions": [
+			{ "module": "presence", "prop": "*", "condition": "==", "value": true },
+			{ "module": "sensors", "prop": "lux", "condition": "<", "value":"15" }
+		],
+		"actions": [
+			{ "module": "chacon", "value": "lampe/on" },
+			{ "module": "chacon", "value": "plafond/on" }
+		]
+	}
+]

@@ -4,9 +4,6 @@ from setuptools.command.install import install as installer
 from setuptools import setup
 from subprocess import call
 
-os.environ["CC"]  = "g++-4.6"
-os.environ["CXX"] = "g++-4.6"
-
 def read(fname):
 	return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -25,10 +22,13 @@ class install(installer):
 		os.chmod(filename, 0o755)
 		call(["update-rc.d", "piserver", "remove"])
 		call(["update-rc.d", "piserver", "defaults", "99"])
+		call(["ln", "-s", "/usr/local/lib/python3.2/dist-packages/piserver/piserver.py", "/usr/local/bin/"])
+		call(["mv", "/usr/local/bin/piserver.py", "/usr/local/bin/piserver"])
 
-setup(name='PiServer',
+setup(name='piserver',
 		version='1.1',
-		description='PiServer is domotic server for RF433, Freebox, Temp & Light Sensor that expose data by web interface and api',
+		install_requires=["bottle>=0.12", "pycurl>=7.19", "pyalsaaudio>=0.8", "watchdog>=0.8", "picamera>=1.6"],
+		description='PiServer, domotic server for RF433, Freebox, Temp & Light Sensor that expose data by web interface and api',
 		long_description=read('README.md'),
 		author='Benjamin Touchard',
 		author_email='benjamin@kolapsis.com',
@@ -41,7 +41,7 @@ setup(name='PiServer',
 			'views':['src/views/*'],
 			'imgs':['src/imgs/*']
 		},
-		data_files=[('piserver', ['src/config.json', 'src/rules.json', 'src/chacon.json', 'src/alarms.json']),
-					('/etc/init.d', ['src/piserver'])],
+		data_files=[('piserver', ['src/conf/config.json', 'src/conf/rules.json', 'src/conf/chacon.json', 'src/conf/alarms.json']),
+					('/etc/init.d', ['src/boot/piserver'])],
 		cmdclass={'install': install},
 	)
