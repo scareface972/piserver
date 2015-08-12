@@ -58,12 +58,19 @@ Configuration
 
 * Edit /usr/local/piserver/config.json
 
+Standlone server
+----------------
+```
+$ sudo piserver
+```
+
 Running/Stopping service
 ------------------------
-
-* sudo service piserver start
-* sudo service piserver stop
-* sudo service piserver restart
+```
+$ sudo service piserver start
+$ sudo service piserver stop
+$ sudo service piserver restart
+```
 
 Speech recognition
 ==================
