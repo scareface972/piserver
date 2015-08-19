@@ -48,7 +48,7 @@
             %   end
             %   cnt += 1
                     <td class="label">{{module['name']}}</td>
-                    <td><div id="{{module['name']}}" class="circle-{{checked}}" onclick="check(this);">&nbsp;</div></td>
+                    <td><div id="{{module['name']}}" class="circle-{{checked}}" type="{{module['type']}}" onclick="check(this);">&nbsp;</div></td>
             %   if cnt%colcount==0:
                     </tr>
             %   end

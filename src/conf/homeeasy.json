@@ -1,0 +1,72 @@
+[
+	{
+		"name": "plafond",
+		"protocole": 2,
+		"where": "salon",
+		"group": "lumiere",
+		"unit": 1,
+		"emitters": [
+			{ "protocole": 2, "code": 13552350, "unit": 1, "toggle": true, "repeat": 5 },
+			{ "protocole": 2, "code": 17144714, "unit": 1 }
+		]
+	},
+	{
+		"name": "lampe",
+		"protocole": 2,
+		"alias": "ampoule",
+		"where": "salon",
+		"group": "lumiere",
+		"unit": 2,
+		"emitters": [
+			{ "protocole": 2, "code": 17144714, "unit": 2 },
+			{ "protocole": 1, "on": 513944, "off": 513942 },
+			{ "protocole": 2, "code": 15530742, "unit": 0, "toggle": true, "repeat": 5 }
+		]
+	},
+	{
+		"name": "cuisine",
+		"protocole": 2,
+		"where": "cuisine",
+		"group": "lumiere",
+		"unit": 3,
+		"emitters": [
+			{ "protocole": 2, "code": 13552350, "unit": 0, "toggle": true, "repeat": 5 },
+			{ "protocole": 2, "code": 17144714, "unit": 0 }
+		]
+	},
+	{
+		"name": "ventilo",
+		"protocole": 1,
+		"where": "salon",
+		"on": 172772,
+		"off": 172770,
+		"unit": 4,
+		"emitters": [
+			{ "protocole": 1, "on": 516860, "off": 516858 }
+		]
+	}, 
+	{
+		"name": "moustique_1",
+		"protocole": 1,
+		"where": "salon",
+		"group": "moustiques",
+		"on": 175688,
+		"off": 175686,
+		"unit": 5,
+		"emitters": [
+			{ "protocole": 1, "on": 517832, "off": 517830 }
+		]
+	}, 
+	{
+		"name": "moustique_2",
+		"protocole": 1,
+		"where": "chambre",
+		"group": "moustiques",
+		"on": 176660,
+		"off": 176658,
+		"unit": 6,
+		"emitters": [
+			{ "protocole": 1, "on": 518156, "off": 518154 }
+		]
+	}
+]

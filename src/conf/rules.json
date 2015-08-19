@@ -1,24 +1,37 @@
 [
 	{
-		"name": "Shutdown when empty",
+		"enabled": false,
+		"name": "Eteindre si personne",
 		"conditions": [
 			{ "module": "presence", "prop": "*", "condition": "==", "value": false }
 		],
 		"actions": [
-			{ "module": "chacon", "value": "lampe/off" },
-			{ "module": "chacon", "value": "plafond/off" },
+			{ "module": "homeeasy", "value": "lampe/off" },
+			{ "module": "homeeasy", "value": "plafond/off" },
 			{ "module": "freebox", "value": "freebox/off" }
 		]
 	},
 	{
-		"name": "Light on night if presence",
+		"enabled": false,
+		"name": "Allumer quand présence",
 		"conditions": [
 			{ "module": "presence", "prop": "*", "condition": "==", "value": true },
 			{ "module": "sensors", "prop": "lux", "condition": "<", "value":"15" }
 		],
 		"actions": [
-			{ "module": "chacon", "value": "lampe/on" },
-			{ "module": "chacon", "value": "plafond/on" }
+			{ "module": "homeeasy", "value": "lampe/on" },
+			{ "module": "homeeasy", "value": "plafond/on" }
+		]
+	},
+	{
+		"name": "Anti-moustiques",
+		"conditions": [
+			{ "hour": 6, "minute": 0, "action": [1] },
+			{ "hour": 20, "minute": 0, "action": [0] }
+		],
+		"actions": [
+			{ "module": "homeeasy", "value": "moustiques/on" },
+			{ "module": "homeeasy", "value": "moustiques/off" }
 		]
 	}
 ]

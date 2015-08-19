@@ -1,0 +1,24 @@
+[
+	{
+		"uid": "305e9155",
+		"name": "Card",
+		"actions_added": [
+			{ "module": "homeeasy", "cmd": "lampe/toggle", "enabled": false },
+			{ "module": "homeeasy", "cmd": "lampe/on" }
+		],
+		"actions_removed": [
+			{ "module": "homeeasy", "cmd": "lampe/off" }
+		]
+	},
+	{
+		"uid": "51b9e52b",
+		"name": "Key",
+		"actions_added": [
+			{ "module": "homeeasy", "cmd": "lampe/toggle", "enabled": false },
+			{ "module": "homeeasy", "cmd": "cuisine/on" }
+		],
+		"actions_removed": [
+			{ "module": "homeeasy", "cmd": "cuisine/off" }
+		]
+	}
+]

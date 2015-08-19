@@ -52,6 +52,12 @@ class Module(dict):
 	def get_module_name(self):
 		return self.module_name
 
+	def get_module_def(self):
+		return [{'name':self.name, 'type': self.module_name, 'cmds': self.list_cmds()}]
+
+	def get_switchers(self):
+		return []
+
 	def list_cmds(self):
 		cmds = []
 		for (cmd, rex) in self.cmds.items():
@@ -129,14 +135,18 @@ class Switch(Module):
 	def __init__(self, conf, cmds={}, state=False):
 		self.state = state
 		if 'pin' in conf: self.pin = conf['pin']
-		key = "((\w+\s)?(" + conf['name']
-		if 'where' in conf: key += "|"+conf['where']
-		if 'group' in conf: key += "|"+conf['group']+"s?"
-		key += ")\s?)"
-		# Initialisation des commandes disponibles
-		cmds = {
-			'toggle' : key,
-			'on': "allumer?\s"+key+"+",
-			'off': "(etein(dre|s))\s"+key+"+"
-		}
+		if cmds == {}:
+			key = "((\w+\s)?(" + conf['name']
+			if 'where' in conf: key += "|"+conf['where']
+			if 'group' in conf: key += "|"+conf['group']+"s?"
+			key += ")\s?)"
+			# Initialisation des commandes disponibles
+			cmds = {
+				'toggle' : key,
+				'on': "allumer?\s"+key+"+",
+				'off': "(etein(dre|s))\s"+key+"+"
+			}
 		super().__init__(conf, cmds)
+
+	def get_module_def(self):
+		return [{'name':self.name, 'type': self.module_name, 'cmds': self.list_cmds(), 'is_switch': True, 'state': self.state}]

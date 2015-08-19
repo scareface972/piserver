@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from modules import Threadable, EventManager
+import core.controller
+from modules import Module, EventManager
 import time, os, logging, sqlite3
 
 log_dir = '/var/log/piserver'
@@ -11,34 +12,32 @@ logging.getLogger("sqlite3").setLevel(logging.WARNING)
 # Tableau des modules (classe) dispo (pour eviter le parsage du document lors du chargement dynamique des modules)
 MODULES = ['Sensors']
 
-db_name = 'piserver.sq3'
-conn = sqlite3.connect(db_name)
-cur = conn.cursor()
-#cur.execute("DROP TABLE IF EXISTS sensors")
-cur.execute("CREATE TABLE IF NOT EXISTS sensors (id INTEGER PRIMARY KEY AUTOINCREMENT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, type TEXT NOT NULL, value REAL NOT NULL)")
-conn.commit()
-
 def log(value):
 	print(value)
 	logging.debug(value)
 
-class Sensors(Threadable):
+class Sensors(Module):
 	"""Class 'Sensors' (DHT11, BH1750) via ATMega368"""
 
 	def __init__(self, conf):
+		self._init_db()
 		cmds = { 'temp': None, 'humidity': None, 'light': None, 'all': None }
 		#self.hum = self.temp = self.lux = 0
 		super().__init__(conf, cmds)
 		EventManager.addEvent(sensors = [self._parseMessage])
-		self.thread.start()
+		EventManager.send(3)
+
+	def _init_db(self):
+		conn = sqlite3.connect(core.controller.Controller.DB_NAME)
+		cur = conn.cursor()
+		if core.controller.Controller.DEBUG:
+			cur.execute("DROP TABLE IF EXISTS sensors")
+		cur.execute("CREATE TABLE IF NOT EXISTS sensors (id INTEGER PRIMARY KEY AUTOINCREMENT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, type TEXT NOT NULL, value REAL NOT NULL)")
+		conn.commit()
 
 	def _parseMessage(self, result):
 		#print("Sensors::_parseMessage")
 		result = list(map(float, result))
-		#print(result)
-		#self.lux = result[0]
-		#self.temp = result[1]
-		#self.hum = result[2]
 		self._check_value('lux', result[0])
 		self._check_value('temp', result[1])
 		self._check_value('hum', result[2])
@@ -50,10 +49,9 @@ class Sensors(Threadable):
 			self._save_value(type, value)
 
 	def _read_value(self, type):
-		global db_name
 		value = 0
 		try:
-			conn = sqlite3.connect(db_name)
+			conn = sqlite3.connect(core.controller.Controller.DB_NAME)
 			cur = conn.cursor()
 			qry = 'SELECT value FROM sensors WHERE type="'+str(type)+'" ORDER BY time DESC LIMIT 1'
 			#print(qry)
@@ -67,14 +65,13 @@ class Sensors(Threadable):
 		return value
 
 	def _save_value(self, type, value):
-		global db_name
 		try:
-			conn = sqlite3.connect(db_name)
+			conn = sqlite3.connect(core.controller.Controller.DB_NAME)
 			cur = conn.cursor()
 			qry = 'INSERT INTO sensors (type, value) VALUES ("'+type+'", '+str(value)+')'
 			#print(qry)
 			cur.execute(qry)
-			log("Sensors::saved " + type + " = " + str(value))
+			#log("Sensors::saved " + type + " = " + str(value))
 			conn.commit()
 			cur.close()
 			conn.close()
@@ -83,7 +80,8 @@ class Sensors(Threadable):
 
 	def execute(self, cmd):
 		log("Sensors::execute: " + cmd)
-		self.controller.atmega.send(3, True)
+		if self._read_value('temp') == 0 or self._read_value('lux') == 0:
+			self.controller.atmega.send(3, True)
 		result = dict(success=True, name=self.name)
 		if cmd == 'temp' or cmd == 'all':
 			result['temp'] = self._read_value('temp')
@@ -97,20 +95,3 @@ class Sensors(Threadable):
 		if prop in ['temp', 'hum', 'lux']:
 			return eval(str(self._read_value(prop)) + " " + condition + " " + str(value))
 		return False
-
-	def worker(self):
-		log("Sensors::startWorker")
-		self.set_running(True)
-		count_down = 1
-		while self.get_running():
-			count_down -= 1
-			if count_down == 0:
-				count_down = 10000000000000
-				try:
-					cmd = 3
-					log("Sensors >> " + str(cmd))
-					EventManager.send(cmd)
-				except:
-					pass
-				time.sleep(1)
-

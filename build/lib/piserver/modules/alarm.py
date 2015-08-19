@@ -36,7 +36,7 @@ class Alarms(modules.Threadable):
 		super().__init__(conf)
 		self.alarms = []
 		self.passed = {}
-		self.alarms_path = './' if core.controller.Controller.DEBUG else '/usr/local/piserver/'
+		self.alarms_path = 'conf/' if core.controller.Controller.DEBUG else '/usr/local/piserver/'
 		self.alarms_file = self.alarms_path + 'alarms.json'
 		self._set_observer()
 		self.thread.start()
@@ -55,14 +55,14 @@ class Alarms(modules.Threadable):
 			log('--> alarm: ' + alarm['name'] + ' ' + alarm['time'] + ' ' + (alarm['date'] if 'date' in alarm else 'recursive: ' + str(alarm['recursive'])))
 
 	def worker(self):
-		print("-> Alarms worker start...")
+		print("-> Alarms::startWorker")
 		self.set_running(True)
 		while self.get_running():
 			for alarm in self.alarms:
 				if self._check(alarm):
 					self.execute(alarm)
 			time.sleep(1)
-		print("-> Alarms worker stopped")
+		#print("-> Alarms worker stopped")
 
 	def _check(self, alarm):
 		#log("Alarms:check: " + alarm['name'])

@@ -1,4 +1,4 @@
-import modules
+from modules import Threadable, Switch
 import alsaaudio as aa
 import audioop, time, wave, os, io, subprocess
 from collections import deque
@@ -23,11 +23,14 @@ SILENCE_LIMIT = 1
 THRESHOLD = 10000
 FLAC_CONV = 'flac -f'
 
+DEFAULT_NAME = 'jarvis'
+HOTKEY_DURATION = 15
+
 def log(value):
 	print(value)
 	logging.debug(value)
 
-class Recognition(modules.Threadable):
+class Recognition(Switch, Threadable):
 	"""Class Recognition for Voice recognition with Google"""
 
 	def __init__(self, conf):
@@ -35,38 +38,30 @@ class Recognition(modules.Threadable):
 			'on': "active la reconnaissance vocale",
 			'off': "desactive la reconnaissance vocale",
 		}
-		super().__init__(conf, cmds)
+		super(Switch, self).__init__(conf, cmds)
+		super(Threadable, self).__init__(conf, cmds)
 		self.mic_index = conf['mic_index'] if 'mic_index' in conf else -1
-		self.threshold = conf['threshold'] if 'threshold' in conf else 10000
+		self.threshold = conf['threshold'] if 'threshold' in conf else THRESHOLD
+		self.hotkeys = conf['hotkeys'] if 'hotkeys' in conf else [DEFAULT_NAME]
+		self.hotkeys.append('freebox')
+		self.hotkey_needed = True
+		self.hotkey_time = 0
 		self.lang = conf['lang'] if 'lang' in conf else 'en-US'
 		self.api_key = conf['api_key'] if 'api_key' in conf else None
-
 		if self.mic_index < 0:
 			print('Error mic_index:', self.mic_index,'undefined')
 			return
-		if 'enable' not in conf or conf['enable']:
-			self._is_listening = True
-			self.thread.start()
+		self.state = False
+		self.thread.start()
 
 	def execute(self, cmd):
 		log("Recognition::execute: " + cmd)
-		result = dict(success=False, cmd=cmd)
-		if cmd == 'on' and not self._is_listening:
-			self._is_listening = True
-			#self.controller.execute('speech/say/La reconnaissance vocale est activée')
-			result['success'] = True
-		elif cmd == 'off' and self._is_listening:
-			self._is_listening = False
-			self.thread.join()
-			#self.controller.execute('speech/say/La reconnaissance vocale est désactivée')
-			result['success'] = True
-		return result
-
-	def is_listening(self):
-		return self._is_listening
+		if cmd == 'on': self.state = True
+		elif cmd == 'off': self.state = False
+		return dict(success=True, cmd=cmd)
 
 	def worker(self):
-		log("Recognition::worker start...")
+		#log("Recognition::startWorker")
 		self.set_running(True)
 		try:
 			audio = aa.PCM(aa.PCM_CAPTURE, aa.PCM_NONBLOCK, 'default')
@@ -78,7 +73,7 @@ class Recognition(modules.Threadable):
 		except Exception as e:
 			log(str(e))
 			self.set_running(False)
-			self._is_listening = False
+			self.state = False
 			return
 
 		recording = False
@@ -86,25 +81,27 @@ class Recognition(modules.Threadable):
 		prev_audio = deque(maxlen=int(PREV_AUDIO * (RATE/CHUNK)))
 
 		while self.get_running():
-			if self._is_listening:
+			if self.state:
 				l,data = audio.read()
 				if l:
 					try:
 						energy = audioop.rms(data, 2)
-						if not recording and energy > THRESHOLD:
-							#print("* Start recording")
+						if not recording and energy > self.threshold:
+							self.hotkey_needed = time.time() - self.hotkey_time > HOTKEY_DURATION
+							log("Recognition::startRecording HotKey needed: " + str(self.hotkey_needed))
 							recording = True
 							audio2send.append(data)
 							duration = 0
 						if recording:
 							audio2send.append(data)
 							duration += .001
-							if energy > THRESHOLD:
+							#print('duration',duration)
+							if energy > self.threshold:
 								duration = 0
 							# record
 							#print('duration',duration)
 							if duration > SILENCE_LIMIT:
-								#print("* Stop recording")
+								log("Recognition::stopRecording")
 								recording = False
 								audio2send = list(prev_audio) + audio2send
 								self.recognize(audio2send)
@@ -117,7 +114,7 @@ class Recognition(modules.Threadable):
 							raise e
 					except Exception as e:
 						log(str(e))
-				time.sleep(.001)
+			time.sleep(.001)
 
 	def samples_to_flac(self, frame_data):
 		with io.BytesIO() as wav_file:
@@ -162,32 +159,33 @@ class Recognition(modules.Threadable):
 				actual_result = result[0]
 				break
 		if "alternative" in actual_result:
-			#result = None
-			#for prediction in actual_result["alternative"]:
-			#	if "transcript" in prediction:
-			#		result = prediction["transcript"].lower()
-			#		result = unicodedata.normalize('NFD', result).encode('ascii', 'ignore').decode('utf-8')
-			#if result != None:
-			#	cmds = self.controller.search(result)
-			#	print(cmds)
 			spoken_text = []
 			for i, prediction in enumerate(actual_result["alternative"]):
 				if "transcript" in prediction:
 					spoken_text.append(unicodedata.normalize('NFD', prediction["transcript"]).encode('ascii', 'ignore').decode('utf-8').lower())
 			executed = False
+			has_hotkey = False
+			hot = None
 			for text in spoken_text:
+				if ' ' in text:
+					tmp = text.split(' ')
+					found = has_hotkey or tmp[0] in self.hotkeys
+					if found: 
+						hot = tmp.pop(0)
+						has_hotkey = found
+						self.hotkey_time = time.time()
+					text = ' '.join(tmp)
+				if self.hotkey_needed and not has_hotkey: continue
 				cmds = self.controller.search(text)
 				if cmds['success'] and len(cmds['cmds']) > 0:
 					for cmd in cmds['cmds']:
 						self.controller.execute(cmd)
-						if cmd == 'homeeasy/ventilo/on':
-							rnd = random.randrange(10)
-							if rnd == 0:
-								self.controller.execute("speech/say/Il devrait faire plus frais maintenant !")
-							if rnd == 1:
-								self.controller.execute("speech/say/C'est fait !")
 					executed = True
 					break
-			#if not executed:
-			#	self.controller.execute("speech/say/Je n'ai pas compris")
-		
+			if self.hotkey_needed and not has_hotkey: 
+				log('Recognition::HotKey needed but not present !')
+			elif not executed:
+				#self.controller.execute("speech/say/Je n'ai pas compris")
+				log("Recognition::notFound")
+				for text in spoken_text:
+					log("-> " + text)

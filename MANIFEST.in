@@ -1,6 +1,9 @@
 recursive-include src *.py *.json piserver
 recursive-include src/static *
 recursive-include src/views *.tpl
+recursive-exclude tests *
+recursive-exclude src/boot *
+recursive-exclude src/conf *
 include requirements.txt
 include LICENSE
 include MANIFEST.in

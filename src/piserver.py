@@ -6,9 +6,9 @@ from core import controller
 
 locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')
 
-# Fichier de configuration (JSON) par défaut, ou passé en argument (1er argument)
-conf_file = '/usr/local/piserver/config.json' if len(sys.argv) == 1 else sys.argv[1]
+debug = False
+if len(sys.argv) > 1: debug = sys.argv[1] == '-d'
 # Initialisation du controller principale
-ctrl = controller.Controller(conf_file)
+ctrl = controller.Controller(debug)
 # démarrage du serveur
 ctrl.run()

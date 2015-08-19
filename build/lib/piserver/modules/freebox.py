@@ -26,20 +26,16 @@ def log(value):
 	print(value)
 	logging.debug(value)
 
-class Freebox(modules.Module):
+class Freebox(modules.Switch):
 	"""Class 'Freebox', télécommande de la Freebox"""
 
 	def __init__(self, conf):
-		self.muted = False
-		self.state = False
 		key = "((\w+\s)?("+conf['name']
 		if 'where' in conf: key += "|"+conf['where']
 		if 'alias' in conf: key += "|"+conf['alias']
 		key += ")\s?)"
-		toggle = conf['name']
 		# Initialisation des commandes disponibles
 		cmds = {
-			'toggle' : toggle,
 			'on': "allumer?\s"+key+"+",
 			'off': "(etein(dre|s))\s"+key+"+",
 			'home': "accueil",
@@ -63,7 +59,8 @@ class Freebox(modules.Module):
 			'pause': "mettre en pause",
 			'forward': "avancer" + modules.Module.REPEAT
 		}
-		super().__init__(conf, cmds)
+		super().__init__(conf, cmds, False)
+		self.muted = False
 		self.url = "http://" + conf['box'] + ".freebox.fr/pub/remote_control?code=" + str(conf['code'])
 		if conf['version'] >= 6:
 			self.fbx = FreeboxOSCtrl(False)
@@ -95,9 +92,16 @@ class Freebox(modules.Module):
 		if self.fbx_ok:
 			self.state = self.fbx.getTvStatus()
 			if self.state == None: self.state = False
+		#	print ('Freebox::active ' + str(self.state) + ' from API')
+		#else:
+		#	print ('Freebox::active ' + str(self.state))
 		return self.state
 
+	def get_module_def(self):
+		return [{'name':self.name, 'type': self.module_name, 'state': self.get_state(), 'is_switch': True, 'cmds': self.list_cmds()}]
+
 	def analys(self, qry):
+		log('Freebox::qry: ' + qry)
 		cmds = super().analys(qry)
 		if len(cmds) == 0:
 			# Recherche d'une chaine
@@ -108,9 +112,6 @@ class Freebox(modules.Module):
 				for name, canal in CHAINES.items():
 					if name == qry:
 						cmds = [self.name + '/' + str(canal)]
-			#elif qry in CHAINES:
-			#	index = CHAINES.index(qry)
-			#	if index > -1: cmds = [self.name + '/' + str(index+1)]
 		return cmds
 
 	def execute(self, key, longPress=False):
@@ -118,14 +119,14 @@ class Freebox(modules.Module):
 		log("Freebox::execute: " + key + " (" + str(longPress) + ")")
 		is_power_key = key.startswith('on') or key.startswith('off') or key.startswith('toggle')
 		result = dict(success=False, name=self.name, state=self.state)
-		#if self.fbx_ok and is_power_key:
-		#	self.state = self.fbx.getTvStatus()
-		#	if self.state == None: 
-		#		result['error'] = 'Box inaccessible !'
-		#		return result
-		#	else:
-		#		result['state'] = self.state
-		#	log("-> Tv is " + ("ON" if self.state else "OFF"))
+		if self.fbx_ok and is_power_key:
+			self.state = self.fbx.getTvStatus()
+			if self.state == None: 
+				result['error'] = 'Box inaccessible !'
+				return result
+			else:
+				result['state'] = self.state
+			print("Freebox::Tv is " + ("ON" if self.state else "OFF"))
 		repeat = 1
 		canal = None
 		if '/' in key:
@@ -153,7 +154,8 @@ class Freebox(modules.Module):
 					try: p = urllib.request.urlopen(req)
 					except: pass
 			else:
-				url = self.url + '&key=' + key + '&long=' + longPress
+				k = 'power' if key == 'toggle' else key
+				url = self.url + '&key=' + k + '&long=' + longPress
 				#print(url)
 				for r in range(repeat):
 					req = urllib.request.Request(url)

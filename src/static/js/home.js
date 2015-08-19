@@ -240,13 +240,15 @@ states.addEventListener('message', function(e) {
 function check(element) {
     var elt = $(element)[0];
     var action = 'off';
-    var className = elt.className.split('-').pop();
-    //console.log(className);
-    if (className == 'checked') className = 'unchecked';
-    else { action = 'on'; className = 'checked'; }
-    $(element).attr('class', 'circle-' + className);
-    var name = (elt.id != 'freebox' ? 'chacon/' : '') + elt.id;
-    //console.log('/exec/' + name + '/' + action)
+    var type = elt.getAttribute('type').split('.').pop().toLowerCase();
+    var state = elt.className.split('-').pop().toLowerCase();
+    console.log('id', elt.id, 'type', type, 'state', state);
+    if (state == 'checked') state = 'unchecked';
+    else { action = 'on'; state = 'checked'; }
+    $(element).attr('class', 'circle-' + state);
+    var name = type;
+    if (elt.id != type) name += '/' + elt.id;
+    console.log('/exec/' + name + '/' + action)
     $.get('/exec/' + name + '/' + action);
 }
 

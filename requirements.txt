@@ -3,7 +3,6 @@
 
 bottle >= 0.12.8
 pycurl >= 7.19.5
-#urllib3 >= 1.8.2
 pyalsaaudio >= 0.8.2
 watchdog >= 0.8.3
 picamera >= 1.8

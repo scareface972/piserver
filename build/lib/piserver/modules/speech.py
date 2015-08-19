@@ -86,6 +86,7 @@ class Speech(modules.Module):
 			s = cmd.split('/')
 			when = cmd[1]
 			canal = cmd[2]
+			print("Not implemented yet !")
 		result['success'] = text != None
 		if text != None: 
 			result['weather'] = text
