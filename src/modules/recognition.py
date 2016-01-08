@@ -5,6 +5,7 @@ from collections import deque
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 import json, unicodedata, logging
+import ssl
 
 log_dir = '/var/log/piserver'
 if not os.path.isdir(log_dir): os.mkdir(log_dir)
@@ -20,7 +21,7 @@ FORMAT = aa.PCM_FORMAT_S16_LE
 
 PREV_AUDIO = 16
 SILENCE_LIMIT = 1
-THRESHOLD = 10000
+THRESHOLD = 14000
 FLAC_CONV = 'flac -f'
 
 DEFAULT_NAME = 'jarvis'
@@ -45,14 +46,15 @@ class Recognition(Switch, Threadable):
 		self.hotkeys = conf['hotkeys'] if 'hotkeys' in conf else [DEFAULT_NAME]
 		self.hotkeys.append('freebox')
 		self.hotkey_needed = True
-		self.hotkey_time = 0
+		self.last_recognize_time = 0
 		self.lang = conf['lang'] if 'lang' in conf else 'en-US'
 		self.api_key = conf['api_key'] if 'api_key' in conf else None
 		if self.mic_index < 0:
 			print('Error mic_index:', self.mic_index,'undefined')
 			return
-		self.state = False
+		self.state = conf['autostart'] if 'autostart' in conf else False
 		self.thread.start()
+		log('-> hotkeys: ' + ', '.join(self.hotkeys))
 
 	def execute(self, cmd):
 		log("Recognition::execute: " + cmd)
@@ -87,8 +89,9 @@ class Recognition(Switch, Threadable):
 					try:
 						energy = audioop.rms(data, 2)
 						if not recording and energy > self.threshold:
-							self.hotkey_needed = time.time() - self.hotkey_time > HOTKEY_DURATION
-							log("Recognition::startRecording HotKey needed: " + str(self.hotkey_needed))
+							self.hotkey_needed = time.time() - self.last_recognize_time > HOTKEY_DURATION
+							#log("Recognition::startRecording HotKey needed: " + str(self.hotkey_needed))
+							self.controller.atmega.set_led('0x0000FF')
 							recording = True
 							audio2send.append(data)
 							duration = 0
@@ -101,9 +104,13 @@ class Recognition(Switch, Threadable):
 							# record
 							#print('duration',duration)
 							if duration > SILENCE_LIMIT:
-								log("Recognition::stopRecording")
+								#log("Recognition::stopRecording")
+								self.controller.atmega.set_led('OFF')
 								recording = False
 								audio2send = list(prev_audio) + audio2send
+								#print("audio2send")
+								#print(" len", len(audio2send))
+								#print(" ", audio2send)
 								self.recognize(audio2send)
 								audio2send = []
 								prev_audio.clear()
@@ -115,6 +122,7 @@ class Recognition(Switch, Threadable):
 					except Exception as e:
 						log(str(e))
 			time.sleep(.001)
+		self.controller.atmega.set_led('OFF')
 
 	def samples_to_flac(self, frame_data):
 		with io.BytesIO() as wav_file:
@@ -139,7 +147,9 @@ class Recognition(Switch, Threadable):
 		return flac_data
 
 	def recognize(self, audio_data):
+		self.controller.atmega.set_led('0x00FF00')
 		flac_data = self.samples_to_flac(audio_data)
+		#print('flac_data len', len(flac_data))
 		url = "http://www.google.com/speech-api/v2/recognize?client=chromium&lang=%s&key=%s" % (self.lang, self.api_key)
 		request = Request(url, data = flac_data, headers = {"Content-Type": "audio/x-flac; rate=%s" % RATE})
 		try:
@@ -149,8 +159,9 @@ class Recognition(Switch, Threadable):
 			raise IndexError("No internet connection available to transfer audio data")
 		except:
 			raise KeyError("Server wouldn't respond (invalid key or quota has been maxed out)")
+		finally:
+			self.controller.atmega.set_led('OFF')
 		response_text = response.read().decode("utf-8")
-		#print('recognize', response_text)
 		actual_result = []
 		for line in response_text.split("\n"):
 			if not line: continue
@@ -173,19 +184,22 @@ class Recognition(Switch, Threadable):
 					if found: 
 						hot = tmp.pop(0)
 						has_hotkey = found
-						self.hotkey_time = time.time()
 					text = ' '.join(tmp)
 				if self.hotkey_needed and not has_hotkey: continue
 				cmds = self.controller.search(text)
 				if cmds['success'] and len(cmds['cmds']) > 0:
+					self.last_recognize_time = time.time()
+					executed = True
 					for cmd in cmds['cmds']:
 						self.controller.execute(cmd)
-					executed = True
+						time.sleep(.1)
 					break
 			if self.hotkey_needed and not has_hotkey: 
 				log('Recognition::HotKey needed but not present !')
+				self.controller.atmega.set_led('0x0000FF', 3)
 			elif not executed:
 				#self.controller.execute("speech/say/Je n'ai pas compris")
+				self.controller.atmega.set_led('0xFF0000', 3)
 				log("Recognition::notFound")
 				for text in spoken_text:
 					log("-> " + text)

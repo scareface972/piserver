@@ -99,7 +99,7 @@ class SpeechThread(Thread):
 		Thread.__init__(self)
 		self.controller = controller
 		self.phrase = phrase
-		print ('phrase', self.phrase)
+		#print ('phrase', self.phrase)
 
 	def run(self):
 		self.speakSpeechFromText(self.phrase)
@@ -119,15 +119,18 @@ class SpeechThread(Thread):
 		fp.close()
 
 	def speakSpeechFromText(self, phrase):
-		filename = "tts.mp3"
-		googleTranslateURL = "http://translate.google.com/translate_tts?tl=" + Speech.LANG + "&q=" + urllib.parse.quote_plus(phrase) + "&"
-		self.downloadFile(googleTranslateURL, filename)
-		fbx = None
-		if self.controller != None: fbx = self.controller.get_module_by_name('freebox')
-		restore = False
-		if fbx != None and not fbx.muted: 
-			restore = True
-			fbx.execute('mute')
-		os.system("mpg123 -a btspeaker -f 10000 -q " + filename) # mplayer tts.mp3 -af extrastereo=0 &
-		if restore: fbx.execute('mute')
-		#os.remove(filename)
+		cmd = 'espeak -v fr "%s" --stdout | aplay' % phrase
+		print(cmd)
+		os.system(cmd)
+		#filename = "tts.mp3"
+		#googleTranslateURL = "http://translate.google.com/translate_tts?tl=" + Speech.LANG + "&q=" + urllib.parse.quote_plus(phrase) + "&"
+		#self.downloadFile(googleTranslateURL, filename)
+		#fbx = None
+		#if self.controller != None: fbx = self.controller.get_module_by_name('freebox')
+		#restore = False
+		##if fbx != None and not fbx.muted: 
+		##	restore = True
+		##	fbx.execute('mute')
+		#os.system("mpg123 -a btspeaker -f 10000 -q " + filename) # mplayer tts.mp3 -af extrastereo=0 &
+		#if restore: fbx.execute('mute')
+		##os.remove(filename)

@@ -8,9 +8,9 @@ if (typeof jQuery === 'undefined') { throw new Error('This JavaScript requires j
  * Starting App
  */
 $(document).ready(function() {
-    var h = new Horloge(true);
-    var w = new Weather();
-    var s = new Temps();
+	var h = new Horloge(true);
+	var w = new Weather();
+	var s = new Temps();
 });
 
 /**
@@ -54,14 +54,15 @@ var Weather = function() {
     this.params = {
         'q':'Bordeaux,France',
         'units':'metric',
-        'lang':'fr'
+        'lang':'fr',
+        'APPID': '506899014894a82160b5e003e296ba81'
     };
     this.updateCurrent();
     this.updateForecast();
     var t = this;
     this.timer = setInterval(function(){
         t.updateCurrent();
-        t.updateForecast();
+        //t.updateForecast();
     }, 60000);
 }
 Weather.ICONS = {
@@ -86,71 +87,92 @@ Weather.ICONS = {
 }
 Weather.DAYSABBR = ['Di.','Lu.','Ma.','Me.','Je.','Ve.','Sa.'];
 Weather.prototype.updateCurrent = function() {
-    $.getJSON('http://api.openweathermap.org/data/2.5/weather', this.params, function(json, textStatus) {
-
-        var iconClass = Weather.ICONS[json.weather[0].icon];
-        var icon = $('<span/>').addClass('icon').addClass('dimmed').addClass('wi').addClass(iconClass);
-        var iconString = icon.wrapAll('<div></div>').parent().html();
-        $('#icon').updateWithText(iconString);
-
-        $('#city').updateWithText(json.name);
-
-        var temp = roundVal(json.main.temp);
-        var temp_min = roundVal(json.main.temp_min);
-        var temp_max = roundVal(json.main.temp_max);
-        var tempString = temp+'&deg;';
-        if (temp != temp_min && temp_min != temp_max)
-            tempString += '<div class="xdimmed">min:' + temp_min+'&deg; - max:' + temp_max+'&deg;</div>';
-        $('#temp').updateWithText(tempString);
-
-        var wind = roundVal(json.wind.speed);
-        var now = new Date();
-        var sunrise = new Date(json.sys.sunrise*1000).toTimeString().substring(0,5);
-        var sunset = new Date(json.sys.sunset*1000).toTimeString().substring(0,5);
-        //var str = '<span class="wi wi-strong-wind xdimmed"></span> ' + '<span class="xdimmed">' + kmh2beaufort(wind) + '</span> ' ;
-        var str = '<span class="wi wi-strong-wind"></span> ' + wind + ' <span style="text-transform: lowercase">km/h</span>';
-        str += '&nbsp;&nbsp;&nbsp;<span class="wi wi-sunrise"></span> ' + sunrise;
-        str += '&nbsp;&nbsp;&nbsp;<span class="wi wi-sunset"></span> ' + sunset;
-        $('#windsun').updateWithText(str);
+	$.ajax({
+          type:"GET",
+          url:"http://api.openweathermap.org/data/2.5/weather",
+          data: this.params,
+          dataType : "jsonp",
+          success: this.showCurrent,
+          error: function(xhr, status, error) {
+              console.log(status);
+          }
     });
+    //$.getJSON('http://api.openweathermap.org/data/2.5/weather', this.params, );
 }
 Weather.prototype.updateForecast = function() {
-    $.getJSON('http://api.openweathermap.org/data/2.5/forecast', this.params, function(json, textStatus) {
-        var forecastData = {};
-        for (var i in json.list) {
-            var forecast = json.list[i];
-            var dateKey  = forecast.dt_txt.substring(0, 10);
-            if (forecastData[dateKey] == undefined) {
-                forecastData[dateKey] = {
-                    'timestamp':forecast.dt * 1000,
-                    'temp_min':forecast.main.temp,
-                    'temp_max':forecast.main.temp
-                };
-            } else {
-                forecastData[dateKey]['temp_min'] = (forecast.main.temp < forecastData[dateKey]['temp_min']) ? forecast.main.temp : forecastData[dateKey]['temp_min'];
-                forecastData[dateKey]['temp_max'] = (forecast.main.temp > forecastData[dateKey]['temp_max']) ? forecast.main.temp : forecastData[dateKey]['temp_max'];
-            }
-
-        }
-        var forecastTable = $('<table />').addClass('forecast-table');
-        var opacity = 1;
-        var row = $('<tr />').css('opacity', opacity);
-        row.append($('<td/>'));
-        row.append($('<td/>').addClass('temp-max').html('<small>max.</small>'));
-        row.append($('<td/>').addClass('temp-min').html('<small>min.</small>'));
-        forecastTable.append(row);
-        for (var i in forecastData) {
-            var forecast = forecastData[i];
-            var dt = new Date(forecast.timestamp);
-            var row = $('<tr />').css('opacity', opacity);
-            row.append($('<td/>').addClass('day').html(Weather.DAYSABBR[dt.getDay()]));
-            row.append($('<td/>').addClass('temp-max').html(roundVal(forecast.temp_max)+'&deg;'));
-            row.append($('<td/>').addClass('temp-min').html(roundVal(forecast.temp_min)+'&deg;'));
-            forecastTable.append(row);
-            opacity -= 0.155;
-        }
-        $('#forecast').updateWithText(forecastTable);
+	$.ajax({
+          type:"GET",
+          url:"http://api.openweathermap.org/data/2.5/forecast",
+          data: this.params,
+          dataType : "jsonp",
+          success: this.showForecast,
+          error: function(xhr, status, error) {
+              console.log(status);
+          }
     });
+    //$.getJSON('http://api.openweathermap.org/data/2.5/forecast', this.params, );
+}
+Weather.prototype.showCurrent = function(result) {
+    var iconClass = Weather.ICONS[result.weather[0].icon];
+    var icon = $('<span/>').addClass('icon').addClass('dimmed').addClass('wi').addClass(iconClass);
+    var iconString = icon.wrapAll('<div></div>').parent().html();
+    $('#icon').updateWithText(iconString);
+
+    $('#city').updateWithText(result.name);
+
+    var temp = roundVal(result.main.temp);
+    var temp_min = roundVal(result.main.temp_min);
+    var temp_max = roundVal(result.main.temp_max);
+    var tempString = temp+'&deg;';
+    if (temp != temp_min && temp_min != temp_max)
+        tempString += '<div class="xdimmed">min:' + temp_min+'&deg; - max:' + temp_max+'&deg;</div>';
+    $('#temp').updateWithText(tempString);
+
+    var wind = roundVal(result.wind.speed);
+    var now = new Date();
+    var sunrise = new Date(result.sys.sunrise*1000).toTimeString().substring(0,5);
+    var sunset = new Date(result.sys.sunset*1000).toTimeString().substring(0,5);
+    //var str = '<span class="wi wi-strong-wind xdimmed"></span> ' + '<span class="xdimmed">' + kmh2beaufort(wind) + '</span> ' ;
+    var str = '<span class="wi wi-strong-wind"></span> ' + wind + ' <span style="text-transform: lowercase">km/h</span>';
+    str += '&nbsp;&nbsp;&nbsp;<span class="wi wi-sunrise"></span> ' + sunrise;
+    str += '&nbsp;&nbsp;&nbsp;<span class="wi wi-sunset"></span> ' + sunset;
+    $('#windsun').updateWithText(str);
+}
+Weather.prototype.showForecast = function(result) {
+    var forecastData = {};
+    for (var i in result.list) {
+        var forecast = result.list[i];
+        var dateKey  = forecast.dt_txt.substring(0, 10);
+        if (forecastData[dateKey] == undefined) {
+            forecastData[dateKey] = {
+                'timestamp':forecast.dt * 1000,
+                'temp_min':forecast.main.temp,
+                'temp_max':forecast.main.temp
+            };
+        } else {
+            forecastData[dateKey]['temp_min'] = (forecast.main.temp < forecastData[dateKey]['temp_min']) ? forecast.main.temp : forecastData[dateKey]['temp_min'];
+            forecastData[dateKey]['temp_max'] = (forecast.main.temp > forecastData[dateKey]['temp_max']) ? forecast.main.temp : forecastData[dateKey]['temp_max'];
+        }
+
+    }
+    var forecastTable = $('<table />').addClass('forecast-table');
+    var opacity = 1;
+    var row = $('<tr />').css('opacity', opacity);
+    row.append($('<td/>'));
+    row.append($('<td/>').addClass('temp-max').html('<small>max.</small>'));
+    row.append($('<td/>').addClass('temp-min').html('<small>min.</small>'));
+    forecastTable.append(row);
+    for (var i in forecastData) {
+        var forecast = forecastData[i];
+        var dt = new Date(forecast.timestamp);
+        var row = $('<tr />').css('opacity', opacity);
+        row.append($('<td/>').addClass('day').html(Weather.DAYSABBR[dt.getDay()]));
+        row.append($('<td/>').addClass('temp-max').html(roundVal(forecast.temp_max)+'&deg;'));
+        row.append($('<td/>').addClass('temp-min').html(roundVal(forecast.temp_min)+'&deg;'));
+        forecastTable.append(row);
+        opacity -= 0.155;
+    }
+    $('#forecast').updateWithText(forecastTable);
 }
 
 /**
@@ -214,8 +236,8 @@ Temps.prototype.update = function() {
         //console.log('json: ' + json);
         //console.log('textStatus: ' + textStatus);
         if (textStatus == 'success') {
-            console.log('temp: ' + json['temp'] + '°C');
-            console.log('humidity: ' + json['humidity'] + '%');
+            //console.log('temp: ' + json['temp'] + '°C');
+            //console.log('humidity: ' + json['humidity'] + '%');
             $('#home_temp').html(json['temp'] + '°C / ' + json['humidity'] + '% d\'humidité');
         }
     });

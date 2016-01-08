@@ -1,8 +1,11 @@
 # This is an implicit value, here for clarity
 --index-url --find-links https://pypi.python.org/simple/
 
-bottle >= 0.12.8
+wiringpi2 >= 1.1
+bottle >= 0.12
 pycurl >= 7.19.5
 pyalsaaudio >= 0.8.2
 watchdog >= 0.8.3
 picamera >= 1.8
+pyserial >= 2.7
+wiringpi2 >= 1.1.1

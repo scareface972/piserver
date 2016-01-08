@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import core.controller
-import modules
+import modules, sqlite3
 from time import sleep
 import os, json, logging
 
@@ -20,11 +20,21 @@ class Presence(modules.Module):
 	"""Class 'Presence' pour la présence au domicile (via phone)"""
 
 	def __init__(self, conf):
+		self._init_db()
 		super().__init__(conf)
 		self.presence = {}
-		self.rules = []
 		self.has_owner = False
 		self.first_time = True
+
+	def _init_db(self):
+		conn = sqlite3.connect(core.controller.Controller.DB_NAME)
+		cur = conn.cursor()
+		if core.controller.Controller.DEBUG:
+			cur.execute("DROP TABLE IF EXISTS devices")
+		cur.execute("CREATE TABLE IF NOT EXISTS devices (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, uid INTEGER NUT NULL, ip TEXT NOT NULL, present INTEGER NOT NULL)")
+		if core.controller.Controller.DEBUG:
+			cur.execute("INSERT INTO devices (name, uid, ip, present) VALUES ('Benjamin', '68627129', '192.168.0.9', 1)")
+		conn.commit()
 
 	def get(self):
 		return self.has_owner or self.first_time
@@ -61,11 +71,11 @@ class Presence(modules.Module):
 		if not len(self.presence) > 0: return
 		has_owner = False
 		for uid in self.presence:
-			# print(uid, self.presence[uid])
+			#print('->', uid, self.presence[uid])
 			if self.presence[uid]['present'] == True:
 				has_owner = True
 				break
-		#log('-> has owner: ' + str(has_owner))
+		log('-> has owner: ' + str(has_owner))
 		if has_owner != self.has_owner or self.first_time:
 			self.has_owner = has_owner
 			self.controller.check_rules()
@@ -74,5 +84,7 @@ class Presence(modules.Module):
 		# print("eval_rule", self.module_name, prop, condition, value)
 		if prop == "*" or prop in self.presence:
 			v = self.has_owner if prop == "*" else self.presence[prop]['present']
-			return eval(str(v) + " " + condition + " " + str(value))
+			rule = str(v) + " " + condition + " " + str(value)
+			#print("Presence::rule", prop, condition, value, rule, eval(rule))
+			return eval(rule)
 		return False

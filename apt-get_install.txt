@@ -1,0 +1,1 @@
+sudo apt-get install libasound2-plugins libasound2-dev libportaudio-dev python3 python3-pip python3-pyaudio flac libcurl4-openssl-dev libssl-dev --yes

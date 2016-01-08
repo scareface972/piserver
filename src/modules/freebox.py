@@ -4,6 +4,7 @@
 # say zapping > passe sur tf1, et quelques secondes par chaines
 # et STOP pour arréter le zapping
 
+import core.controller
 import modules
 import re, urllib, logging
 from threading import Thread
@@ -20,6 +21,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 MODULES = ['Freebox']
 
 START_TV_DELAY = 6
+ZAPPING_DELAY = 5
 PISERVER_VERSION = 1
 
 def log(value):
@@ -57,14 +59,21 @@ class Freebox(modules.Switch):
 			'rewind': "reculer" + modules.Module.REPEAT,
 			'play': "reprendre la lecture",
 			'pause': "mettre en pause",
-			'forward': "avancer" + modules.Module.REPEAT
+			'forward': "avancer" + modules.Module.REPEAT, 
+			'zapping_start': "zapping",
+			'zapping_stop': "stop"
 		}
 		super().__init__(conf, cmds, False)
 		self.muted = False
 		self.url = "http://" + conf['box'] + ".freebox.fr/pub/remote_control?code=" + str(conf['code'])
+		if 'start_tv_delay' in conf:
+			START_TV_DELAY = conf['start_tv_delay']
+		if 'zapping_tv_delay' in conf:
+			ZAPPING_DELAY = conf['zapping_tv_delay']
 		if conf['version'] >= 6:
 			self.fbx = FreeboxOSCtrl(False)
 			self.verify_fbx()
+		self.zapping = None
 
 	def verify_fbx(self):
 		self.fbx_ok = False
@@ -101,7 +110,7 @@ class Freebox(modules.Switch):
 		return [{'name':self.name, 'type': self.module_name, 'state': self.get_state(), 'is_switch': True, 'cmds': self.list_cmds()}]
 
 	def analys(self, qry):
-		log('Freebox::qry: ' + qry)
+		#log('Freebox::qry: ' + qry)
 		cmds = super().analys(qry)
 		if len(cmds) == 0:
 			# Recherche d'une chaine
@@ -116,7 +125,7 @@ class Freebox(modules.Switch):
 
 	def execute(self, key, longPress=False):
 		# Execution de la requete sur l'api télécommande de la box
-		log("Freebox::execute: " + key + " (" + str(longPress) + ")")
+		log("Freebox::execute: " + str(key) + " (" + str(longPress) + ")")
 		is_power_key = key.startswith('on') or key.startswith('off') or key.startswith('toggle')
 		result = dict(success=False, name=self.name, state=self.state)
 		if self.fbx_ok and is_power_key:
@@ -145,7 +154,11 @@ class Freebox(modules.Switch):
 		longPress = str(1 if longPress else 0)
 		if key.startswith('on') or key.startswith('off'): 
 			key = 'power'
-		if key == 'power' or key == 'toggle' or self.state:
+		if key == 'zapping_start' and self.zapping == None:
+			self.zapping = Zapping(self)
+		elif key == 'zapping_stop' and self.zapping != None:
+			self.zapping.stopped = True
+		elif key == 'power' or key == 'toggle' or self.state:
 			if key.isdigit():
 				for k in key:
 					url = self.url + '&key=' + k + '&long=' + longPress
@@ -172,6 +185,24 @@ class Freebox(modules.Switch):
 				self.muted = not self.muted
 		return result
 
+	def destroyZapping(self):
+		self.zapping = None
+
+class Zapping(Thread):
+	def __init__(self, callback):
+		Thread.__init__(self)
+		self.callback = callback
+		self.stopped = False
+		self.start()
+
+	def run(self):
+		canals = [1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 14, 16, 22, 23, 41, 42, 43, 44, 45]
+		for canal in canals:
+			if self.stopped: break;
+			self.callback.execute(str(canal))
+			sleep(ZAPPING_DELAY)
+		self.callback.destroyZapping()
+
 class StartTV(Thread):
 	def __init__(self, callback, canal=None):
 		Thread.__init__(self)
@@ -188,15 +219,11 @@ class StartTV(Thread):
 
 
 class FbxOSException(Exception):
-
 	""" Exception for FreeboxOS domain """
-
 	def __init__(self, reason):
 		self.reason = reason
-
 	def __str__(self):
 		return self.reason
-
 
 class FreeboxOSCtrl:
 
@@ -215,7 +242,7 @@ class FreeboxOSCtrl:
 		self.debug = debug
 		self.fbxAddress = "http://mafreebox.freebox.fr"
 		self.isLoggedIn = False
-		self.registrationSaveFile = "/usr/local/piserver/freebox.json"
+		self.registrationSaveFile = core.controller.Controller.CONF_PATH + "freebox.json"
 		self.registration = {'app_token': '', 'track_id': None}
 		self.challenge = None
 		self.sessionToken = None

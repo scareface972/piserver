@@ -16,19 +16,20 @@ class Rules():
 
 	def __init__(self):
 		self.name = "Rules"
-		self._init_rules()
-		self._load_rules()
+		self._init_conf()
+		self._load_conf()
 		self.thread = threading.Thread(target=self.worker)
 		self.thread.daemon = True
 		self.thread.start()
 
-	def _init_rules(self):
+	def _init_conf(self):
 		#log("Rules::init")
 		self.rules = []
 		self.conf_file = core.controller.Controller.CONF_PATH + 'rules.json'
-		core.handlers.setObserver(self._load_rules, self.conf_file, core.controller.Controller.CONF_PATH)
+		#print('-> Init observer: ' + self.conf_file)
+		core.handlers.setObserver(self._load_conf, self.conf_file, core.controller.Controller.CONF_PATH)
 
-	def _load_rules(self):
+	def _load_conf(self):
 		self.rules = json.loads(open(self.conf_file).read())
 		log('-> loadRules, ' + str(len(self.rules)) + ' entry in ' + self.conf_file)
 		#for rule in self.rules: 
@@ -49,32 +50,39 @@ class Rules():
 		while self.get_running():
 			if second != datetime.now().second:
 				second = datetime.now().second
-				self.check_rules()
+				self.check_rules(True)
 			time.sleep(.5)
 
-	def check_rules(self):
+	def check_rules(self, automatic=False):
 		#log('Rules::checkRules')
 		for rule in self.rules:
-			if 'enabled' in rule and rule['enabled'] == False: continue
+			#if 'enabled' in rule and rule['enabled'] == False: continue
 			#log('-> rule: ' + rule['name'])
 			actions = []
+			execute = True
 			for condition in rule['conditions']:
 				exe = False
-				if 'module' in condition: 
+				if not automatic and 'module' in condition: 
 					(exe, acts) = self._check_module(condition)
-				if 'hours' in condition or 'minute' in condition or 'second' in condition:
+				if automatic and ('hours' in condition or 'minute' in condition or 'second' in condition):
 					(exe, acts) = self._check_time(condition)
+				execute = execute and exe
 				if exe:
 					if acts != None: 
 						for act in acts: 
-							actions.append(rule['actions'][act])
-					else: 
-						actions.extend(rule['actions'])
-			execute = len(actions) > 0
+							act = rule['actions'][act]
+							if not act in actions:
+								actions.append(act)
+					else:
+						for act in rule['actions']: 
+							if not act in actions:
+								actions.append(act)
+			execute = execute and len(actions) > 0
 			if execute:
 				log('Rules::rule "' + rule['name'] + '" > ' + str(execute))
 				for action in actions:
-					#log('Rules::execute: ' + action['module'] + '/' + action['value'])
+					log('-> ' + action['module'] + '/' + str(action['value']))
+					if 'enabled' in rule and rule['enabled'] == False: continue
 					self.controller.execute(action['module'] + '/' + action['value'])
 
 	def _check_module(self, condition):
@@ -86,7 +94,7 @@ class Rules():
 		if mod != None:
 			value = mod.eval_rule(condition['prop'], condition['condition'], condition['value'])
 			#log('--> result: ' + str(value))
-		return value, None if not 'action' in condition else condition['action']
+		return value, None if not 'actions' in condition else condition['actions']
 
 	def _check_time(self, condition):
 		if 'action' in condition and condition['action'] == -1: return False, None

@@ -28,6 +28,7 @@ $ cd /tmp
 $ git clone https://github.com/btouchard/piserver.git
 $ cd piserver
 # Ensure dependencies
+$ sudo apt-get install libasound2-plugins libasound2-dev libportaudio-dev python3 python3-pip python3-pyaudio flac libcurl4-openssl-dev libssl-dev --yes
 $ sudo ./setup.py develop 
 # And finally install
 $ sudo ./setup.py install
@@ -47,10 +48,6 @@ $ sudo ./setup.py install
 	DHT11				| Digital Pin 4
 	BH1750 (I²C)		| Analog Input 4 and 5 (I²C)
 	--------------------|---------------------------
-	Component (Option)	| ATMega328 Pin
-	--------------------|---------------------------
-	LED (Input RF)		| Digital Pin 7
-	LED (Output RF)		| Digital Pin 8
 ```
 
 * Vous pouvez désinstaller le serveur avec :

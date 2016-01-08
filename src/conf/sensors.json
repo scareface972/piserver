@@ -1,0 +1,12 @@
+[
+	{
+		"uid": 0,
+		"where": "salon",
+		"caps": "temp,hum,lux"
+	},
+	{
+		"uid": 1,
+		"where": "chambre",
+		"caps": "temp,hum"
+	}
+]

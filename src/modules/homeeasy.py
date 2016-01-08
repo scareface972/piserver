@@ -25,7 +25,7 @@ class HomeEasy(Switch):
 		self.cmds = {}
 		self.module_name = conf['module']
 		self.emitter = conf['emitter']
-		self._init_homeeasy()
+		self._init_conf()
 		self._load_conf()
 		super().__init__(conf, self.cmds)
 		EventManager.addEvent(ready = [self._ready])
@@ -37,16 +37,19 @@ class HomeEasy(Switch):
 			conn = sqlite3.connect(core.controller.Controller.DB_NAME)
 			cur = conn.cursor()
 			if core.controller.Controller.DEBUG:
+				#log("-> Clear Database")
 				cur.execute("DROP TABLE IF EXISTS receiver")
 				cur.execute("DROP TABLE IF EXISTS emitter")
 			cur.execute("CREATE TABLE IF NOT EXISTS receiver (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `protocole` INTEGER, `unit` INTEGER UNIQUE, `name` TEXT, `group` TEXT, `state` INTEGER, `on` INTEGER, `off` INTEGER)")
 			cur.execute("CREATE TABLE IF NOT EXISTS emitter (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `receiver_id` INTEGER, `protocole` INTEGER, `code` INTEGER, `unit` INTEGER, `toggle` INTEGER, `repeat` INTEGER)")
+			#log("-> Database Ready !")
 			conn.commit()
 		except sqlite3.Error as e:
 			print ("An error occurred:" + str(e.args[0]))
 
-	def _init_homeeasy(self):
+	def _init_conf(self):
 		self.conf_file = core.controller.Controller.CONF_PATH + 'homeeasy.json'
+		#print('-> Init observer: ' + self.conf_file)
 		core.handlers.setObserver(self._load_conf, self.conf_file, core.controller.Controller.CONF_PATH)
 		
 	def _load_conf(self):
@@ -64,7 +67,7 @@ class HomeEasy(Switch):
 				if 'group' in rc: key += "|"+rc['group']
 				else: rc['group'] = ''
 				key += ")\s?)"
-				self.cmds[rc['name']+'/toggle'] = rc['name']
+				self.cmds[rc['name']+'/toggle'] = rc['name']+"|"+rc['group']
 				self.cmds[rc['name']+'/on'] = "allumer?\s"+key+"+"
 				self.cmds[rc['name']+'/off'] = "(etein(dre|s))\s"+key+"+"
 				self.cmds[rc['name']+'/associate'] = None
@@ -84,6 +87,7 @@ class HomeEasy(Switch):
 							q +=  ', ' + str(em['off'])
 						q +=  ', ' + str(int(em['toggle']) if 'toggle' in em else 0)
 						q +=  ', ' + str(int(em['repeat']) if 'repeat' in em else 0)
+						#log(q)
 						cur.execute('INSERT OR IGNORE INTO emitter (`receiver_id`, `protocole`, `code`, `unit`, `toggle`, `repeat`) VALUES (' + q + ')')
 			conn.commit()
 			cur.close()
@@ -105,7 +109,7 @@ class HomeEasy(Switch):
 		#print("receiver: " + str(receiver))
 		if receiver != None:
 			repeat = 3
-			if 'repeat' in receiver and receiver['repeat'] > 3:
+			if 'repeat' in receiver and receiver['repeat'] > 0:
 				repeat = receiver['repeat']
 			if receiver['toggle']: receiver['new_state'] = not receiver['state']
 			elif receiver['e_protocole'] == 1: receiver['new_state'] = int(code == receiver['e_on'])
@@ -190,7 +194,7 @@ class HomeEasy(Switch):
 		return r
 
 	def set_switcher(self, unit, state):
-		log("HomeEasy::set_switcher unit: " + str(unit) + ", state: " + str(state))
+		#log("HomeEasy::set_switcher unit: " + str(unit) + ", state: " + str(int(state)))
 		try:
 			conn = sqlite3.connect(core.controller.Controller.DB_NAME)
 			cur = conn.cursor()
@@ -204,6 +208,7 @@ class HomeEasy(Switch):
 
 	def execute(self, cmd):
 		log("HomeEasy::execute: " + cmd)
+		#print(self.controller.atmega)
 		name = cmd.split("/")[0]
 		result = dict(success=False, name=name)
 		receivers = self._find_receivers('name', name)
@@ -219,7 +224,7 @@ class HomeEasy(Switch):
 						if 'on' in receiver or 'off' in receiver:
 							result['error'] = 'HomeEasy H200 don\'t requiere association'
 						else:
-							self.send_v2(receiver['unit'], True)
+							self.send_v2(receiver['unit'], True, 10)
 							result['state'] = self.set_switcher(receiver['unit'], True)
 							result['success'] = True
 					elif cmd == 'state':
@@ -234,15 +239,12 @@ class HomeEasy(Switch):
 							self.send_v1(receiver["on" if new_state == 1 else "off"])
 						elif 'unit' in receiver:
 							#print("send v2 pinOut: " + str(self.pinOut) + ", emitter: " + str(self.emitter) + ", receiver: " + str(receiver['unit']) + ", new state: " + str(int(new_state)))
-							repeat = 2
-							#if 'repeat' in receiver and receiver['repeat'] > 2:
-							#	repeat = receiver['repeat']
-							self.send_v2(receiver['unit'], new_state, repeat)
+							self.send_v2(receiver['unit'], new_state, 3)
 						result['state'] = self.set_switcher(receiver['unit'], new_state)
 				result['success'] = True
 			else:
 				result['error'] = 'Unknown command'
-				result['success'] = True
+				result['success'] = False
 		return result
 
 	def set_sender(self, code):
@@ -251,11 +253,11 @@ class HomeEasy(Switch):
 		EventManager.send("1-" + str(code))
 
 	def send_v1(self, code):
-		#log("HomeEasy::send_v1: " + str(code))
-		#self.serial_write("2-1-" + str(code))
-		EventManager.send("2-1-" + str(code))
+		cmd = "2-1-" + str(code)
+		#EventManager.send(cmd)
+		self.controller.atmega.send(cmd)
 
 	def send_v2(self, unit, state, repeat):
-		#log("HomeEasy::send_v2: " + str(unit) + " = " + str(state))
-		#self.serial_write("2-2-" + str(unit) + "-" + str(int(state)) + "-" + str(repeat))
-		EventManager.send("2-2-" + str(unit) + "-" + str(int(state)) + "-" + str(repeat))
+		cmd = "2-2-" + str(unit) + "-" + str(int(state)) + "-" + str(repeat)
+		#EventManager.send(cmd)
+		self.controller.atmega.send(cmd)

@@ -11,20 +11,27 @@ def read(fname):
 class install(installer):
 	def run(self):
 		installer.run(self)
-		filename = '/etc/init.d/piserver'
 		path = site.getsitepackages()[0]
+		# service
+		filename = '/etc/init.d/piserver'
 		s = open(filename).read()
 		s = s.replace('{user_local_lib_python}', path)
 		f=open(filename, 'w')
 		f.write(s)
 		f.flush()
 		f.close()
+		os.chmod(filename, 0o755)
+		# executable
 		filename = path + '/piserver/piserver.py'
 		os.chmod(filename, 0o755)
+		# registeR
 		call(["update-rc.d", "piserver", "remove"])
 		call(["update-rc.d", "piserver", "defaults", "99"])
-		call(["ln", "-s", "/usr/local/lib/python3.2/dist-packages/piserver/piserver.py", "/usr/local/bin/"])
+		call(["ln", "-s", "/usr/local/lib/python3.4/dist-packages/piserver/piserver.py", "/usr/local/bin/"])
 		call(["mv", "/usr/local/bin/piserver.py", "/usr/local/bin/piserver"])
+		call(["rm", "/usr/local/piserver/piserver.sq3"])
+		call(["touch", "/var/log/piserver/piserver.log"])
+		os.chmod("/var/log/piserver/piserver.log", 0o766)
 
 setup(
 	name='piserver',
@@ -43,7 +50,7 @@ setup(
 		'views':['src/views/*'],
 		'imgs':['src/imgs/*']
 	},
-	data_files=[('piserver', ['src/conf/config.json', 'src/conf/rules.json', 'src/conf/homeeasy.json', 'src/conf/alarms.json', 'src/conf/rfid.json']),
+	data_files=[('piserver', ['src/conf/config.json', 'src/conf/rules.json', 'src/conf/homeeasy.json', 'src/conf/alarms.json', 'src/conf/sensors.json']),
 				('/etc/init.d', ['src/boot/piserver'])],
 	cmdclass={'install': install},
 )

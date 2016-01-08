@@ -2,7 +2,8 @@
 
 import bottle, signal
 from multiprocessing import Process
-from modules import Threadable, Switch, speech, freebox, homeeasy, recognition, serial, rules
+from modules import Threadable, Switch, freebox, homeeasy, serial, rules
+#from modules import recognition, speech
 import sys, os, importlib, re, json, time
 from threading import Thread
 import datetime, logging
@@ -48,7 +49,9 @@ class Controller():
 		self.enabled = []				# tableau des modules ACTIFS
 		self.threads = []				# tableau des modules avec threads
 		self.last_cmd = None			# dernière commande executé (pour l'instruction "encore")
-		if Controller.DEBUG: Controller.CONF_PATH = 'conf/'
+		if Controller.DEBUG: 
+			Controller.CONF_PATH = 'conf/'
+			Controller.DB_NAME = Controller.CONF_PATH + 'piserver.sq3'
 		self.conf_file = Controller.CONF_PATH + 'config.json'
 		self._load_conf()
 		self._init_server()
@@ -60,7 +63,6 @@ class Controller():
 		## Ajout manuel de ATMega328 SerialCom
 		print ("class", "ATMega328")
 		self.atmega = serial.ATMega328()
-		self.threads.append(self.atmega)
 		## Fin ajout manuel
 		for name in config:
 			if name == 'host':
@@ -96,6 +98,8 @@ class Controller():
 		self.rules = rules.Rules()
 		self.rules.controller = self
 		self.threads.append(self.rules)
+		## Ajout manuel de ATMega328 à la liste des threads
+		self.threads.append(self.atmega)
 		## Fin ajout manuel
 
 	def _init_server(self):
@@ -146,7 +150,7 @@ class Controller():
 		except KeyboardInterrupt:
 			pass
 		finally:
-			print('Closing all threads...')
+			print('\nClosing all threads...')
 			for module in self.threads:
 				print("kill thread in", module.name, module.get_running())
 				if module.get_running():
